@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Layer: layer.xml
+OpenIDE-Module-Display-Category: Sentinel-3 Toolbox

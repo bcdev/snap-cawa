@@ -1,0 +1,46 @@
+<assembly>
+    <!-- WADAMO assembly -->
+
+    <id>release</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>dir</format>
+    </formats>
+
+    <fileSets>
+        <fileSet>
+            <includes>
+                <include>README*</include>
+                <include>LICENSE*</include>
+            </includes>
+        </fileSet>
+        
+        <fileSet>
+            <outputDirectory>beam-wadamo</outputDirectory>
+            <directory>src/main/python</directory>
+            <includes>
+                <include>wadamo*.py</include>
+                <include>*-info.xml</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <outputDirectory>shared_libs</outputDirectory>
+            <directory>src/main/python/shared_libs</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <outputDirectory>beam-wadamo/luts</outputDirectory>
+            <directory>src/main/python/luts</directory>
+            <includes>
+                <include>*.json</include>
+            </includes>
+        </fileSet>
+
+    </fileSets>
+
+</assembly>

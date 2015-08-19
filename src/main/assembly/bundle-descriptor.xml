@@ -1,0 +1,66 @@
+<bundleDescriptor>
+    <bundleName>beam-wadamo</bundleName>
+    <bundleVersion>${pom.version}</bundleVersion>
+
+    <processorDescriptors>
+
+        <processorDescriptor>
+            <executableName>beam.wadamo</executableName>
+            <processorName>WaDaMo</processorName>
+            <processorVersion>1.0-SNAPSHOT</processorVersion>
+            <defaultParameters><![CDATA[<parameters>
+    <!-- ***********WaDaMo Parameters start here*********** -->
+
+
+
+</parameters>]]></defaultParameters>
+            <outputFormats>Multi-GeoTIFF,BEAM-DIMAP,NetCDF</outputFormats>
+            <descriptionHtml>
+                <![CDATA[<p>Performs WaDaMo/CAWA water vapour processing.</p>]]>
+            </descriptionHtml>
+            <inputProductTypes>MERIS_L1B</inputProductTypes>
+            <outputProductType>WaDaMo_L2</outputProductType>
+            <validMaskExpression>!l1b_flags.INVALID</validMaskExpression>
+
+            <jobConfig>
+                <jobParameter>
+                    <name>calvalus.hadoop.mapred.child.java.opts</name>
+                    <value>-Xmx3000M</value>
+                </jobParameter>
+
+                <jobParameter>
+                    <name>calvalus.hadoop.mapred.max.map.failures.percent</name>
+                    <value>10</value>
+                </jobParameter>
+
+                <jobParameter>
+                    <name>calvalus.system.beam.envisat.usePixelGeoCoding</name>
+                    <value>true</value>
+                </jobParameter>
+                <jobParameter>
+                    <name>calvalus.system.beam.pixelGeoCoding.fractionAccuracy</name>
+                    <value>true</value>
+                </jobParameter>
+
+                <jobParameter>
+                    <name>calvalus.output.compression</name>
+                    <value>NONE</value>
+                </jobParameter>
+            </jobConfig>
+
+            <outputVariables>
+                <outputVariable>
+                    <name>tcwv</name>
+                    <defaultAggregator>AVG</defaultAggregator>
+                    <defaultWeightCoeff>1.0</defaultWeightCoeff>
+                </outputVariable>
+                <outputVariable>
+                    <name>tcwv_flags</name>
+                </outputVariable>
+            </outputVariables>
+
+        </processorDescriptor>
+
+    </processorDescriptors>
+
+</bundleDescriptor>
