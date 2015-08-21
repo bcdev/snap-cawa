@@ -12,6 +12,7 @@ local.dat
 *.war
 *.ear
 *.exe
+*.pyc
 __pycache__/
 jpy.dll
 libjpy.so
