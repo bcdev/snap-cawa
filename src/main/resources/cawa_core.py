@@ -147,19 +147,19 @@ class cawa_core:
         t1 = time.clock() * 1000
         data=copy.deepcopy(input)
         t2 = time.clock() * 1000
-        print('copy.deepcopy(input): ', (t2 - t1))
+        # print('copy.deepcopy(input): ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_full(data,poly=poly,bands=bands,abscor=abscor)
         t2 = time.clock() * 1000
-        print('init_full(data,poly=poly,bands=bands,abscor=abscor): ', (t2 - t1))
+        # print('init_full(data,poly=poly,bands=bands,abscor=abscor): ', (t2 - t1))
         t1 = time.clock() * 1000
         self._do_inversion(data)
         t2 = time.clock() * 1000
-        print('_do_inversion(data): ', (t2 - t1))
+        # print('_do_inversion(data): ', (t2 - t1))
         t1 = time.clock() * 1000
         self._exit_data(data)
         t2 = time.clock() * 1000
-        print('_exit_data(data): ', (t2 - t1))
+        # print('_exit_data(data): ', (t2 - t1))
         return data
 
     def _init_data(self,data):
@@ -399,31 +399,31 @@ class cawa_core:
         t1 = time.clock() * 1000
         self._init_data(data)
         t2 = time.clock() * 1000
-        print('   _init_data: ', (t2 - t1))
+        # print('   _init_data: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_atmc(data)
         t2 = time.clock() * 1000
-        print('   _init_atmc: ', (t2 - t1))
+        # print('   _init_atmc: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_prs_tmp(data,poly=poly,abscor=abscor) # 0.17ms
         t2 = time.clock() * 1000
-        print('   _init_prs_tmp: ', (t2 - t1))
+        # print('   _init_prs_tmp: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._do_first_guess(data)  #0.17ms
         t2 = time.clock() * 1000
-        print('   _do_first_guess: ', (t2 - t1))
+        # print('   _do_first_guess: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._do_atmc(data)     #0.27ms
         t2 = time.clock() * 1000
-        print('   _do_atmc: ', (t2 - t1))
+        # print('   _do_atmc: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_scat(data)   #0.19mx
         t2 = time.clock() * 1000
-        print('   _init_scat: ', (t2 - t1))
+        # print('   _init_scat: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_forward(data,used_bands=bands)  #0 ms
         t2 = time.clock() * 1000
-        print('   _init_forward: ', (t2 - t1))
+        # print('   _init_forward: ', (t2 - t1))
 
     def _do_atmc(self,data):
         '''
@@ -434,19 +434,19 @@ class cawa_core:
         t1 = time.clock() * 1000
         data['trans_fg']={ch:self.tro[ch](data['fgu']) for ch in self.wb+self.ab}
         t2 = time.clock() * 1000
-        print('   trans_fg: ', (t2 - t1))
+        # print('   trans_fg: ', (t2 - t1))
 
         # 1. water vapor transmission correction in window bands
         t1 = time.clock() * 1000
         data['rtoa_0']={ch:data['rtoa'][ch]/data['trans_fg'][ch] for ch in self.wb}
         t2 = time.clock() * 1000
-        print('   water vapor transmission: ', (t2 - t1))
+        # print('   water vapor transmission: ', (t2 - t1))
 
         # 2. aerosol correction in window bands
         t1 = time.clock() * 1000
         data['alb']={ch:self.atmc_intp[ch](data['rtoa_0'][ch]) for ch in self.wb}
         t2 = time.clock() * 1000
-        print('   alb: ', (t2 - t1))
+        # print('   alb: ', (t2 - t1))
 
         # 3. interpolation to absorption band
         t1 = time.clock() * 1000
@@ -456,7 +456,7 @@ class cawa_core:
                 data[what][ch]=self.win_to_abs_interpolator[ch](rrr)
 
         t2 = time.clock() * 1000
-        print('   interpolation: ', (t2 - t1))
+        # print('   interpolation: ', (t2 - t1))
 
 
     def _do_first_guess(self,data):

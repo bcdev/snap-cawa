@@ -5,7 +5,7 @@ import numpy
 
 import snappy
 import sys
-# import cawa_core
+import cawa_core
 
 import cawa_utils as cu
 
@@ -39,17 +39,10 @@ class CawaOp:
 
         with zipfile.ZipFile(resource_root) as zf:
             auxpath = SystemUtils.getAuxDataPath()
+            print('auxpath: ' + str(auxpath))
             lut_json = zf.extract('luts/wadamo_core_meris.json', os.path.join(str(auxpath), 'cawa'))
-            # self.wd = cawa_core.cawa_core(lut_json)
+            self.cawa = cawa_core.cawa_core(lut_json)
             print('LUT json file: ' + lut_json)
-
-        python_root = 'C:\\Python27'
-        platform = 'windows32'
-        ftn_libs_path = os.path.join('shared_libs', platform)
-        print('python_root: ' + python_root)
-        with zipfile.ZipFile(resource_root) as zf:
-            wadamo_poly = zf.extract('shared_libs/windows32/f2py/wadamo_poly.pyd', os.path.join(python_root, 'cawa'))
-            print('wadamo_poly: ' + wadamo_poly)
 
         width = sourceProduct.getSceneRasterWidth()
         height = sourceProduct.getSceneRasterHeight()
@@ -70,7 +63,8 @@ class CawaOp:
         cawaProduct.setPreferredTileSize(width, 16)
         cawaProduct.setPreferredTileSize(width, height)   # todo: wadamo_core does not yet support multi-threading with smaller tiles
         self.tcwvBand = cawaProduct.addBand('tcwv', snappy.ProductData.TYPE_FLOAT32)
-        self.tcwvFlagsBand = cawaProduct.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
+        # todo: flag band
+        # self.tcwvFlagsBand = cawaProduct.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
 
         print('set target product...')
         operator.setTargetProduct(cawaProduct)
@@ -131,13 +125,13 @@ class CawaOp:
                         }
             }
             # tcwvData[i] = i*1.0
-            tcwvData[i] = self.getTcwv(self.wd, input)
+            tcwvData[i] = self.getTcwv(self.cawa, input)
             # print('i, time in millisec: ', i, ' // ', int(round(time.time() * 1000)))
 
         # fill target tiles...
         print('fill target tiles...')
         tcwvTile = targetTiles.get(self.tcwvBand)
-        tcwvFlagsTile = targetTiles.get(self.tcwvFlagsBand)
+        # tcwvFlagsTile = targetTiles.get(self.tcwvFlagsBand)
 
         # todo: define low/high flag
         tcwvLow = tcwvData < 0.0
@@ -146,7 +140,7 @@ class CawaOp:
 
         print('set samples...')
         tcwvTile.setSamples(tcwvData)
-        tcwvFlagsTile.setSamples(tcwvFlags)
+        # tcwvFlagsTile.setSamples(tcwvFlags)
 
 
     def getBand(self, inputProduct, bandName):
@@ -159,8 +153,6 @@ class CawaOp:
 
 
     def getTcwv(self, wd_algo, input):
-        print('entered getTcwv...')
-        print('wd_algo.estimator = ' + str(wd_algo.estimator))
         return wd_algo.estimator(input)['tcwv']
 
 
