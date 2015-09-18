@@ -42,7 +42,7 @@ memory = Memory(cachedir=cachedir, verbose=1)
 memcached_j2d=memory.cache(j2d)
 
 
-class cawa_core:
+class cawa_core_debug:
     '''
     ee
     '''
@@ -145,21 +145,22 @@ class cawa_core:
                        diagnostics, uncertainties ...
         '''
         t1 = time.clock() * 1000
-        data=copy.deepcopy(input)
+        # data=copy.deepcopy(input)
+        data=input
         t2 = time.clock() * 1000
-        # print('copy.deepcopy(input): ', (t2 - t1))
+        print('copy.deepcopy(input): ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_full(data,poly=poly,bands=bands,abscor=abscor)
         t2 = time.clock() * 1000
-        # print('init_full(data,poly=poly,bands=bands,abscor=abscor): ', (t2 - t1))
+        print('init_full(data,poly=poly,bands=bands,abscor=abscor): ', (t2 - t1))
         t1 = time.clock() * 1000
         self._do_inversion(data)
         t2 = time.clock() * 1000
-        # print('_do_inversion(data): ', (t2 - t1))
+        print('_do_inversion(data): ', (t2 - t1))
         t1 = time.clock() * 1000
         self._exit_data(data)
         t2 = time.clock() * 1000
-        # print('_exit_data(data): ', (t2 - t1))
+        print('_exit_data(data): ', (t2 - t1))
         return data
 
     def _init_data(self,data):
@@ -208,16 +209,16 @@ class cawa_core:
         '''
 
         #1. subset atmc for win channels
-        self.atmc={}
+        atmc={}
         for cha in self.lut['atc']:
             wo_geo=[self.intp['atc'][cha][dim](data[dim]) for dim in ['azi','vie','suz']]
             wo_aot=self.intp['atc'][cha]['aot'](data['aot'][cha])
             #self.atmc[cha]=self._interpol_5to1(self.lut['atc'][cha]['ltoa'],wo_geo,wo_aot)
-            self.atmc[cha]=wrap_interpol_5to1(self.lut['atc'][cha]['ltoa'],wo_geo,wo_aot)
+            atmc[cha]=wrap_interpol_5to1(self.lut['atc'][cha]['ltoa'],wo_geo,wo_aot)
         self.atmc_intp={}
         #2. make interpolators rtoa--> alb
         for cha in self.lut['atc']:
-            self.atmc_intp[cha]=generate_interpol(self.atmc[cha],self.lut['atc'][cha]['alb'])
+            self.atmc_intp[cha]=generate_interpol(atmc[cha],self.lut['atc'][cha]['alb'])
 
     def _init_scat(self, data):
         '''
@@ -399,31 +400,31 @@ class cawa_core:
         t1 = time.clock() * 1000
         self._init_data(data)
         t2 = time.clock() * 1000
-        # print('   _init_data: ', (t2 - t1))
+        print('       _init_data: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_atmc(data)
         t2 = time.clock() * 1000
-        # print('   _init_atmc: ', (t2 - t1))
+        print('       _init_atmc: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_prs_tmp(data,poly=poly,abscor=abscor) # 0.17ms
         t2 = time.clock() * 1000
-        # print('   _init_prs_tmp: ', (t2 - t1))
+        print('       _init_prs_tmp: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._do_first_guess(data)  #0.17ms
         t2 = time.clock() * 1000
-        # print('   _do_first_guess: ', (t2 - t1))
+        print('       _do_first_guess: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._do_atmc(data)     #0.27ms
         t2 = time.clock() * 1000
-        # print('   _do_atmc: ', (t2 - t1))
+        print('       _do_atmc: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_scat(data)   #0.19mx
         t2 = time.clock() * 1000
-        # print('   _init_scat: ', (t2 - t1))
+        print('       _init_scat: ', (t2 - t1))
         t1 = time.clock() * 1000
         self._init_forward(data,used_bands=bands)  #0 ms
         t2 = time.clock() * 1000
-        # print('   _init_forward: ', (t2 - t1))
+        print('       _init_forward: ', (t2 - t1))
 
     def _do_atmc(self,data):
         '''
@@ -478,7 +479,7 @@ class cawa_core:
             data['fgu']=self.fgu[self.fb[0]](tra)
 
     def _do_inversion(self,data):
-        data['tcwv']=data['fgu']
+        # data['tcwv']=data['fgu']
         # so ist es implementiert in Hannes's programm, , aber falsch
         # yy = np.array([
         #             data['rtoa'][bb]/(data['alb'][bb]/np.pi*np.cos(np.deg2rad(data['suz'])))

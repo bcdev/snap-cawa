@@ -64,7 +64,7 @@ class CawaOp:
         cawaProduct.setPreferredTileSize(width, height)   # todo: wadamo_core does not yet support multi-threading with smaller tiles
         self.tcwvBand = cawaProduct.addBand('tcwv', snappy.ProductData.TYPE_FLOAT32)
         # todo: flag band
-        # self.tcwvFlagsBand = cawaProduct.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
+        self.tcwvFlagsBand = cawaProduct.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
 
         print('set target product...')
         operator.setTargetProduct(cawaProduct)
@@ -131,16 +131,18 @@ class CawaOp:
         # fill target tiles...
         print('fill target tiles...')
         tcwvTile = targetTiles.get(self.tcwvBand)
-        # tcwvFlagsTile = targetTiles.get(self.tcwvFlagsBand)
+        tcwvFlagsTile = targetTiles.get(self.tcwvFlagsBand)
 
         # todo: define low/high flag
         tcwvLow = tcwvData < 0.0
         tcwvHigh = tcwvData > 15.0
         tcwvFlags = tcwvLow + 2 * tcwvHigh
+        # tcwvFlags = tcwvFlags.astype(numpy.uint8, copy=False)
+        tcwvFlags = tcwvFlags.view(numpy.uint8) # a bit faster
 
         print('set samples...')
         tcwvTile.setSamples(tcwvData)
-        # tcwvFlagsTile.setSamples(tcwvFlags)
+        tcwvFlagsTile.setSamples(tcwvFlags)
 
 
     def getBand(self, inputProduct, bandName):

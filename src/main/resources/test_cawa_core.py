@@ -8,13 +8,17 @@ import numpy
 
 # import snappy
 
+# import cawa_core_debug as cawa
 import cawa_core as cawa
 
 
 class test_cawa_core(unittest.TestCase):
     def setUp(self):
         bla = 0
-        self.cawa = cawa.cawa_core(os.path.join('.', 'luts', 'wadamo_core_meris.json'))
+        # self.cawa = cawa.cawa_core(os.path.join('.', 'luts', 'wadamo_core_meris.json'))
+        # self.cawa = cawa.cawa_core_debug(os.path.join('.', 'luts', 'wadamo_core_meris.json'))
+        # self.cawa = cawa.cawa_core_debug(os.path.join('.', 'luts', 'wadamo_core_modis_terra.json'))
+        self.cawa = cawa.cawa_core(os.path.join('.', 'luts', 'wadamo_core_modis_terra.json'))
 
     # @unittest.skip("skipping test...")
     # def test_call_op(self):
@@ -36,7 +40,7 @@ class test_cawa_core(unittest.TestCase):
     #     snappy.ProductIO.writeProduct(target_product, ofile, 'BEAM-DIMAP')
 
 
-    # @unittest.skip("skipping test...")
+    @unittest.skip("skipping test...")
     def test_estimator_meris(self):
         inp = {'tmp': 273.
             , 'prs': 900.
@@ -57,10 +61,60 @@ class test_cawa_core(unittest.TestCase):
         }
         }
         t1 = time.clock() * 1000
+        print('pixel tcwv result: ', self.cawa.estimator(inp)['tcwv'])
         self.assertAlmostEqual(self.cawa.estimator(inp)['tcwv'], 43.52, delta=0.1)
         # self.assertAlmostEqual(self.wd.estimator(inp, False)['tcwv'], 43.52, delta=0.1)   # almost twice as slow
         t2 = time.clock() * 1000
         print('TCWV estimator time (ms) for one pixel: ', (t2 - t1))
+
+    def test_estimator_modis(self):
+        inp = {'tmp': 303.
+            , 'prs': 1003.
+            , 'suz': 9.7968997955322270
+            , 'vie': 46.12860107421875
+            , 'azi': 18.
+            , 'aot': {'2': 0.1
+                    , '5': 0.08
+                    , '17': 0.1
+                    , '18': 0.1
+                    , '19': 0.1
+                      }
+            , 'sig_aot': {'2': 0.1
+                    , '5': 0.08
+                    , '17': 0.1
+                    , '18': 0.1
+                    , '19': 0.1
+                      }
+            , 'rtoa': {'2': 0.2/numpy.pi
+                    , '5': 0.205/numpy.pi
+                    , '17': 0.158/numpy.pi
+                    , '18': 0.06/numpy.pi
+                    , '19': 0.094/numpy.pi
+                      }
+               }
+        t1 = time.clock() * 1000
+        print('pixel MODIS tcwv result: ', self.cawa.estimator(inp)['tcwv'])
+        self.assertAlmostEqual(self.cawa.estimator(inp)['tcwv'], 15.26, delta=0.1)
+        t2 = time.clock() * 1000
+        print('TCWV estimator time (ms) for one pixel MODIS: ', (t2 - t1))
+
+    @unittest.skip("skipping test...")
+    def test_flags(self):
+        tcwvData = numpy.array([1.0, 2.0, 3.0, 4.0, 5.0], dtype=numpy.float32)
+        tcwvLow = tcwvData < 2.0
+        tcwvHigh = tcwvData > 3.0
+        tcwvFlags = tcwvLow + 2 * tcwvHigh
+        print('tcwvLow: ', tcwvLow)
+        print('tcwvHigh: ', tcwvHigh)
+        print('flags: ', tcwvFlags)
+        tcwvFlags2 = numpy.empty(5, dtype=numpy.uint8)
+        tcwvFlags2 = tcwvLow + 2 * tcwvHigh
+        t1 = time.clock() * 1000
+        # tcwvFlags2 = tcwvFlags2.astype(numpy.uint8, copy=False)
+        tcwvFlags2 = tcwvFlags2.view(numpy.uint8)
+        t2 = time.clock() * 1000
+        print('astype: ', (t2 - t1))
+        print('flags2: ', tcwvFlags2)
 
 
 print 'Testing org.esa.snap.cawa core'
