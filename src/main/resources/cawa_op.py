@@ -14,12 +14,28 @@ from snappy import SystemUtils
 
 jpy = snappy.jpy
 
+LAT_VALID_MIN_VALUE = -90.0
+LAT_VALID_MAX_VALUE = 90.0
+LAT_NODATA_VALUE = -999.0
+LON_VALID_MIN_VALUE = -180.0
+LON_VALID_MAX_VALUE = 180.0
+LON_NODATA_VALUE = -999.0
+
+TCWV_NODATA_VALUE = -999.0
 
 class CawaOp:
 
     def initialize(self, operator):
-        sourceProduct = operator.getSourceProduct('source')
-        print('start initialize: source product is', sourceProduct.getFileLocation().getAbsolutePath())
+        source_product = operator.getSourceProduct('sourceProduct')
+        if not source_product:
+            raise RuntimeError('No source product specified or product not found - cannot continue.')
+
+        print('start initialize: source product is', source_product.getFileLocation().getAbsolutePath())
+
+        # pixel classification from Idepix:
+        classif_product = operator.getSourceProduct('classifProduct')
+        if not classif_product:
+            raise RuntimeError('No pixel classification product specified or product not found - cannot continue.')
 
         print('Python module location: ' + __file__)
         resource_root = os.path.dirname(__file__)
@@ -44,40 +60,61 @@ class CawaOp:
             self.cawa = cawa_core.cawa_core(lut_json)
             print('LUT json file: ' + lut_json)
 
-        width = sourceProduct.getSceneRasterWidth()
-        height = sourceProduct.getSceneRasterHeight()
+        width = source_product.getSceneRasterWidth()
+        height = source_product.getSceneRasterHeight()
         print('width, height = ...', width, height)
 
         print('get bands ...')
         # todo: add something similar for MODIS input
-        self.rhoToa13Band = self.getBand(sourceProduct, 'reflec_13')
-        self.rhoToa14Band = self.getBand(sourceProduct, 'reflec_14')
-        self.rhoToa15Band = self.getBand(sourceProduct, 'reflec_15')
-        self.szaBand = self.getBand(sourceProduct, 'sun_zenith')
+        self.rhoToa13Band = self.get_band(source_product, 'reflec_13')
+        self.rhoToa14Band = self.get_band(source_product, 'reflec_14')
+        self.rhoToa15Band = self.get_band(source_product, 'reflec_15')
+        self.szaBand = self.get_band(source_product, 'sun_zenith')
         print('got band vza ...')
-        self.vzaBand = self.getBand(sourceProduct, 'view_zenith')
-        self.vaaBand = self.getBand(sourceProduct, 'view_azimuth')
+        self.vzaBand = self.get_band(source_product, 'view_zenith')
+        self.vaaBand = self.get_band(source_product, 'view_azimuth')
+
+        self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
 
         print('setup target product...')
-        cawaProduct = snappy.Product('pyCAWA', 'pyCAWA', width, height)
-        cawaProduct.setPreferredTileSize(width, 16)
-        cawaProduct.setPreferredTileSize(width, height)   # todo: wadamo_core does not yet support multi-threading with smaller tiles
-        self.tcwvBand = cawaProduct.addBand('tcwv', snappy.ProductData.TYPE_FLOAT32)
+        cawa_product = snappy.Product('pyCAWA', 'pyCAWA', width, height)
+        cawa_product.setPreferredTileSize(width, 16)
+        cawa_product.setPreferredTileSize(width, height)   # todo: wadamo_core does not yet support multi-threading with smaller tiles
+        self.tcwvBand = cawa_product.addBand('tcwv', snappy.ProductData.TYPE_FLOAT32)
+        self.tcwvBand .setNoDataValue(TCWV_NODATA_VALUE)
+        self.tcwvBand .setNoDataValueUsed(True)
         # todo: flag band
-        self.tcwvFlagsBand = cawaProduct.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
+        self.tcwvFlagsBand = cawa_product.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
+
+        lat_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_latitude')
+        lat_ac_band .setNoDataValue(LAT_NODATA_VALUE)
+        lat_ac_band .setNoDataValueUsed(True)
+        lon_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_longitude')
+        lat_ac_band .setNoDataValue(LON_NODATA_VALUE)
+        lon_ac_band .setNoDataValueUsed(True)
+        sza_ac_band = self.copy_src_band(source_product, cawa_product, 'sun_zenith')
+        vza_ac_band = self.copy_src_band(source_product, cawa_product, 'view_zenith')
+        vaa_ac_band = self.copy_src_band(source_product, cawa_product, 'sun_azimuth')
+        vaa_ac_band = self.copy_src_band(source_product, cawa_product, 'view_azimuth')
+        altitude_ac_band = self.copy_src_band(source_product, cawa_product, 'altitude')
+        snappy.ProductUtils.copyFlagBands(source_product, cawa_product, True)
+        snappy.ProductUtils.copyFlagBands(classif_product, cawa_product, True)
+
+        # copy geocoding:
+        source_product.transferGeoCodingTo(cawa_product, None)
 
         print('set target product...')
-        operator.setTargetProduct(cawaProduct)
+        operator.setTargetProduct(cawa_product)
 
         print('end initialize.')
 
 
-    def compute(self, operator, targetTiles, targetRectangle):
+    def compute(self, operator, target_tiles, target_rectangle):
 
-        print('enter compute: rectangle = ', targetRectangle.toString())
-        rhoToa13Tile = operator.getSourceTile(self.rhoToa13Band, targetRectangle)
-        rhoToa14Tile = operator.getSourceTile(self.rhoToa14Band, targetRectangle)
-        rhoToa15Tile = operator.getSourceTile(self.rhoToa15Band, targetRectangle)
+        print('enter compute: rectangle = ', target_rectangle.toString())
+        rhoToa13Tile = operator.getSourceTile(self.rhoToa13Band, target_rectangle)
+        rhoToa14Tile = operator.getSourceTile(self.rhoToa14Band, target_rectangle)
+        rhoToa15Tile = operator.getSourceTile(self.rhoToa15Band, target_rectangle)
 
         print('get rhoToaSamples ...')
         rhoToa13Samples = rhoToa13Tile.getSamplesFloat()
@@ -88,9 +125,13 @@ class CawaOp:
         rhoToa14Data = numpy.array(rhoToa14Samples, dtype=numpy.float32)
         rhoToa15Data = numpy.array(rhoToa15Samples, dtype=numpy.float32)
 
-        szaTile = operator.getSourceTile(self.szaBand, targetRectangle)
-        vzaTile = operator.getSourceTile(self.vzaBand, targetRectangle)
-        vaaTile = operator.getSourceTile(self.vaaBand, targetRectangle)
+        szaTile = operator.getSourceTile(self.szaBand, target_rectangle)
+        vzaTile = operator.getSourceTile(self.vzaBand, target_rectangle)
+        vaaTile = operator.getSourceTile(self.vaaBand, target_rectangle)
+
+        classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
+        classif_samples = classif_tile.getSamplesInt()
+        classif_data = numpy.array(classif_samples, dtype=numpy.int32)
 
         print('get geometry Samples ...')
         szaSamples = szaTile.getSamplesFloat()
@@ -125,18 +166,19 @@ class CawaOp:
                         }
             }
             # tcwvData[i] = i*1.0
-            tcwvData[i] = self.getTcwv(self.cawa, input)
+            tcwvData[i] = self.getTcwv(self.cawa, input, classif_data[i])
             # print('i, time in millisec: ', i, ' // ', int(round(time.time() * 1000)))
 
         # fill target tiles...
         print('fill target tiles...')
-        tcwvTile = targetTiles.get(self.tcwvBand)
-        tcwvFlagsTile = targetTiles.get(self.tcwvFlagsBand)
+        tcwvTile = target_tiles.get(self.tcwvBand)
+        tcwvFlagsTile = target_tiles.get(self.tcwvFlagsBand)
 
-        # todo: define low/high flag
-        tcwvLow = tcwvData < 0.0
-        tcwvHigh = tcwvData > 15.0
+        # todo: define appropriate low/high flag
+        tcwvLow = tcwvData < 5.0
+        tcwvHigh = tcwvData > 10.0
         tcwvFlags = tcwvLow + 2 * tcwvHigh
+        tcwvFlags = tcwvData == TCWV_NODATA_VALUE
         # tcwvFlags = tcwvFlags.astype(numpy.uint8, copy=False)
         tcwvFlags = tcwvFlags.view(numpy.uint8) # a bit faster
 
@@ -144,18 +186,30 @@ class CawaOp:
         tcwvTile.setSamples(tcwvData)
         tcwvFlagsTile.setSamples(tcwvFlags)
 
-
-    def getBand(self, inputProduct, bandName):
-        band = inputProduct.getBand(bandName)
+    def get_band(self, input_product, band_name):
+        band = input_product.getBand(band_name)
         if not band:
-            band = inputProduct.getTiePointGrid(bandName)
+            band = input_product.getTiePointGrid(band_name)
             if not band:
-                raise RuntimeError('Product has no band or tpg with name', bandName)
+                raise RuntimeError('Product has no band or tpg with name', band_name)
         return band
 
+    def copy_src_band(self, input_product, target_product, band_name):
+        src_band = self.get_band(input_product, band_name)
+        target_band = target_product.addBand(band_name, src_band.getDataType())
+        target_band.setSourceImage(src_band.getSourceImage())
+        target_band.setScalingFactor(src_band.getScalingFactor())
+        target_band.setScalingOffset(src_band.getScalingOffset())
+        target_band.setDescription(src_band.getDescription())
+        target_band.setUnit(src_band.getUnit())
+        target_band.setNoDataValue(src_band.getNoDataValue())
+        target_band.setNoDataValueUsed(src_band.isNoDataValueUsed())
+        return target_band
 
-    def getTcwv(self, wd_algo, input):
-        return wd_algo.estimator(input)['tcwv']
+
+
+    def getTcwv(self, wd_algo, input, classif_data):
+        return wd_algo.estimator(input, classif_data)['tcwv']
 
 
     def dispose(self, operator):

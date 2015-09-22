@@ -7,6 +7,7 @@ import wadamo_interpolators  # todo: we need mechanism to make these available i
 import wadamo_poly
 
 import numpy as np
+import cawa_utils as cu
 
 ######################################################################################
 # The CAWA core operations (i.e. LUT access) for total water vapour column retrieval.
@@ -50,6 +51,9 @@ class cawa_core:
         '''
         dgfra
         '''
+        self.cawa_utils = cu.cawa_utils()
+        self.num_computations = 0
+
         # 0 read LUT.
         #self.lut = d2j.json2dict(corefile,order='F')
         self.lut = memcached_j2d(corefile,order='F')
@@ -130,7 +134,7 @@ class cawa_core:
         t2 = time.clock() * 1000
         print('init_4: ', (t2 - t1))
 
-    def estimator(self,input,poly=True,bands=None,abscor=True):
+    def estimator(self, input, classif_data, poly=True,bands=None,abscor=True):
         '''
         :param input:  dict containing all necessary input (see tests)
         :param poly:   if true polynomes are used instead of exponetial sums.
@@ -144,22 +148,32 @@ class cawa_core:
         :return:       a dict containing the input the TCWV and some
                        diagnostics, uncertainties ...
         '''
+
         t1 = time.clock() * 1000
         data=copy.deepcopy(input)
         t2 = time.clock() * 1000
         # print('copy.deepcopy(input): ', (t2 - t1))
-        t1 = time.clock() * 1000
-        self._init_full(data,poly=poly,bands=bands,abscor=abscor)
-        t2 = time.clock() * 1000
-        # print('init_full(data,poly=poly,bands=bands,abscor=abscor): ', (t2 - t1))
-        t1 = time.clock() * 1000
-        self._do_inversion(data)
-        t2 = time.clock() * 1000
-        # print('_do_inversion(data): ', (t2 - t1))
-        t1 = time.clock() * 1000
-        self._exit_data(data)
-        t2 = time.clock() * 1000
-        # print('_exit_data(data): ', (t2 - t1))
+
+        # exclude mask pixels from computation:
+        pixel_mask = self.cawa_utils.calculate_pixel_mask(classif_data)
+        valid = pixel_mask == 0
+        if not valid:
+            data['tcwv'] = -999.0 # todo: define no_data value
+            data ['sig_tcwv'] = -999.0
+        else:
+            t1 = time.clock() * 1000
+            self._init_full(data,poly=poly,bands=bands,abscor=abscor)
+            t2 = time.clock() * 1000
+            # print('init_full(data,poly=poly,bands=bands,abscor=abscor): ', (t2 - t1))
+            t1 = time.clock() * 1000
+            self._do_inversion(data)
+            t2 = time.clock() * 1000
+            # print('_do_inversion(data): ', (t2 - t1))
+            t1 = time.clock() * 1000
+            self._exit_data(data)
+            t2 = time.clock() * 1000
+            # print('_exit_data(data): ', (t2 - t1))
+
         return data
 
     def _init_data(self,data):
