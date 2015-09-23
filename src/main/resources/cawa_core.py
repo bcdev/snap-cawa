@@ -134,7 +134,7 @@ class cawa_core:
         t2 = time.clock() * 1000
         print('init_4: ', (t2 - t1))
 
-    def estimator(self, input, classif_data, poly=True,bands=None,abscor=True):
+    def estimator(self, input, classif_data, l1_flag_data, poly=True,bands=None,abscor=True):
         '''
         :param input:  dict containing all necessary input (see tests)
         :param poly:   if true polynomes are used instead of exponetial sums.
@@ -155,7 +155,7 @@ class cawa_core:
         # print('copy.deepcopy(input): ', (t2 - t1))
 
         # exclude mask pixels from computation:
-        pixel_mask = self.cawa_utils.calculate_pixel_mask(classif_data)
+        pixel_mask = self.cawa_utils.calculate_pixel_mask(classif_data, l1_flag_data)
         valid = pixel_mask == 0
         if not valid:
             data['tcwv'] = -999.0 # todo: define no_data value

@@ -36,20 +36,21 @@ class test_cawa_utils(unittest.TestCase):
 
     def test_mask(self):
         inputData = numpy.array([3, 12, 6, 16, 36, 64], dtype=numpy.int32)
+        l1DummyData = numpy.array([0, 0, 0, 0, 0, 0], dtype=numpy.int32)
         mask = numpy.empty(6, dtype=numpy.uint8)
         for i in range(inputData.shape[0]):
-            mask[i] = self.cu.calculate_pixel_mask(i, inputData)
+            mask[i] = self.cu.calculate_pixel_mask_array(i, inputData, l1DummyData)
 
-        self.assertItemsEqual(mask, [1, 0, 1, 1, 1, 0])
+        self.assertItemsEqual(mask, [1, 1, 1, 0, 0, 0])
         print('mask: ', mask)
         print('inputData: ', inputData)
         valid = mask == 0
         print('valid: ', valid)
         print('inputData[valid]: ', inputData[valid])
 
-        inp = {{'tmp': 303., 'prs': 1003.}, {'tmp': 6749., 'prs': 2005.}}
-        print('inp[0]: ', inp.values()[0])
-        print('inp[1]: ', inp.values()[1])
+        # inp = {{'tmp': 303., 'prs': 1003.}, {'tmp': 6749., 'prs': 2005.}}
+        # print('inp[0]: ', inp.values()[0])
+        # print('inp[1]: ', inp.values()[1])
 
 
 print 'Testing org.esa.snap.cawa core'

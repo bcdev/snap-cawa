@@ -74,17 +74,25 @@ class CawaOp:
         self.vzaBand = self.get_band(source_product, 'view_zenith')
         self.vaaBand = self.get_band(source_product, 'view_azimuth')
 
+        self.l1_flag_band = self.get_band(source_product, 'l1_flags')
         self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
 
         print('setup target product...')
-        cawa_product = snappy.Product('pyCAWA', 'pyCAWA', width, height)
-        cawa_product.setPreferredTileSize(width, 16)
-        cawa_product.setPreferredTileSize(width, height)   # todo: wadamo_core does not yet support multi-threading with smaller tiles
+        cawa_product = snappy.Product('pyCAWA', 'CAWA TCWV', width, height)
+        cawa_product.setDescription('CAWA TCWV product')
+        cawa_product.setStartTime(source_product.getStartTime())
+        cawa_product.setEndTime(source_product.getEndTime())
+        # cawa_product.setPreferredTileSize(width, 16)
+        # cawa_product.setPreferredTileSize(width, height)   # todo: wadamo_core does not yet support multi-threading with smaller tiles
         self.tcwvBand = cawa_product.addBand('tcwv', snappy.ProductData.TYPE_FLOAT32)
         self.tcwvBand .setNoDataValue(TCWV_NODATA_VALUE)
         self.tcwvBand .setNoDataValueUsed(True)
+        self.tcwvBand .setUnit('mm')
+        self.tcwvBand .setDescription('Total column of water vapour')
         # todo: flag band
         self.tcwvFlagsBand = cawa_product.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
+        self.tcwvFlagsBand .setUnit('dl')
+        self.tcwvFlagsBand .setDescription('TCWV flags band')
 
         lat_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_latitude')
         lat_ac_band .setNoDataValue(LAT_NODATA_VALUE)
@@ -129,6 +137,10 @@ class CawaOp:
         vzaTile = operator.getSourceTile(self.vzaBand, target_rectangle)
         vaaTile = operator.getSourceTile(self.vaaBand, target_rectangle)
 
+        l1_flag_tile = operator.getSourceTile(self.l1_flag_band, target_rectangle)
+        l1_flag_samples = l1_flag_tile.getSamplesInt()
+        l1_flag_data = numpy.array(l1_flag_samples, dtype=numpy.int16)
+
         classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
         classif_samples = classif_tile.getSamplesInt()
         classif_data = numpy.array(classif_samples, dtype=numpy.int32)
@@ -166,7 +178,7 @@ class CawaOp:
                         }
             }
             # tcwvData[i] = i*1.0
-            tcwvData[i] = self.getTcwv(self.cawa, input, classif_data[i])
+            tcwvData[i] = self.getTcwv(self.cawa, input, classif_data[i], l1_flag_data[i])
             # print('i, time in millisec: ', i, ' // ', int(round(time.time() * 1000)))
 
         # fill target tiles...
@@ -208,8 +220,8 @@ class CawaOp:
 
 
 
-    def getTcwv(self, wd_algo, input, classif_data):
-        return wd_algo.estimator(input, classif_data)['tcwv']
+    def getTcwv(self, wd_algo, input, classif_data, l1_flag_data):
+        return wd_algo.estimator(input, classif_data, l1_flag_data)['tcwv']
 
 
     def dispose(self, operator):

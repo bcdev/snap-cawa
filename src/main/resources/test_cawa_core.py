@@ -93,8 +93,9 @@ class test_cawa_core(unittest.TestCase):
                       }
                }
         t1 = time.clock() * 1000
-        print('pixel MODIS tcwv result: ', self.cawa.estimator(inp)['tcwv'])
-        self.assertAlmostEqual(self.cawa.estimator(inp)['tcwv'], 15.26, delta=0.1)
+        tcwv_result = self.cawa.estimator(inp, 0, 0)['tcwv']
+        print('pixel MODIS tcwv result: ', tcwv_result)
+        self.assertAlmostEqual(tcwv_result, 15.26, delta=0.1)
         t2 = time.clock() * 1000
         print('TCWV estimator time (ms) for one pixel MODIS: ', (t2 - t1))
 
