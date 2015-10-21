@@ -2,3 +2,4 @@
 # line an operator is specified by its relative Python module path and its Python class name. Both elements need
 # to be separated by one or more whitespaces.
 cawa_op                CawaOp
+cawa_tcwv_op                CawaTcwvOp
