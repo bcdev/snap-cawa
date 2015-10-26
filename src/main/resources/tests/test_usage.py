@@ -14,7 +14,7 @@ def test_it(what='ocean',inst='meris'):
     
     if what == 'ocean':
         if inst == 'meris':
-            tcwv_op=cawa_tcwv_ocean_core.ocean_core(TSTDIR+'/../luts/ocean/ocean_core_meris.nc4')
+            tcwv_op=cawa_tcwv_ocean_core.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_meris.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -28,7 +28,7 @@ def test_it(what='ocean',inst='meris'):
             # Attention: prior windspeed and prior tcwv must come from a 
             # relaible source (e.g. ECMWF ERA). I can provide necessarty data
         elif inst == 'modis_terra':
-            tcwv_op=cawa_tcwv_ocean_core.ocean_core(TSTDIR+'/../luts/ocean/ocean_core_modis_terra.nc4')
+            tcwv_op=cawa_tcwv_ocean_core.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_modis_terra.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,

@@ -40,7 +40,7 @@ SA[2,2]=SAw
 
 
 
-class ocean_core:
+class cawa_tcwv_ocean_core:
     '''
     '''
     def __init__(self,corefile=os.path.join(about_me()['cawadir'],'luts','ocean','ocean_core_meris.nc4')):
@@ -167,42 +167,42 @@ class ocean_core:
             
                 
  
-if __name__=='__main__':
-    import cawa_tcwv_ocean_core
-    oc=cawa_tcwv_ocean_core.cawa_tcwv_ocean_core()
-    
-    print oc.forward([4.5,0.15,8.],[170.,20.,30.])
-    print oc.jforward([4.5,0.15,8.],[170.,20.,30.])
-    
-    xa=np.array([3.,0.1,7.])
-    
-    SE=np.diag([0.0001,0.0001,0.001])
-    
-    print oc.inverter([ 0.0045663,0.00440355,0.21067386]
-                      ,fparams=np.array([170.,20.,30.])
-                      ,jparams=np.array([170.,20.,30.])
-                      ,sa=SA,se=SE,xa=xa,method=2,full=True,maxiter=4)
-
-    inp={'suz':10.,'vie':40.,'azi':170.,'amf':1./np.cos(40.*np.pi/180.)+1./np.cos(10.*np.pi/180.)
-        ,'rtoa':{'13':0.0045663,'14':0.00440355,'15':0.00356704375818}
-        ,'prior_wsp':7.5,'prior_aot':0.15,'prior_tcwv':15.}
-
-    print oc.estimator(inp)['res'].x
-    
-    import time
-    tt=time.time
-    a=tt()
-    for i in range(1000): _=oc.forward([4.5,0.15,8.],[170.,20.,30.])
-    print 'forward',tt()-a
-    a=tt()
-    for i in range(1000): _=oc.inverter([ 0.0045663,0.00440355,0.21067386]
-                      ,fparams=np.array([170.,20.,30.])
-                      ,jparams=np.array([170.,20.,30.])
-                      ,sa=SA,se=SE,xa=xa,method=2,full=False,maxiter=4)
-    print 'inverter',tt()-a
-    a=tt()
-    for i in range(1000): _=oc.estimator(inp)['res'].x
-    print 'estimator',tt()-a
-  
-    print HIER
+# if __name__=='__main__':
+#     import cawa_tcwv_ocean_core
+#     oc=cawa_tcwv_ocean_core.cawa_tcwv_ocean_core()
+#
+#     print oc.forward([4.5,0.15,8.],[170.,20.,30.])
+#     print oc.jforward([4.5,0.15,8.],[170.,20.,30.])
+#
+#     xa=np.array([3.,0.1,7.])
+#
+#     SE=np.diag([0.0001,0.0001,0.001])
+#
+#     print oc.inverter([ 0.0045663,0.00440355,0.21067386]
+#                       ,fparams=np.array([170.,20.,30.])
+#                       ,jparams=np.array([170.,20.,30.])
+#                       ,sa=SA,se=SE,xa=xa,method=2,full=True,maxiter=4)
+#
+#     inp={'suz':10.,'vie':40.,'azi':170.,'amf':1./np.cos(40.*np.pi/180.)+1./np.cos(10.*np.pi/180.)
+#         ,'rtoa':{'13':0.0045663,'14':0.00440355,'15':0.00356704375818}
+#         ,'prior_wsp':7.5,'prior_aot':0.15,'prior_tcwv':15.}
+#
+#     print oc.estimator(inp)['res'].x
+#
+#     import time
+#     tt=time.time
+#     a=tt()
+#     for i in range(1000): _=oc.forward([4.5,0.15,8.],[170.,20.,30.])
+#     print 'forward',tt()-a
+#     a=tt()
+#     for i in range(1000): _=oc.inverter([ 0.0045663,0.00440355,0.21067386]
+#                       ,fparams=np.array([170.,20.,30.])
+#                       ,jparams=np.array([170.,20.,30.])
+#                       ,sa=SA,se=SE,xa=xa,method=2,full=False,maxiter=4)
+#     print 'inverter',tt()-a
+#     a=tt()
+#     for i in range(1000): _=oc.estimator(inp)['res'].x
+#     print 'estimator',tt()-a
+#
+#     print HIER
 

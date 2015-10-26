@@ -14,11 +14,8 @@ import cawa_core as cawa
 
 class test_cawa_core(unittest.TestCase):
     def setUp(self):
-        bla = 0
-        # self.cawa = cawa.cawa_core(os.path.join('.', 'luts', 'wadamo_core_meris.json'))
-        # self.cawa = cawa.cawa_core_debug(os.path.join('.', 'luts', 'wadamo_core_meris.json'))
-        # self.cawa = cawa.cawa_core_debug(os.path.join('.', 'luts', 'wadamo_core_modis_terra.json'))
-        self.cawa = cawa.cawa_core(os.path.join('.', 'luts', 'wadamo_core_modis_terra.json'))
+        self.cawa = cawa.cawa_core(os.path.join('.', 'luts', 'wadamo_core_meris.json'))
+        # self.cawa = cawa.cawa_core(os.path.join('.', 'luts', 'wadamo_core_modis_terra.json'))
 
     # @unittest.skip("skipping test...")
     # def test_call_op(self):
@@ -40,7 +37,7 @@ class test_cawa_core(unittest.TestCase):
     #     snappy.ProductIO.writeProduct(target_product, ofile, 'BEAM-DIMAP')
 
 
-    @unittest.skip("skipping test...")
+    # @unittest.skip("skipping test...")
     def test_estimator_meris(self):
         inp = {'tmp': 273.
             , 'prs': 900.
@@ -60,13 +57,21 @@ class test_cawa_core(unittest.TestCase):
             , '15': 0.0204
         }
         }
-        t1 = time.clock() * 1000
-        print('pixel tcwv result: ', self.cawa.estimator(inp)['tcwv'])
-        self.assertAlmostEqual(self.cawa.estimator(inp)['tcwv'], 43.52, delta=0.1)
-        # self.assertAlmostEqual(self.wd.estimator(inp, False)['tcwv'], 43.52, delta=0.1)   # almost twice as slow
-        t2 = time.clock() * 1000
-        print('TCWV estimator time (ms) for one pixel: ', (t2 - t1))
 
+        t_ave = 0.0
+        for i in range(1000):
+            t1 = time.clock() * 1000
+            tcwv_result = self.cawa.estimator(inp, 0, 0)['tcwv']
+            # print('pixel tcwv result: ', tcwv_result)
+            self.assertAlmostEqual(tcwv_result, 43.52, delta=0.1)
+            # self.assertAlmostEqual(self.cawa.estimator(inp, 0, 0, False)['tcwv'], 43.52, delta=0.1)   # almost twice as slow
+            t2 = time.clock() * 1000
+            # print('TCWV estimator time (ms) for one pixel: ', (t2 - t1))
+            t_ave += (t2-t1)
+        print('TCWV estimator average time (ms) for one pixel: ', t_ave/1000.0)
+
+
+    @unittest.skip("skipping test...")
     def test_estimator_modis(self):
         inp = {'tmp': 303.
             , 'prs': 1003.

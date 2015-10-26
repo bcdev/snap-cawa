@@ -39,7 +39,7 @@ SA[0,0]=SAt
 SA[1,1]=SAa0
 SA[2,2]=SAa1
 
-class land_core:
+class cawa_tcwv_land_core:
     '''
     '''
     def __init__(self,corefile=os.path.join(about_me()['cawadir'],'luts','land','land_core_meris.nc4')):
@@ -165,36 +165,36 @@ class land_core:
 
         
         
-if __name__=='__main__':
-    import cawa_tcwv_land_core
-    lc=cawa_tcwv_land_core.cawa_tcwv_land_core()
-    
-    print lc.forward([2.5,0.15,0.16],[0.1,1005,280.,170.,20.,30.])
-    #print lc.jforward([4.5,0.15,0.16],[0.1,1005,280.,170.,20.,30.])
-    
-    
-    xa=np.array([13.,0.04*np.pi,0.04*np.pi])    
-    SE=np.diag([0.00001,0.00001,0.0001])
-        
-       
-    #print lc.inverter([0.04228669,0.04442161,0.21411778]
-                      #,fparams=np.array([0.1,1005,280.,170.,20.,30.])
-                      #,jparams=np.array([0.1,1005,280.,170.,20.,30.])
-                      #,sa=SA,se=SE,xa=xa,method=2,full=True,maxiter=4)
-       
-    inp={'suz':30.,'vie':20.,'azi':170.,'amf':1./np.cos(40.*np.pi/180.)+1./np.cos(10.*np.pi/180.)
-        ,'prs':1005,'aot':0.1,'tmp':280.
-        ,'rtoa':{'13':0.04228669,'14':0.04442161,'15':0.031}
-        ,'prior_al0':0.13,'prior_al1':0.13,'prior_tcwv':15.}
-
-    
-    print lc.estimator(inp)['tcwv']
-    print lc.estimator(inp)['al0']
-    print lc.estimator(inp)['al1']
-    #print lc.estimator(inp)['mes']
-    import time
-    tt=time.time
-    a=tt()
-    for i in range(1000): _=lc.estimator(inp)['res'].x
-    print 'estimator',tt()-a
+# if __name__=='__main__':
+#     import cawa_tcwv_land_core
+#     lc=cawa_tcwv_land_core.cawa_tcwv_land_core()
+#
+#     print lc.forward([2.5,0.15,0.16],[0.1,1005,280.,170.,20.,30.])
+#     #print lc.jforward([4.5,0.15,0.16],[0.1,1005,280.,170.,20.,30.])
+#
+#
+#     xa=np.array([13.,0.04*np.pi,0.04*np.pi])
+#     SE=np.diag([0.00001,0.00001,0.0001])
+#
+#
+#     #print lc.inverter([0.04228669,0.04442161,0.21411778]
+#                       #,fparams=np.array([0.1,1005,280.,170.,20.,30.])
+#                       #,jparams=np.array([0.1,1005,280.,170.,20.,30.])
+#                       #,sa=SA,se=SE,xa=xa,method=2,full=True,maxiter=4)
+#
+#     inp={'suz':30.,'vie':20.,'azi':170.,'amf':1./np.cos(40.*np.pi/180.)+1./np.cos(10.*np.pi/180.)
+#         ,'prs':1005,'aot':0.1,'tmp':280.
+#         ,'rtoa':{'13':0.04228669,'14':0.04442161,'15':0.031}
+#         ,'prior_al0':0.13,'prior_al1':0.13,'prior_tcwv':15.}
+#
+#
+#     print lc.estimator(inp)['tcwv']
+#     print lc.estimator(inp)['al0']
+#     print lc.estimator(inp)['al1']
+#     #print lc.estimator(inp)['mes']
+#     import time
+#     tt=time.time
+#     a=tt()
+#     for i in range(1000): _=lc.estimator(inp)['res'].x
+#     print 'estimator',tt()-a
 
