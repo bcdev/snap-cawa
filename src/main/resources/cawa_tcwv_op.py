@@ -1,15 +1,14 @@
 import os
 import zipfile
 
-import numpy
+import numpy as np
 
 import snappy
 import sys
-import cawa_core
+import cawa_tcwv_core as cawa_core
 
 import cawa_utils as cu
 
-from joblib import Memory
 from snappy import SystemUtils
 
 jpy = snappy.jpy
@@ -56,9 +55,18 @@ class CawaTcwvOp:
         with zipfile.ZipFile(resource_root) as zf:
             auxpath = SystemUtils.getAuxDataPath()
             print('auxpath: ' + str(auxpath))
-            lut_json = zf.extract('luts/wadamo_core_meris.json', os.path.join(str(auxpath), 'cawa'))
-            self.cawa = cawa_core.cawa_core(lut_json)
-            print('LUT json file: ' + lut_json)
+
+            # land_lut = os.path.join('.', 'luts', 'land', 'land_core_meris.nc4')
+            # ocean_lut = os.path.join('.', 'luts', 'ocean', 'ocean_core_meris.nc4')
+            # self.cawa_core = cawa_core.cawa_tcwv_core(land_lut, ocean_lut)
+
+            # lut_json = zf.extract('luts/wadamo_core_meris.json', os.path.join(str(auxpath), 'cawa'))
+            # self.cawa = cawa_core.cawa_core(lut_json)
+            land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+            ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+            print('LUT land: ' + land_lut)
+            print('LUT ocean: ' + ocean_lut)
+            self.cawa = cawa_core.cawa_tcwv_core(land_lut, ocean_lut)
 
         width = source_product.getSceneRasterWidth()
         height = source_product.getSceneRasterHeight()
@@ -94,12 +102,12 @@ class CawaTcwvOp:
         self.tcwvFlagsBand .setUnit('dl')
         self.tcwvFlagsBand .setDescription('TCWV flags band')
 
-        lat_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_latitude')
-        lat_ac_band .setNoDataValue(LAT_NODATA_VALUE)
-        lat_ac_band .setNoDataValueUsed(True)
-        lon_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_longitude')
-        lat_ac_band .setNoDataValue(LON_NODATA_VALUE)
-        lon_ac_band .setNoDataValueUsed(True)
+        # lat_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_latitude')
+        # lat_ac_band .setNoDataValue(LAT_NODATA_VALUE)
+        # lat_ac_band .setNoDataValueUsed(True)
+        # lon_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_longitude')
+        # lat_ac_band .setNoDataValue(LON_NODATA_VALUE)
+        # lon_ac_band .setNoDataValueUsed(True)
         sza_ac_band = self.copy_src_band(source_product, cawa_product, 'sun_zenith')
         vza_ac_band = self.copy_src_band(source_product, cawa_product, 'view_zenith')
         vaa_ac_band = self.copy_src_band(source_product, cawa_product, 'sun_azimuth')
@@ -129,9 +137,9 @@ class CawaTcwvOp:
         rhoToa14Samples = rhoToa14Tile.getSamplesFloat()
         rhoToa15Samples = rhoToa15Tile.getSamplesFloat()
 
-        rhoToa13Data = numpy.array(rhoToa13Samples, dtype=numpy.float32)
-        rhoToa14Data = numpy.array(rhoToa14Samples, dtype=numpy.float32)
-        rhoToa15Data = numpy.array(rhoToa15Samples, dtype=numpy.float32)
+        rhoToa13Data = np.array(rhoToa13Samples, dtype=np.float32)
+        rhoToa14Data = np.array(rhoToa14Samples, dtype=np.float32)
+        rhoToa15Data = np.array(rhoToa15Samples, dtype=np.float32)
 
         szaTile = operator.getSourceTile(self.szaBand, target_rectangle)
         vzaTile = operator.getSourceTile(self.vzaBand, target_rectangle)
@@ -139,47 +147,34 @@ class CawaTcwvOp:
 
         l1_flag_tile = operator.getSourceTile(self.l1_flag_band, target_rectangle)
         l1_flag_samples = l1_flag_tile.getSamplesInt()
-        l1_flag_data = numpy.array(l1_flag_samples, dtype=numpy.int16)
+        l1_flag_data = np.array(l1_flag_samples, dtype=np.int16)
 
         classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
         classif_samples = classif_tile.getSamplesInt()
-        classif_data = numpy.array(classif_samples, dtype=numpy.int32)
+        classif_data = np.array(classif_samples, dtype=np.int32)
 
         print('get geometry Samples ...')
         szaSamples = szaTile.getSamplesFloat()
         vzaSamples = vzaTile.getSamplesFloat()
         vaaSamples = vaaTile.getSamplesFloat()
 
-        szaData = numpy.array(szaSamples, dtype=numpy.float32)
-        vzaData = numpy.array(vzaSamples, dtype=numpy.float32)
-        vaaData = numpy.array(vaaSamples, dtype=numpy.float32)
+        szaData = np.array(szaSamples, dtype=np.float32)
+        vzaData = np.array(vzaSamples, dtype=np.float32)
+        vaaData = np.array(vaaSamples, dtype=np.float32)
 
         # loop over whole tile...
         print('start loop ...')
         print('rhoToa13Data.size[0]: ', rhoToa13Data.shape[0])
-        tcwvData = numpy.empty(rhoToa13Data.shape[0], dtype=numpy.float32)
+        tcwvData = np.empty(rhoToa13Data.shape[0], dtype=np.float32)
         for i in range(0, rhoToa13Data.shape[0]):
-            input={'tmp':self.temperature
-                ,'prs':self.pressure
-                ,'suz':szaData[i]
-                ,'vie':vzaData[i]
-                ,'azi':vaaData[i]
-                ,'aot': {'13':self.aot13
-                , '14':self.aot14
-                , '15':self.aot15
-                    }
-                ,'sig_aot': {'13':self.sig_aot13
-                , '14':self.sig_aot14
-                , '15':self.sig_aot15
-                            }
-                ,'rtoa':{'13':rhoToa13Data[i]
-                , '14':rhoToa14Data[i]
-                , '15':rhoToa15Data[i]
-                        }
-            }
-            # tcwvData[i] = i*1.0
-            tcwvData[i] = self.getTcwv(self.cawa, input, classif_data[i], l1_flag_data[i])
-            # print('i, time in millisec: ', i, ' // ', int(round(time.time() * 1000)))
+            input = {'suz': szaData[i], 'vie': vzaData[i], 'azi': vaaData[i],
+                   'amf': 1. / np.cos(40. * np.pi / 180.) + 1. / np.cos(10. * np.pi / 180.),
+                   'prs': self.pressure, 'aot': self.aot13, 'tmp': self.temperature,
+                   'rtoa': {'13': rhoToa13Data[i], '14': rhoToa14Data[i], '15': rhoToa15Data[i]},
+                   'prior_wsp':7.5,'prior_aot':0.15,
+                   'prior_al0': 0.13, 'prior_al1': 0.13, 'prior_tcwv': 15.}
+
+            tcwvData[i] = self.getTcwv(input, classif_data[i], l1_flag_data[i])
 
         # fill target tiles...
         print('fill target tiles...')
@@ -191,8 +186,8 @@ class CawaTcwvOp:
         tcwvHigh = tcwvData > 10.0
         tcwvFlags = tcwvLow + 2 * tcwvHigh
         tcwvFlags = tcwvData == TCWV_NODATA_VALUE
-        # tcwvFlags = tcwvFlags.astype(numpy.uint8, copy=False)
-        tcwvFlags = tcwvFlags.view(numpy.uint8) # a bit faster
+        # tcwvFlags = tcwvFlags.astype(np.uint8, copy=False)
+        tcwvFlags = tcwvFlags.view(np.uint8) # a bit faster
 
         print('set samples...')
         tcwvTile.setSamples(tcwvData)
@@ -218,11 +213,8 @@ class CawaTcwvOp:
         target_band.setNoDataValueUsed(src_band.isNoDataValueUsed())
         return target_band
 
-
-
-    def getTcwv(self, wd_algo, input, classif_data, l1_flag_data):
-        return wd_algo.estimator(input, classif_data, l1_flag_data)['tcwv']
-
+    def getTcwv(self, input, classif_data, l1_flag_data):
+        return self.cawa.compute_pixel(input, classif_data, l1_flag_data)['tcwv']
 
     def dispose(self, operator):
         pass

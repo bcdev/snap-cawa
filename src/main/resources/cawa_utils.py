@@ -4,12 +4,13 @@ import os
 # CAWA utils.
 ######################################################################################
 
-# Idepix flags:
-L1_INVALID      = 128
+# Idepix flags (MERIS):
+L1_INVALID     = 128
 F_INVALID      = 1
 F_CLOUD        = 2
 F_CLOUD_BUFFER = 4
 F_CLOUD_SHADOW = 8
+F_LAND         = 128
 
 class cawa_utils:
 
@@ -18,10 +19,10 @@ class cawa_utils:
     def do_nothing(self):
         pass
 
-    def calculate_pixel_mask_array(self, index, classif_data, l1_flag_data):
-        return self.calculate_pixel_mask(classif_data[index], l1_flag_data[index])
+    def calculate_meris_pixel_mask_array(self, index, classif_data, l1_flag_data):
+        return self.calculate_meris_pixel_mask(classif_data[index], l1_flag_data[index])
 
-    def calculate_pixel_mask(self, classif_data, l1_flag_data):
+    def calculate_meris_pixel_mask(self, classif_data, l1_flag_data):
         """
         Exclude pixels classified as invalid, cloud, cloudbuffer, cloudshadow:
         # F_INVALID (1)
@@ -40,4 +41,10 @@ class cawa_utils:
 
         return return_value
 
+    def is_meris_land_pixel(self, classif_data):
+        """
+        Determine from Idepix flag if pixel is land pixel
+        """
+        return classif_data & F_LAND == F_LAND
 
+    # todo: provide for MODIS accordingly

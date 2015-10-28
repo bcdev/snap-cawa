@@ -4,8 +4,8 @@ import math
 import time
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-import cawa_tcwv_land_core
-import cawa_tcwv_ocean_core
+import cawa_tcwv_land
+import cawa_tcwv_ocean
 
 TSTDIR=os.path.realpath(os.path.dirname(__file__))
 
@@ -14,7 +14,7 @@ def test_it(what='ocean',inst='meris'):
     
     if what == 'ocean':
         if inst == 'meris':
-            tcwv_op=cawa_tcwv_ocean_core.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_meris.nc4')
+            tcwv_op=cawa_tcwv_ocean.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_meris.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -28,7 +28,7 @@ def test_it(what='ocean',inst='meris'):
             # Attention: prior windspeed and prior tcwv must come from a 
             # relaible source (e.g. ECMWF ERA). I can provide necessarty data
         elif inst == 'modis_terra':
-            tcwv_op=cawa_tcwv_ocean_core.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_modis_terra.nc4')
+            tcwv_op=cawa_tcwv_ocean.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_modis_terra.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -43,7 +43,7 @@ def test_it(what='ocean',inst='meris'):
                  
     elif what == 'land':
         if inst == 'meris':
-            tcwv_op=cawa_tcwv_land_core.land_core(TSTDIR+'/../luts/land/land_core_meris.nc4')
+            tcwv_op=cawa_tcwv_land.land_core(TSTDIR+'/../luts/land/land_core_meris.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -58,7 +58,7 @@ def test_it(what='ocean',inst='meris'):
                  'prior_al1':0.13,
                  'prior_tcwv':15.}
         if inst == 'modis_terra':
-            tcwv_op=cawa_tcwv_land_core.land_core(TSTDIR+'/../luts/land/land_core_modis_terra.nc4')
+            tcwv_op=cawa_tcwv_land.land_core(TSTDIR+'/../luts/land/land_core_modis_terra.nc4')
             inp={'suz':40.,
                  'vie':10.,
                  'azi':170.,

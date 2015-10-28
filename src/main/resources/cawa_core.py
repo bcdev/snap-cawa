@@ -155,7 +155,7 @@ class cawa_core:
         # print('copy.deepcopy(input): ', (t2 - t1))
 
         # exclude mask pixels from computation:
-        pixel_mask = self.cawa_utils.calculate_pixel_mask(classif_data, l1_flag_data)
+        pixel_mask = self.cawa_utils.calculate_meris_pixel_mask(classif_data, l1_flag_data)
         valid = pixel_mask == 0
         if not valid:
             data['tcwv'] = -999.0 # todo: define no_data value

@@ -39,7 +39,7 @@ class test_cawa_utils(unittest.TestCase):
         l1DummyData = numpy.array([0, 0, 0, 0, 0, 0], dtype=numpy.int32)
         mask = numpy.empty(6, dtype=numpy.uint8)
         for i in range(inputData.shape[0]):
-            mask[i] = self.cu.calculate_pixel_mask_array(i, inputData, l1DummyData)
+            mask[i] = self.cu.calculate_meris_pixel_mask_array(i, inputData, l1DummyData)
 
         self.assertItemsEqual(mask, [1, 1, 1, 0, 0, 0])
         print('mask: ', mask)
