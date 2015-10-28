@@ -1,138 +1,118 @@
-import os
-import zipfile
-
-import numpy as np
-
 import snappy
-import sys
-import cawa_tcwv_core as cawa_core
-
-import cawa_utils as cu
-
 from snappy import SystemUtils
 
-jpy = snappy.jpy
-
-LAT_VALID_MIN_VALUE = -90.0
-LAT_VALID_MAX_VALUE = 90.0
-LAT_NODATA_VALUE = -999.0
-LON_VALID_MIN_VALUE = -180.0
-LON_VALID_MAX_VALUE = 180.0
-LON_NODATA_VALUE = -999.0
+import os
+import zipfile
+import numpy as np
+import cawa_tcwv_core as cawa_core
 
 TCWV_NODATA_VALUE = -999.0
 
+
 class CawaTcwvOp:
+    """
+    The CAWA GPF operator for total water vapour column retrieval.
+    Authors: O.Danne, N.Fomferra, October 2015
+    """
+
+    def __init__(self):
+        pass
 
     def initialize(self, operator):
-        source_product = operator.getSourceProduct('sourceProduct')
-        if not source_product:
-            raise RuntimeError('No source product specified or product not found - cannot continue.')
-
-        print('start initialize: source product is', source_product.getFileLocation().getAbsolutePath())
-
-        # pixel classification from Idepix:
-        classif_product = operator.getSourceProduct('classifProduct')
-        if not classif_product:
-            raise RuntimeError('No pixel classification product specified or product not found - cannot continue.')
-
+        """
+        GPF initialize method
+        :param operator
+        :return:
+        """
         print('Python module location: ' + __file__)
         resource_root = os.path.dirname(__file__)
         print('Python module location parent: ' + resource_root)
 
-        print('get parameters ...')
-        self.temperature = operator.getParameter('temperature')
-        self.pressure = operator.getParameter('pressure')
-        self.aot13 = operator.getParameter('aot_13')
+        # get source product:
+        source_product = operator.getSourceProduct('sourceProduct')
+        if not source_product:
+            raise RuntimeError('No source product specified or product not found - cannot continue.')
+
+        print('Start initialize: source product is', source_product.getFileLocation().getAbsolutePath())
+
+        # get pixel classification from Idepix:
+        classif_product = operator.getSourceProduct('classifProduct')
+        if not classif_product:
+            raise RuntimeError('No pixel classification product specified or product not found - cannot continue.')
+
+        # get parameters:
+        self.temperature = operator.getParameter('temperature')  # todo: get temperature field from ERA-Interim
+        self.pressure = operator.getParameter('pressure')        # todo: get pressure field from ERA-Interim
+        self.aot13 = operator.getParameter('aot_13')             # todo: clarify if only one AOT is needed
         self.aot14 = operator.getParameter('aot_14')
         self.aot15 = operator.getParameter('aot_15')
-        self.sig_aot13 = self.aot13
-        self.sig_aot14 = self.aot14
-        self.sig_aot15 = self.aot15
-
-        self.cawa_utils = cu.cawa_utils()
 
         with zipfile.ZipFile(resource_root) as zf:
             auxpath = SystemUtils.getAuxDataPath()
             print('auxpath: ' + str(auxpath))
-
-            # land_lut = os.path.join('.', 'luts', 'land', 'land_core_meris.nc4')
-            # ocean_lut = os.path.join('.', 'luts', 'ocean', 'ocean_core_meris.nc4')
-            # self.cawa_core = cawa_core.cawa_tcwv_core(land_lut, ocean_lut)
-
-            # lut_json = zf.extract('luts/wadamo_core_meris.json', os.path.join(str(auxpath), 'cawa'))
-            # self.cawa = cawa_core.cawa_core(lut_json)
             land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
             ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
             print('LUT land: ' + land_lut)
             print('LUT ocean: ' + ocean_lut)
-            self.cawa = cawa_core.cawa_tcwv_core(land_lut, ocean_lut)
+
+        self.cawa = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
 
         width = source_product.getSceneRasterWidth()
         height = source_product.getSceneRasterHeight()
-        print('width, height = ...', width, height)
+        print('Source product width, height = ...', width, height)
 
-        print('get bands ...')
-        # todo: add something similar for MODIS input
+        # get source bands:
         self.rhoToa13Band = self.get_band(source_product, 'reflec_13')
         self.rhoToa14Band = self.get_band(source_product, 'reflec_14')
         self.rhoToa15Band = self.get_band(source_product, 'reflec_15')
         self.szaBand = self.get_band(source_product, 'sun_zenith')
-        print('got band vza ...')
         self.vzaBand = self.get_band(source_product, 'view_zenith')
         self.vaaBand = self.get_band(source_product, 'view_azimuth')
 
         self.l1_flag_band = self.get_band(source_product, 'l1_flags')
         self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
 
-        print('setup target product...')
+        # setup target product:
         cawa_product = snappy.Product('pyCAWA', 'CAWA TCWV', width, height)
         cawa_product.setDescription('CAWA TCWV product')
         cawa_product.setStartTime(source_product.getStartTime())
         cawa_product.setEndTime(source_product.getEndTime())
-        # cawa_product.setPreferredTileSize(width, 16)
-        # cawa_product.setPreferredTileSize(width, height)   # todo: wadamo_core does not yet support multi-threading with smaller tiles
+
+        # setup target bands:
         self.tcwvBand = cawa_product.addBand('tcwv', snappy.ProductData.TYPE_FLOAT32)
         self.tcwvBand .setNoDataValue(TCWV_NODATA_VALUE)
         self.tcwvBand .setNoDataValueUsed(True)
         self.tcwvBand .setUnit('mm')
         self.tcwvBand .setDescription('Total column of water vapour')
-        # todo: flag band
         self.tcwvFlagsBand = cawa_product.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
         self.tcwvFlagsBand .setUnit('dl')
         self.tcwvFlagsBand .setDescription('TCWV flags band')
 
-        # lat_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_latitude')
-        # lat_ac_band .setNoDataValue(LAT_NODATA_VALUE)
-        # lat_ac_band .setNoDataValueUsed(True)
-        # lon_ac_band = self.copy_src_band(source_product, cawa_product, 'corr_longitude')
-        # lat_ac_band .setNoDataValue(LON_NODATA_VALUE)
-        # lon_ac_band .setNoDataValueUsed(True)
-        sza_ac_band = self.copy_src_band(source_product, cawa_product, 'sun_zenith')
-        vza_ac_band = self.copy_src_band(source_product, cawa_product, 'view_zenith')
-        vaa_ac_band = self.copy_src_band(source_product, cawa_product, 'sun_azimuth')
-        vaa_ac_band = self.copy_src_band(source_product, cawa_product, 'view_azimuth')
-        altitude_ac_band = self.copy_src_band(source_product, cawa_product, 'altitude')
+        # copy flag bands, tie points, geocoding:
         snappy.ProductUtils.copyFlagBands(source_product, cawa_product, True)
         snappy.ProductUtils.copyFlagBands(classif_product, cawa_product, True)
-
-        # copy geocoding:
+        snappy.ProductUtils.copyTiePointGrids(source_product, cawa_product)
         source_product.transferGeoCodingTo(cawa_product, None)
 
-        print('set target product...')
         operator.setTargetProduct(cawa_product)
 
         print('end initialize.')
 
-
     def compute(self, operator, target_tiles, target_rectangle):
+        """
+        GPF compute method
+        :param operator
+        :param target_tiles
+        :param target_rectangle
+        :return:
+        """
 
         print('enter compute: rectangle = ', target_rectangle.toString())
+
         rhoToa13Tile = operator.getSourceTile(self.rhoToa13Band, target_rectangle)
         rhoToa14Tile = operator.getSourceTile(self.rhoToa14Band, target_rectangle)
         rhoToa15Tile = operator.getSourceTile(self.rhoToa15Band, target_rectangle)
 
-        print('get rhoToaSamples ...')
         rhoToa13Samples = rhoToa13Tile.getSamplesFloat()
         rhoToa14Samples = rhoToa14Tile.getSamplesFloat()
         rhoToa15Samples = rhoToa15Tile.getSamplesFloat()
@@ -153,7 +133,6 @@ class CawaTcwvOp:
         classif_samples = classif_tile.getSamplesInt()
         classif_data = np.array(classif_samples, dtype=np.int32)
 
-        print('get geometry Samples ...')
         szaSamples = szaTile.getSamplesFloat()
         vzaSamples = vzaTile.getSamplesFloat()
         vaaSamples = vaaTile.getSamplesFloat()
@@ -162,9 +141,8 @@ class CawaTcwvOp:
         vzaData = np.array(vzaSamples, dtype=np.float32)
         vaaData = np.array(vaaSamples, dtype=np.float32)
 
-        # loop over whole tile...
-        print('start loop ...')
-        print('rhoToa13Data.size[0]: ', rhoToa13Data.shape[0])
+        # loop over whole tile:
+        print('start loop over tile...')
         tcwvData = np.empty(rhoToa13Data.shape[0], dtype=np.float32)
         for i in range(0, rhoToa13Data.shape[0]):
             input = {'suz': szaData[i], 'vie': vzaData[i], 'azi': vaaData[i],
@@ -174,47 +152,43 @@ class CawaTcwvOp:
                    'prior_wsp':7.5,'prior_aot':0.15,
                    'prior_al0': 0.13, 'prior_al1': 0.13, 'prior_tcwv': 15.}
 
-            tcwvData[i] = self.getTcwv(input, classif_data[i], l1_flag_data[i])
+            tcwvData[i] = self.cawa.compute_pixel(input, classif_data[i], l1_flag_data[i])['tcwv']
 
-        # fill target tiles...
+        # fill target tiles:
         print('fill target tiles...')
         tcwvTile = target_tiles.get(self.tcwvBand)
         tcwvFlagsTile = target_tiles.get(self.tcwvFlagsBand)
 
+        # set TCWV flag:
         # todo: define appropriate low/high flag
-        tcwvLow = tcwvData < 5.0
-        tcwvHigh = tcwvData > 10.0
-        tcwvFlags = tcwvLow + 2 * tcwvHigh
+        # tcwvLow = tcwvData < 5.0
+        # tcwvHigh = tcwvData > 10.0
+        # tcwvFlags = tcwvLow + 2 * tcwvHigh
         tcwvFlags = tcwvData == TCWV_NODATA_VALUE
-        # tcwvFlags = tcwvFlags.astype(np.uint8, copy=False)
         tcwvFlags = tcwvFlags.view(np.uint8) # a bit faster
 
-        print('set samples...')
+        #set samples:
         tcwvTile.setSamples(tcwvData)
         tcwvFlagsTile.setSamples(tcwvFlags)
 
+    def dispose(self, operator):
+        """
+        The GPF dispose method. Nothing to do here.
+        :param operator:
+        :return:
+        """
+        pass
+
     def get_band(self, input_product, band_name):
+        """
+        Gets band from input product by name
+        :param input_product
+        :param band_name
+        :return:
+        """
         band = input_product.getBand(band_name)
         if not band:
             band = input_product.getTiePointGrid(band_name)
             if not band:
                 raise RuntimeError('Product has no band or tpg with name', band_name)
         return band
-
-    def copy_src_band(self, input_product, target_product, band_name):
-        src_band = self.get_band(input_product, band_name)
-        target_band = target_product.addBand(band_name, src_band.getDataType())
-        target_band.setSourceImage(src_band.getSourceImage())
-        target_band.setScalingFactor(src_band.getScalingFactor())
-        target_band.setScalingOffset(src_band.getScalingOffset())
-        target_band.setDescription(src_band.getDescription())
-        target_band.setUnit(src_band.getUnit())
-        target_band.setNoDataValue(src_band.getNoDataValue())
-        target_band.setNoDataValueUsed(src_band.isNoDataValueUsed())
-        return target_band
-
-    def getTcwv(self, input, classif_data, l1_flag_data):
-        return self.cawa.compute_pixel(input, classif_data, l1_flag_data)['tcwv']
-
-    def dispose(self, operator):
-        pass

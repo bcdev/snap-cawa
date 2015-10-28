@@ -3,9 +3,10 @@ import os
 import math
 import time
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 import cawa_tcwv_land
 import cawa_tcwv_ocean
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
 TSTDIR=os.path.realpath(os.path.dirname(__file__))
 
@@ -14,21 +15,21 @@ def test_it(what='ocean',inst='meris'):
     
     if what == 'ocean':
         if inst == 'meris':
-            tcwv_op=cawa_tcwv_ocean.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_meris.nc4')
+            tcwv_op=cawa_tcwv_ocean.CawaTcwvOceanCore(TSTDIR+'/../luts/ocean/ocean_core_meris.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
                  'amf':1./math.cos(40.*math.pi/180.)+1./math.cos(10.*math.pi/180.),
-                 'rtoa':{ '13':0.0045663
-                         ,'14':0.00440355
-                         ,'15':0.00356704375818},
+                 'rtoa':{ '13':0.0045663,
+                         '14':0.00440355,
+                         '15':0.00356704375818},
                  'prior_wsp':10.5,
                  'prior_aot':0.15,
                  'prior_tcwv':10.}
             # Attention: prior windspeed and prior tcwv must come from a 
             # relaible source (e.g. ECMWF ERA). I can provide necessarty data
         elif inst == 'modis_terra':
-            tcwv_op=cawa_tcwv_ocean.cawa_tcwv_ocean_core(TSTDIR+'/../luts/ocean/ocean_core_modis_terra.nc4')
+            tcwv_op=cawa_tcwv_ocean.CawaTcwvOceanCore(TSTDIR+'/../luts/ocean/ocean_core_modis_terra.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -43,7 +44,7 @@ def test_it(what='ocean',inst='meris'):
                  
     elif what == 'land':
         if inst == 'meris':
-            tcwv_op=cawa_tcwv_land.land_core(TSTDIR+'/../luts/land/land_core_meris.nc4')
+            tcwv_op=cawa_tcwv_land.CawaTcwvLandCore(TSTDIR+'/../luts/land/land_core_meris.nc4')
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -58,7 +59,7 @@ def test_it(what='ocean',inst='meris'):
                  'prior_al1':0.13,
                  'prior_tcwv':15.}
         if inst == 'modis_terra':
-            tcwv_op=cawa_tcwv_land.land_core(TSTDIR+'/../luts/land/land_core_modis_terra.nc4')
+            tcwv_op=cawa_tcwv_land.CawaTcwvLandCore(TSTDIR+'/../luts/land/land_core_modis_terra.nc4')
             inp={'suz':40.,
                  'vie':10.,
                  'azi':170.,
@@ -75,15 +76,12 @@ def test_it(what='ocean',inst='meris'):
                  'prior_al1':0.13,
                  'prior_tcwv':15.}
 
-
-    
     tt=time.time
     a=tt()
     for i in range(1000): _=tcwv_op.estimator(inp)['res'].x
     print '     %s, %s: %i us'%(what,inst,(tt()-a)*1000.)
 
-     
- 
+
 if __name__=='__main__':
     for inst in ('meris','modis_terra'):
         for what in ('ocean','land'):

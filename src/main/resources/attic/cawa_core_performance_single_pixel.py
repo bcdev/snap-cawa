@@ -3,7 +3,7 @@ import time
 
 __author__ = 'olafd'
 
-import cawa_core_debug
+from attic import cawa_core_debug
 import profile
 
 def bla():

@@ -1,50 +1,50 @@
-import os
-
 ######################################################################################
 # CAWA utils.
 ######################################################################################
 
 # Idepix flags (MERIS):
-L1_INVALID     = 128
-F_INVALID      = 1
-F_CLOUD        = 2
+L1_INVALID = 128
+F_INVALID = 1
+F_CLOUD = 2
 F_CLOUD_BUFFER = 4
 F_CLOUD_SHADOW = 8
-F_LAND         = 128
-
-class cawa_utils:
+F_LAND = 128
 
 
+# noinspection PyUnresolvedReferences
+class CawaUtils:
+    """
+    CAWA utility class
+    Author: O.Danne
+    """
 
-    def do_nothing(self):
+    def __init__(self):
         pass
 
-    def calculate_meris_pixel_mask_array(self, index, classif_data, l1_flag_data):
-        return self.calculate_meris_pixel_mask(classif_data[index], l1_flag_data[index])
-
-    def calculate_meris_pixel_mask(self, classif_data, l1_flag_data):
+    @staticmethod
+    def calculate_meris_pixel_mask(classif_flag, l1_flag):
         """
-        Exclude pixels classified as invalid, cloud, cloudbuffer, cloudshadow:
-        # F_INVALID (1)
+        Pixel mask: Exclude pixels classified as invalid, cloud, cloudbuffer, cloudshadow
+        :param classif_flag
+        :param l1_flag
+        :return: 1 if pixel is invalid, 0 otherwise
         """
-        # print('classif_data[index]: ', classif_data[index])
-        # print('classif_data[index] & F_INVALID: ', classif_data[index] & F_INVALID)
-        # print('classif_data[index] & F_CLOUD: ', classif_data[index] & F_CLOUD)
-        # print('classif_data[index] & F_CLOUD_BUFFER: ', classif_data[index] & F_CLOUD_BUFFER)
-        # print('classif_data[index] & F_CLOUD_SHADOW: ', classif_data[index] & F_CLOUD_SHADOW)
 
-        return_value =  l1_flag_data & L1_INVALID == L1_INVALID or \
-                        classif_data & F_INVALID == F_INVALID or \
-                        classif_data & F_CLOUD == F_CLOUD or \
-                        classif_data & F_CLOUD_SHADOW == F_CLOUD_SHADOW
+        return_value = l1_flag & L1_INVALID == L1_INVALID or \
+                       classif_flag & F_INVALID == F_INVALID or \
+                       classif_flag & F_CLOUD == F_CLOUD or \
+                       classif_flag & F_CLOUD_SHADOW == F_CLOUD_SHADOW
         # todo: discuss if we want cloud buffer and/or cloud shadow
 
         return return_value
 
-    def is_meris_land_pixel(self, classif_data):
+    @staticmethod
+    def is_meris_land_pixel(classif_flag):
         """
-        Determine from Idepix flag if pixel is land pixel
+        Determines from Idepix flag if pixel is land pixel
+        :param classif_flag:
+        :return: 1 if MERIS pixel is land, 0 otherwise
         """
-        return classif_data & F_LAND == F_LAND
 
-    # todo: provide for MODIS accordingly
+        return classif_flag & F_LAND == F_LAND
+        # todo: provide for MODIS accordingly

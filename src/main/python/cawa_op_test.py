@@ -2,8 +2,8 @@ __author__ = 'olafd'
 import os
 import unittest
 
-import cawa_core as caw
-import cawa_op
+import attic.cawa_core as caw
+from attic import cawa_op
 
 
 class test_cawa_operator(unittest.TestCase):

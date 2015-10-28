@@ -1,16 +1,11 @@
+import snappy
+from snappy import SystemUtils
+
 import os
 import zipfile
-
 import numpy
-
-import snappy
-import sys
-import cawa_core
-
+from attic import cawa_core
 import cawa_utils as cu
-
-from joblib import Memory
-from snappy import SystemUtils
 
 jpy = snappy.jpy
 
@@ -51,7 +46,7 @@ class CawaOp:
         self.sig_aot14 = self.aot14
         self.sig_aot15 = self.aot15
 
-        self.cawa_utils = cu.cawa_utils()
+        self.cawa_utils = cu.CawaUtils()
 
         with zipfile.ZipFile(resource_root) as zf:
             auxpath = SystemUtils.getAuxDataPath()

@@ -51,7 +51,7 @@ class cawa_core:
         '''
         dgfra
         '''
-        self.cawa_utils = cu.cawa_utils()
+        self.cawa_utils = cu.CawaUtils()
         self.num_computations = 0
 
         # 0 read LUT.
@@ -149,13 +149,14 @@ class cawa_core:
                        diagnostics, uncertainties ...
         '''
 
-        t1 = time.clock() * 1000
+        # t1 = time.clock() * 1000
         data=copy.deepcopy(input)
-        t2 = time.clock() * 1000
+        # t2 = time.clock() * 1000
         # print('copy.deepcopy(input): ', (t2 - t1))
 
         # exclude mask pixels from computation:
-        pixel_mask = self.cawa_utils.calculate_meris_pixel_mask(classif_data, l1_flag_data)
+        pixel_mask = cu.CawaUtils.calculate_meris_pixel_mask(classif_data, l1_flag_data)
+
         valid = pixel_mask == 0
         if not valid:
             data['tcwv'] = -999.0 # todo: define no_data value

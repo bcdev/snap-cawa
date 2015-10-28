@@ -9,7 +9,7 @@ import numpy
 # import snappy
 
 # import cawa_core_debug as cawa
-import cawa_core as cawa
+from attic import cawa_core as cawa
 
 
 class test_cawa_core(unittest.TestCase):

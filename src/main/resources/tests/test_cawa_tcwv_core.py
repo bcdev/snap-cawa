@@ -10,13 +10,14 @@ import cawa_tcwv_land as cawa_land
 import cawa_tcwv_ocean as cawa_ocean
 
 
-class test_cawa_core(unittest.TestCase):
+# noinspection PyUnresolvedReferences
+class TestCawaCore(unittest.TestCase):
     def setUp(self):
         land_lut = os.path.join('../', 'luts', 'land', 'land_core_meris.nc4')
         ocean_lut = os.path.join('../', 'luts', 'ocean', 'ocean_core_meris.nc4')
-        self.cawa_core = cawa_core.cawa_tcwv_core(land_lut, ocean_lut)
-        self.cawa_land = cawa_land.cawa_tcwv_land_core(os.path.join('../', 'luts', 'land', 'land_core_meris.nc4'))
-        self.cawa_ocean = cawa_ocean.cawa_tcwv_ocean_core(os.path.join('../', 'luts', 'ocean', 'ocean_core_meris.nc4'))
+        self.cawa_core = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
+        self.cawa_land = cawa_land.CawaTcwvLandCore(os.path.join('../', 'luts', 'land', 'land_core_meris.nc4'))
+        self.cawa_ocean = cawa_ocean.CawaTcwvOceanCore(os.path.join('../', 'luts', 'ocean', 'ocean_core_meris.nc4'))
 
     # @unittest.skip("skipping test...")
     def test_estimator_meris_land(self):
@@ -55,7 +56,6 @@ class test_cawa_core(unittest.TestCase):
             # print('TCWV land estimator time (ms) for one pixel: ', (t2 - t1))
             t_ave += (t2-t1)
         print('TCWV land estimator average time (ms) for one pixel: ', t_ave/1000.0)
-
 
     # @unittest.skip("skipping test...")
     def test_estimator_meris_ocean(self):
@@ -111,5 +111,5 @@ class test_cawa_core(unittest.TestCase):
     #     print('TCWV estimator time (ms) for one pixel MODIS: ', (t2 - t1))
 
 print 'Testing org.esa.snap.cawa core'
-suite = unittest.TestLoader().loadTestsFromTestCase(test_cawa_core)
+suite = unittest.TestLoader().loadTestsFromTestCase(TestCawaCore)
 unittest.TextTestRunner(verbosity=2).run(suite)
