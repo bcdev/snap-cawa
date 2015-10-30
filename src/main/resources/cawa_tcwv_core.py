@@ -10,7 +10,7 @@ class CawaTcwvCore:
     """
     The CAWA core class for total water vapour column retrieval.
     Basically a wrapper which determines the valid mask and land/water distinction
-    and calls the corresponding algorithm (updates for land and water provided by FUB (RP), October 2014
+    and calls the corresponding algorithm (updates for land and water provided by FUB (RP), October 2015)
     """
 
     def __init__(self, land_lut=os.path.join('.', 'luts', 'land', 'land_core_meris.nc4'),
