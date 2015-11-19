@@ -63,7 +63,7 @@ class CawaTcwvOp:
                 shared_libs_dir = tempfile.gettempdir()
                 zf.extract('lib-python/interpolators.so', shared_libs_dir)
                 zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
-                zf.extract('lib-python/optimal_estimation.so', shared_libs_dir)
+                zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
 
         print('LUT land: ' + land_lut)
         print('LUT ocean: ' + ocean_lut)
