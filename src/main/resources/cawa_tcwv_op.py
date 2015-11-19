@@ -4,7 +4,10 @@ from snappy import SystemUtils
 import os
 import zipfile
 import numpy as np
-import cawa_tcwv_core as cawa_core
+
+import tempfile
+import sys
+
 
 TCWV_NODATA_VALUE = -999.0
 
@@ -47,14 +50,28 @@ class CawaTcwvOp:
         self.aot14 = operator.getParameter('aot_14')
         self.aot15 = operator.getParameter('aot_15')
 
-        with zipfile.ZipFile(resource_root) as zf:
-            auxpath = SystemUtils.getAuxDataPath()
-            print('auxpath: ' + str(auxpath))
-            land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
-            ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
-            print('LUT land: ' + land_lut)
-            print('LUT ocean: ' + ocean_lut)
+        if os.path.isdir(resource_root):
+            land_lut = os.path.join(resource_root, 'luts/land/land_core_meris.nc4')
+            ocean_lut = os.path.join(resource_root, 'luts/ocean/ocean_core_meris.nc4')
+            shared_libs_dir = os.path.join(os.path.dirname(__file__), 'lib-python')
+        else:
+            with zipfile.ZipFile(resource_root) as zf:
+                auxpath = SystemUtils.getAuxDataPath()
+                print('auxpath: ' + str(auxpath))
+                land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+                ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+                shared_libs_dir = tempfile.gettempdir()
+                zf.extract('lib-python/interpolators.so', shared_libs_dir)
+                zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
+                zf.extract('lib-python/optimal_estimation.so', shared_libs_dir)
 
+        print('LUT land: ' + land_lut)
+        print('LUT ocean: ' + ocean_lut)
+
+        print('shared_libs_dir = %s' % shared_libs_dir)
+        sys.path.append(shared_libs_dir)
+
+        import cawa_tcwv_core as cawa_core
         self.cawa = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
 
         width = source_product.getSceneRasterWidth()
