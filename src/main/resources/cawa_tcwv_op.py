@@ -29,10 +29,10 @@ class CawaTcwvOp:
         :param operator
         :return:
         """
-        f = open(os.path.dirname(os.path.dirname(__file__)) + '/cava_tcwv.log', 'w')
+        resource_root = os.path.dirname(__file__)
+        f = open(os.path.dirname(resource_root) + '/cava_tcwv.log', 'w')
 
         f.write('Python module location: ' + __file__ + '\n')
-        resource_root = os.path.dirname(__file__)
         f.write('Python module location parent: ' + resource_root + '\n')
 
         # get source product:
@@ -57,7 +57,8 @@ class CawaTcwvOp:
         if os.path.isdir(resource_root):
             land_lut = os.path.join(resource_root, 'luts/land/land_core_meris.nc4')
             ocean_lut = os.path.join(resource_root, 'luts/ocean/ocean_core_meris.nc4')
-            shared_libs_dir = os.path.join(os.path.dirname(__file__), 'lib-python')
+            # shared_libs_dir = os.path.join(os.path.dirname(__file__), 'lib-python')
+            shared_libs_dir = resource_root
         else:
             with zipfile.ZipFile(resource_root) as zf:
                 auxpath = SystemUtils.getAuxDataPath()
