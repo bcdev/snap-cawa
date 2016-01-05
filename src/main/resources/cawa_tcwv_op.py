@@ -8,6 +8,8 @@ import numpy as np
 import tempfile
 import sys
 
+import time
+
 
 TCWV_NODATA_VALUE = -999.0
 
@@ -27,22 +29,24 @@ class CawaTcwvOp:
         :param operator
         :return:
         """
-        print('Python module location: ' + __file__)
+        f = open(os.path.join(os.path.dirname(__file__)) + '/../cava_tcwv.log', 'w')
+
+        f.write('Python module location: ' + __file__ + '\n')
         resource_root = os.path.dirname(__file__)
-        print('Python module location parent: ' + resource_root)
+        f.write('Python module location parent: ' + resource_root + '\n')
 
         # get source product:
         source_product = operator.getSourceProduct('sourceProduct')
         if not source_product:
             raise RuntimeError('No source product specified or product not found - cannot continue.')
 
-        print('Start initialize: source product is', source_product.getFileLocation().getAbsolutePath())
+        f.write('Start initialize: source product is' + source_product.getFileLocation().getAbsolutePath() + '\n')
 
         # get pixel classification from Idepix:
-        classif_product = operator.getSourceProduct('classifProduct')
-        if not classif_product:
-            raise RuntimeError('No pixel classification product specified or product not found - cannot continue.')
-
+        # classif_product = operator.getSourceProduct('classifProduct')
+        # if not classif_product:
+        #     raise RuntimeError('No pixel classification product specified or product not found - cannot continue.')
+        #
         # get parameters:
         self.temperature = operator.getParameter('temperature')  # todo: get temperature field from ERA-Interim
         self.pressure = operator.getParameter('pressure')  # todo: get pressure field from ERA-Interim
@@ -57,7 +61,7 @@ class CawaTcwvOp:
         else:
             with zipfile.ZipFile(resource_root) as zf:
                 auxpath = SystemUtils.getAuxDataPath()
-                print('auxpath: ' + str(auxpath))
+                f.write('auxpath: ' + str(auxpath) + '\n')
                 land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
                 ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
                 shared_libs_dir = tempfile.gettempdir()
@@ -65,29 +69,35 @@ class CawaTcwvOp:
                 zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
                 zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
 
-        print('LUT land: ' + land_lut)
-        print('LUT ocean: ' + ocean_lut)
+        f.write('LUT land: ' + land_lut + '\n')
+        f.write('LUT ocean: ' + ocean_lut + '\n')
 
-        print('shared_libs_dir = %s' % shared_libs_dir)
+        f.write('shared_libs_dir = %s' % shared_libs_dir + '\n')
         sys.path.append(shared_libs_dir)
+        f.close()
+        time.sleep(600)
 
         import cawa_tcwv_core as cawa_core
         self.cawa = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
 
         width = source_product.getSceneRasterWidth()
         height = source_product.getSceneRasterHeight()
-        print('Source product width, height = ...', width, height)
+        # f.write('Source product width, height = ...', width, height)
 
         # get source bands:
-        self.rho_toa_13_band = self.get_band(source_product, 'reflec_13')
-        self.rho_toa_14_band = self.get_band(source_product, 'reflec_14')
-        self.rho_toa_15_band = self.get_band(source_product, 'reflec_15')
+        # self.rho_toa_13_band = self.get_band(source_product, 'reflec_13') # reflec is from radiometry product!
+        # self.rho_toa_14_band = self.get_band(source_product, 'reflec_14')
+        # self.rho_toa_15_band = self.get_band(source_product, 'reflec_15')
+        self.rho_toa_13_band = self.get_band(source_product, 'rho_toa_13') # rho_toa is from Idepix product!
+        self.rho_toa_14_band = self.get_band(source_product, 'rho_toa_14')
+        self.rho_toa_15_band = self.get_band(source_product, 'rho_toa_15')
         self.sza_band = self.get_band(source_product, 'sun_zenith')
         self.vza_band = self.get_band(source_product, 'view_zenith')
         self.vaa_band = self.get_band(source_product, 'view_azimuth')
 
         self.l1_flag_band = self.get_band(source_product, 'l1_flags')
-        self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
+        # self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
+        self.classif_band = self.get_band(source_product, 'cloud_classif_flags')
 
         # setup target product:
         cawa_product = snappy.Product('pyCAWA', 'CAWA TCWV', width, height)
@@ -107,13 +117,14 @@ class CawaTcwvOp:
 
         # copy flag bands, tie points, geocoding:
         snappy.ProductUtils.copyFlagBands(source_product, cawa_product, True)
-        snappy.ProductUtils.copyFlagBands(classif_product, cawa_product, True)
-        snappy.ProductUtils.copyTiePointGrids(source_product, cawa_product)
+        # snappy.ProductUtils.copyFlagBands(classif_product, cawa_product, True)
+        # snappy.ProductUtils.copyTiePointGrids(source_product, cawa_product) # todo: wait for fix in SNAP
         source_product.transferGeoCodingTo(cawa_product, None)
 
         operator.setTargetProduct(cawa_product)
 
-        print('end initialize.')
+        # f.write('end initialize.')
+        # f.close()
 
     def compute(self, operator, target_tiles, target_rectangle):
         """
@@ -170,6 +181,7 @@ class CawaTcwvOp:
                      'prior_al0': 0.13, 'prior_al1': 0.13, 'prior_tcwv': 15.}
 
             tcwv_data[i] = self.cawa.compute_pixel(input, classif_data[i], l1_flag_data[i])['tcwv']
+            # tcwv_data[i] = self.cawa.compute_pixel(input, 1, l1_flag_data[i])['tcwv']
 
         # fill target tiles:
         print('fill target tiles...')
