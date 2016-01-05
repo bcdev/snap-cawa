@@ -29,7 +29,7 @@ class CawaTcwvOp:
         :param operator
         :return:
         """
-        f = open(os.path.join(os.path.dirname(__file__)) + '/../cava_tcwv.log', 'w')
+        f = open(os.path.dirname(os.path.dirname(__file__)) + '/cava_tcwv.log', 'w')
 
         f.write('Python module location: ' + __file__ + '\n')
         resource_root = os.path.dirname(__file__)
@@ -72,10 +72,11 @@ class CawaTcwvOp:
         f.write('LUT land: ' + land_lut + '\n')
         f.write('LUT ocean: ' + ocean_lut + '\n')
 
-        f.write('shared_libs_dir = %s' % shared_libs_dir + '\n')
-        sys.path.append(shared_libs_dir)
+        f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
+        sys.path.append(shared_libs_dir + '/lib-python')
         f.close()
-        time.sleep(600)
+
+        #time.sleep(600)
 
         import cawa_tcwv_core as cawa_core
         self.cawa = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
