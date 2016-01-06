@@ -40,7 +40,8 @@ class CawaTcwvOp:
         if not source_product:
             raise RuntimeError('No source product specified or product not found - cannot continue.')
 
-        f.write('Start initialize: source product is' + source_product.getFileLocation().getAbsolutePath() + '\n')
+        # f.write('Start initialize: source product is' + source_product.getFileLocation().getAbsolutePath() + '\n')
+        f.write('Start initialize: source product is' + source_product.getName() + '\n')
 
         # get pixel classification from Idepix:
         # classif_product = operator.getSourceProduct('classifProduct')
@@ -66,9 +67,10 @@ class CawaTcwvOp:
                 land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
                 ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
                 shared_libs_dir = tempfile.gettempdir()
-                zf.extract('lib-python/interpolators.so', shared_libs_dir)
-                zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
-                zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
+                if not os.path.exists(shared_libs_dir + '/lib-python'):
+                    zf.extract('lib-python/interpolators.so', shared_libs_dir)
+                    zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
+                    zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
 
         f.write('LUT land: ' + land_lut + '\n')
         f.write('LUT ocean: ' + ocean_lut + '\n')
