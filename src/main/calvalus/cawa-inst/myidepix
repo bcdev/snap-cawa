@@ -1,0 +1,17 @@
+#!/bin/bash
+# CAWA environment setup for Idepix
+# usage:  . myidepix
+
+export CAWA_INST=/home/cvop/cawa-inst
+export CAWA_LOG=$CAWA_INST/log
+
+export CAWA_PRODUCTION_JAR=$CAWA_INST/lib/cpt.jar
+export CAWA_BEAM_VERSION=beam-5.0.1
+export CAWA_CALVALUS_VERSION=calvalus-2.7
+
+export PYTHONPATH=$CAWA_INST:$CAWA_INST/src:$PYTHONPATH
+export PATH=$CAWA_INST/bin:$CAWA_PROCESSING_DIR/bin:$JAVA_DIR/bin:$PATH
+PS1="\[\e]0;\u@\h: \w\a\]\[\e[1;32m\]\u \[\e[1;34m\]\w\[\e[0m\] \[\e[0;31m\](CAWA-IDEPIX)\[\e[0m\]$ "
+
+echo "using Instance          $CAWA_INST"
+echo "using Calvalus software $CAWA_PROCESSING_DIR"

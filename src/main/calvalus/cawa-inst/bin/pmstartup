@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ -z "$CAWA_INST" ]; then
+    CAWA_INST=`pwd`
+    . $CAWA_INST/mycawa
+fi
+
+if [ -z "$1" ]; then
+    echo "call   : pmstartup <workflow>"
+    echo "example: pmstartup cawa.py"
+    exit 1
+fi
+
+workflow=$(basename ${1%.py})
+
+if [ -e ${workflow}.pid ]
+then
+    if kill -0 $(cat ${workflow}.pid) 2> /dev/null
+    then
+        ps -elf | grep $(cat ${workflow}.pid) | grep -v grep
+        echo "process already running"
+        echo "delete ${workflow}.pid file if running process is not the workflow"
+        exit 1
+    fi
+fi
+
+nohup python $CAWA_INST/${workflow}.py > $CAWA_INST/${workflow}.out 2>&1 &
+echo $! > $CAWA_INST/${workflow}.pid
+sleep 2
+cat $CAWA_INST/${workflow}.status
