@@ -48,3 +48,10 @@ class CawaUtils:
 
         return classif_flag & F_LAND == F_LAND
         # todo: provide for MODIS accordingly
+
+    @staticmethod
+    def band_exists(name, band_names):
+        for band_name in band_names:
+            if name == band_name:
+                return True
+        return False

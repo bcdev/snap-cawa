@@ -77,27 +77,32 @@ class CawaTcwvOp:
 
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
         sys.path.append(shared_libs_dir + '/lib-python')
-        f.close()
+        # f.close()
 
         #time.sleep(600)
 
         import cawa_tcwv_core as cawa_core
+        import cawa_utils as cu
         self.cawa = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
+        self.cawa_utils = cu.CawaUtils()
 
         width = source_product.getSceneRasterWidth()
         height = source_product.getSceneRasterHeight()
-        # f.write('Source product width, height = ...', width, height)
+        f.write('Source product width, height = ...' + str(width) + ', ' + str(height))
 
         # get source bands:
-        # self.rho_toa_13_band = self.get_band(source_product, 'reflec_13') # reflec is from radiometry product!
-        # self.rho_toa_14_band = self.get_band(source_product, 'reflec_14')
-        # self.rho_toa_15_band = self.get_band(source_product, 'reflec_15')
         self.rho_toa_13_band = self.get_band(source_product, 'rho_toa_13') # rho_toa is from Idepix product!
         self.rho_toa_14_band = self.get_band(source_product, 'rho_toa_14')
         self.rho_toa_15_band = self.get_band(source_product, 'rho_toa_15')
+
         self.sza_band = self.get_band(source_product, 'sun_zenith')
         self.vza_band = self.get_band(source_product, 'view_zenith')
         self.vaa_band = self.get_band(source_product, 'view_azimuth')
+
+        if cu.CawaUtils.band_exists('tcwv', source_product.getBandNames()):
+            self.prior_tcwv_band = self.get_band(source_product, 'tcwv')
+        if cu.CawaUtils.band_exists('ws', source_product.getBandNames()):
+            self.prior_wsp_band = self.get_band(source_product, 'ws')
 
         self.l1_flag_band = self.get_band(source_product, 'l1_flags')
         # self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
@@ -127,8 +132,8 @@ class CawaTcwvOp:
 
         operator.setTargetProduct(cawa_product)
 
-        # f.write('end initialize.')
-        # f.close()
+        f.write('end initialize.')
+        f.close()
 
     def compute(self, operator, target_tiles, target_rectangle):
         """
@@ -173,16 +178,32 @@ class CawaTcwvOp:
         vza_data = np.array(vza_samples, dtype=np.float32)
         vaa_data = np.array(vaa_samples, dtype=np.float32)
 
+        prior_tcwv_data = numpy.empty(lat_data.shape)
+        prior_tcwv_data.fill(30.0)
+        if cu.CawaUtils.band_exists('tcwv', source_product.getBandNames()):
+            prior_tcwv_tile = operator.getSourceTile(self.prior_tcwv_band, target_rectangle)
+            prior_tcwv_samples = prior_tcwv_tile.getSamplesFloat()
+            prior_tcwv_data = np.array(prior_tcwv_samples, dtype=np.float32)
+
+        prior_wsp_data = numpy.empty(lat_data.shape)
+        prior_wsp_data.fill(7.5)
+        if cu.CawaUtils.band_exists('ws', source_product.getBandNames()):
+            prior_wsp_tile = operator.getSourceTile(self.prior_wsp_band, target_rectangle)
+            prior_wsp_samples = prior_wsp_tile.getSamplesFloat()
+            prior_wsp_data = np.array(prior_wsp_samples, dtype=np.float32)
+
         # loop over whole tile:
         print('start loop over tile...')
         tcwv_data = np.empty(rho_toa_13_data.shape[0], dtype=np.float32)
         for i in range(0, rho_toa_13_data.shape[0]):
             input = {'suz': sza_data[i], 'vie': vza_data[i], 'azi': vaa_data[i],
-                     'amf': 1. / np.cos(40. * np.pi / 180.) + 1. / np.cos(10. * np.pi / 180.),
+                     'amf': 1. / np.cos(sza_data[i] * np.pi / 180.) + 1. / np.cos(vza_data[i] * np.pi / 180.),
                      'prs': self.pressure, 'aot': self.aot13, 'tmp': self.temperature,
-                     'rtoa': {'13': rho_toa_13_data[i], '14': rho_toa_14_data[i], '15': rho_toa_15_data[i]},
-                     'prior_wsp': 7.5, 'prior_aot': 0.15,
-                     'prior_al0': 0.13, 'prior_al1': 0.13, 'prior_tcwv': 15.}
+                     'rtoa': {'13': rho_toa_13_data[i]*np.cos(sza_data[i] * np.pi / 180.),
+                              '14': rho_toa_14_data[i]*np.cos(sza_data[i] * np.pi / 180.),
+                              '15': rho_toa_15_data[i]*np.cos(sza_data[i] * np.pi / 180.)},
+                     'prior_wsp': prior_wsp_data[i], 'prior_aot': 0.15,
+                     'prior_al0': 0.13, 'prior_al1': 0.13, 'prior_tcwv': prior_tcwv_data[i]}
 
             tcwv_data[i] = self.cawa.compute_pixel(input, classif_data[i], l1_flag_data[i])['tcwv']
             # tcwv_data[i] = self.cawa.compute_pixel(input, 1, l1_flag_data[i])['tcwv']
