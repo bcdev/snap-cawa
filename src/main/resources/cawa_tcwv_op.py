@@ -30,7 +30,8 @@ class CawaTcwvOp:
         :return:
         """
         resource_root = os.path.dirname(__file__)
-        f = open(os.path.dirname(resource_root) + '/cava_tcwv.log', 'w')
+        # f = open(os.path.dirname(resource_root) + '/cava_tcwv.log', 'w')
+        f = open(tempfile.gettempdir() + '/cava_tcwv.log', 'w')
 
         f.write('Python module location: ' + __file__ + '\n')
         f.write('Python module location parent: ' + resource_root + '\n')
@@ -77,7 +78,6 @@ class CawaTcwvOp:
 
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
         sys.path.append(shared_libs_dir + '/lib-python')
-        # f.close()
 
         #time.sleep(600)
 
@@ -88,7 +88,7 @@ class CawaTcwvOp:
 
         width = source_product.getSceneRasterWidth()
         height = source_product.getSceneRasterHeight()
-        f.write('Source product width, height = ...' + str(width) + ', ' + str(height))
+        f.write('Source product width, height = ...' + str(width) + ', ' + str(height) + '\n')
 
         # get source bands:
         self.rho_toa_13_band = self.get_band(source_product, 'rho_toa_13') # rho_toa is from Idepix product!
@@ -145,6 +145,9 @@ class CawaTcwvOp:
         """
 
         print('enter compute: rectangle = ', target_rectangle.toString())
+        # if target_rectangle.y == 0:
+        #     f1 = open(tempfile.gettempdir() + '/cava_tcwv' + str(target_rectangle.x) + '_' + str(target_rectangle.y) + '.log', 'w')
+        #     f1.write('enter compute: rectangle = ' + target_rectangle.toString() + '\n')
 
         rho_toa_13_tile = operator.getSourceTile(self.rho_toa_13_band, target_rectangle)
         rho_toa_14_tile = operator.getSourceTile(self.rho_toa_14_band, target_rectangle)
@@ -178,16 +181,16 @@ class CawaTcwvOp:
         vza_data = np.array(vza_samples, dtype=np.float32)
         vaa_data = np.array(vaa_samples, dtype=np.float32)
 
-        prior_tcwv_data = numpy.empty(lat_data.shape)
+        prior_tcwv_data = np.empty(sza_data.shape)
         prior_tcwv_data.fill(30.0)
-        if cu.CawaUtils.band_exists('tcwv', source_product.getBandNames()):
+        if self.prior_tcwv_band:
             prior_tcwv_tile = operator.getSourceTile(self.prior_tcwv_band, target_rectangle)
             prior_tcwv_samples = prior_tcwv_tile.getSamplesFloat()
             prior_tcwv_data = np.array(prior_tcwv_samples, dtype=np.float32)
 
-        prior_wsp_data = numpy.empty(lat_data.shape)
+        prior_wsp_data = np.empty(sza_data.shape)
         prior_wsp_data.fill(7.5)
-        if cu.CawaUtils.band_exists('ws', source_product.getBandNames()):
+        if self.prior_wsp_band:
             prior_wsp_tile = operator.getSourceTile(self.prior_wsp_band, target_rectangle)
             prior_wsp_samples = prior_wsp_tile.getSamplesFloat()
             prior_wsp_data = np.array(prior_wsp_samples, dtype=np.float32)
@@ -224,6 +227,9 @@ class CawaTcwvOp:
         # set samples:
         tcwv_tile.setSamples(tcwv_data)
         tcwv_flags_tile.setSamples(tcwv_flags)
+
+        # if target_rectangle.y == 0:
+        #     f1.close()
 
     def dispose(self, operator):
         """

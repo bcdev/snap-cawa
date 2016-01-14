@@ -25,6 +25,7 @@ SA[2, 2] = SAw
 
 class CawaTcwvOceanCore:
     def __init__(self, ocean_lut=os.path.join('.', 'luts', 'ocean', 'ocean_core_meris.nc4')):
+        # sys.stderr.write('entering CawaTcwvOceanCore... \n')
         libdir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'libs')
         sys.path.append(libdir)
 
