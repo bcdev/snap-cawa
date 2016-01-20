@@ -33,8 +33,9 @@ class CawaUtils:
         return_value = l1_flag & L1_INVALID == L1_INVALID or \
                        classif_flag & F_INVALID == F_INVALID or \
                        classif_flag & F_CLOUD == F_CLOUD or \
+                       classif_flag & F_CLOUD_BUFFER == F_CLOUD_BUFFER or \
                        classif_flag & F_CLOUD_SHADOW == F_CLOUD_SHADOW
-        # todo: discuss if we want cloud buffer and/or cloud shadow
+        # todo: discuss if we want cloud buffer (yes - RP 20160119) and/or cloud shadow
 
         return return_value
 
