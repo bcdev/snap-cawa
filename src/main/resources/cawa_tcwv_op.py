@@ -99,6 +99,10 @@ class CawaTcwvOp:
         self.vza_band = self.get_band(source_product, 'view_zenith')
         self.vaa_band = self.get_band(source_product, 'view_azimuth')
 
+        if cu.CawaUtils.band_exists('t2m', source_product.getBandNames()):
+            self.prior_t2m_band = self.get_band(source_product, 't2m')
+        if cu.CawaUtils.band_exists('msl', source_product.getBandNames()):
+            self.prior_msl_band = self.get_band(source_product, 'msl')
         if cu.CawaUtils.band_exists('tcwv', source_product.getBandNames()):
             self.prior_tcwv_band = self.get_band(source_product, 'tcwv')
         if cu.CawaUtils.band_exists('ws', source_product.getBandNames()):
@@ -181,6 +185,20 @@ class CawaTcwvOp:
         vza_data = np.array(vza_samples, dtype=np.float32)
         vaa_data = np.array(vaa_samples, dtype=np.float32)
 
+        prior_t2m_data = np.empty(sza_data.shape)
+        prior_t2m_data.fill(self.temperature)
+        if self.prior_t2m_band:
+            prior_t2m_tile = operator.getSourceTile(self.prior_t2m_band, target_rectangle)
+            prior_t2m_samples = prior_t2m_tile.getSamplesFloat()
+            prior_t2m_data = np.array(prior_t2m_samples, dtype=np.float32)
+
+        prior_msl_data = np.empty(sza_data.shape)
+        prior_msl_data.fill(self.pressure)
+        if self.prior_msl_band:
+            prior_msl_tile = operator.getSourceTile(self.prior_msl_band, target_rectangle)
+            prior_msl_samples = prior_msl_tile.getSamplesFloat()
+            prior_msl_data = np.array(prior_msl_samples, dtype=np.float32)
+
         prior_tcwv_data = np.empty(sza_data.shape)
         prior_tcwv_data.fill(30.0)
         if self.prior_tcwv_band:
@@ -201,7 +219,7 @@ class CawaTcwvOp:
         for i in range(0, rho_toa_13_data.shape[0]):
             input = {'suz': sza_data[i], 'vie': vza_data[i], 'azi': vaa_data[i],
                      'amf': 1. / np.cos(sza_data[i] * np.pi / 180.) + 1. / np.cos(vza_data[i] * np.pi / 180.),
-                     'prs': self.pressure, 'aot': self.aot13, 'tmp': self.temperature,
+                     'prs': prior_msl_data[i]/100.0, 'aot': self.aot13, 'tmp': prior_t2m_data[i],
                      'rtoa': {'13': rho_toa_13_data[i]*np.cos(sza_data[i] * np.pi / 180.),
                               '14': rho_toa_14_data[i]*np.cos(sza_data[i] * np.pi / 180.),
                               '15': rho_toa_15_data[i]*np.cos(sza_data[i] * np.pi / 180.)},
