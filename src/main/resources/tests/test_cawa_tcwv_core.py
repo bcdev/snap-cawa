@@ -1,23 +1,29 @@
 import os
+import sys
 
 import unittest
 import time
 
 import numpy as np
 
-import cawa_tcwv_core as cawa_core
-import cawa_tcwv_land as cawa_land
-import cawa_tcwv_ocean as cawa_ocean
-
 
 # noinspection PyUnresolvedReferences
 class TestCawaCore(unittest.TestCase):
     def setUp(self):
-        land_lut = os.path.join('../', 'luts', 'land', 'land_core_meris.nc4')
-        ocean_lut = os.path.join('../', 'luts', 'ocean', 'ocean_core_meris.nc4')
+        parent_dir = os.path.dirname(os.path.normpath(os.path.dirname(__file__)))
+        sys.path.append(parent_dir + '/lib-python')
+
+        import cawa_tcwv_core as cawa_core
+        import cawa_tcwv_land as cawa_land
+        import cawa_tcwv_ocean as cawa_ocean
+
+        land_lut = os.path.join(parent_dir, 'luts', 'land', 'land_core_meris.nc4')
+        ocean_lut = os.path.join(parent_dir, 'luts', 'ocean', 'ocean_core_meris.nc4')
+
         self.cawa_core = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
-        self.cawa_land = cawa_land.CawaTcwvLandCore(os.path.join('../', 'luts', 'land', 'land_core_meris.nc4'))
-        self.cawa_ocean = cawa_ocean.CawaTcwvOceanCore(os.path.join('../', 'luts', 'ocean', 'ocean_core_meris.nc4'))
+        self.cawa_land = cawa_land.CawaTcwvLandCore(os.path.join(parent_dir, 'luts', 'land', 'land_core_meris.nc4'))
+        self.cawa_ocean = cawa_ocean.CawaTcwvOceanCore(os.path.join(parent_dir, 'luts', 'ocean', 'ocean_core_meris.nc4'))
+
 
     # @unittest.skip("skipping test...")
     def test_estimator_meris_land(self):

@@ -3,19 +3,21 @@ import os
 import math
 import time
 
-import cawa_tcwv_land
-import cawa_tcwv_ocean
-
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-
-TSTDIR=os.path.realpath(os.path.dirname(__file__))
-
 
 def test_it(what='ocean',inst='meris'):
-    
+
+    parent_dir = os.path.dirname(os.path.normpath(os.path.dirname(__file__)))
+    sys.path.append(parent_dir + '/lib-python')
+
+    import cawa_tcwv_core as cawa_core
+    import cawa_tcwv_land as cawa_land
+    import cawa_tcwv_ocean as cawa_ocean
+
     if what == 'ocean':
         if inst == 'meris':
-            tcwv_op=cawa_tcwv_ocean.CawaTcwvOceanCore(TSTDIR+'/../luts/ocean/ocean_core_meris.nc4')
+            ocean_lut=os.path.join(parent_dir, 'luts', 'ocean', 'ocean_core_meris.nc4')
+            tcwv_op = cawa_ocean.CawaTcwvOceanCore(ocean_lut)
+
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -29,7 +31,9 @@ def test_it(what='ocean',inst='meris'):
             # Attention: prior windspeed and prior tcwv must come from a 
             # relaible source (e.g. ECMWF ERA). I can provide necessarty data
         elif inst == 'modis_terra':
-            tcwv_op=cawa_tcwv_ocean.CawaTcwvOceanCore(TSTDIR+'/../luts/ocean/ocean_core_modis_terra.nc4')
+            ocean_lut=os.path.join(parent_dir, 'luts', 'ocean', 'ocean_core_modis_terra.nc4')
+            tcwv_op = cawa_ocean.CawaTcwvOceanCore(ocean_lut)
+
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -44,7 +48,9 @@ def test_it(what='ocean',inst='meris'):
                  
     elif what == 'land':
         if inst == 'meris':
-            tcwv_op=cawa_tcwv_land.CawaTcwvLandCore(TSTDIR+'/../luts/land/land_core_meris.nc4')
+            land_lut=os.path.join(parent_dir, 'luts', 'land', 'land_core_meris.nc4')
+            tcwv_op = cawa_land.CawaTcwvLandCore(land_lut)
+
             inp={'suz':10.,
                  'vie':40.,
                  'azi':170.,
@@ -59,7 +65,9 @@ def test_it(what='ocean',inst='meris'):
                  'prior_al1':0.13,
                  'prior_tcwv':15.}
         if inst == 'modis_terra':
-            tcwv_op=cawa_tcwv_land.CawaTcwvLandCore(TSTDIR+'/../luts/land/land_core_modis_terra.nc4')
+            land_lut=os.path.join(parent_dir, 'luts', 'land', 'land_core_modis_terra.nc4')
+            tcwv_op = cawa_land.CawaTcwvLandCore(land_lut)
+
             inp={'suz':40.,
                  'vie':10.,
                  'azi':170.,
