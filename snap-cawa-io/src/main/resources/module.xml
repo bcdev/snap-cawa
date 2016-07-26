@@ -1,0 +1,40 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-avhrr-directory-reader</symbolicName>
+    <version>1.1</version>
+    <name>AVHRR Directory Reader</name>
+    <description>
+        A product reader for directories of AVHRR ENVI files.
+    </description>
+
+    <copyright>(C) 2014 by Brockmann Consult</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-envi-reader</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Reader, Envi, AVHRR</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <id>importAVHRRDirectoryProduct</id>
+            <helpId>importAVHRRDirectoryProduct</helpId>
+            <formatName>AVHRR_DIRECTORY</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <text>AVHRR Collection</text>
+            <shortDescr>Import a collection of AVHRR products from one directory.</shortDescr>
+            <description>Import a collection of AVHRR products from one directory.</description>
+        </action>
+    </extension>
+
+</module>
