@@ -9,6 +9,7 @@ import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
 import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamFlagCodingPart;
 import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamGeocodingPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamTiePointGridPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
@@ -44,6 +45,11 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
     @Override
     public ProfilePartWriter createFlagCodingPartWriter() {
         return new BeamFlagCodingPart();
+    }
+
+    @Override
+    public ProfilePartWriter createTiePointGridPartWriter() {
+        return new BeamTiePointGridPart();
     }
 
 
@@ -100,14 +106,12 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
             for (Band b : product.getBands()) {
                 final String bandName = b.getName();
                 if (bandName.equals("tcwv")) {
-                    // AC reflectance band
                     addNc4VariableAttribute(writeable, b,
                             Nc4Constants.AC_CORR_VALID_MIN_VALUE, Nc4Constants.AC_CORR_VALID_MAX_VALUE);
 
-                } else if (bandName.equals("flag") && bandName.endsWith("uncertainty")) {
-                    // AC reflectance uncertainty band
-//                    addNc4VariableAttribute(writeable, b,
-//                            Nc4Constants.UNCERTAINTY_VALID_MIN_VALUE, Nc4Constants.UNCERTAINTY_VALID_MAX_VALUE);
+                } else if (bandName.endsWith("flags")) {
+                    addNc4VariableAttribute(writeable, b,
+                            Nc4Constants.UNCERTAINTY_VALID_MIN_VALUE, Nc4Constants.UNCERTAINTY_VALID_MAX_VALUE);
                 } else {
                     // all other bands
 //                    addAcAncillaryVariableAttributes(writeable, b);
@@ -224,7 +228,7 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
                                              double validMinValue,
                                              double validMaxValue) throws IOException {
             NVariable variable = writeable.addVariable(b.getName(),
-                                                       DataTypeUtils.getNetcdfDataType(ProductData.TYPE_FLOAT32),
+                                                       DataTypeUtils.getNetcdfDataType(b.getDataType()),
                                                        tileSize, writeable.getDimensions());
 
 //            final String bandName = b.getName();
