@@ -97,6 +97,7 @@ class CawaTcwvOp:
 
         self.sza_band = self.get_band(source_product, 'sun_zenith')
         self.vza_band = self.get_band(source_product, 'view_zenith')
+        self.saa_band = self.get_band(source_product, 'sun_azimuth')
         self.vaa_band = self.get_band(source_product, 'view_azimuth')
 
         if cu.CawaUtils.band_exists('t2m', source_product.getBandNames()):
@@ -167,6 +168,7 @@ class CawaTcwvOp:
 
         sza_tile = operator.getSourceTile(self.sza_band, target_rectangle)
         vza_tile = operator.getSourceTile(self.vza_band, target_rectangle)
+        saa_tile = operator.getSourceTile(self.saa_band, target_rectangle)
         vaa_tile = operator.getSourceTile(self.vaa_band, target_rectangle)
 
         l1_flag_tile = operator.getSourceTile(self.l1_flag_band, target_rectangle)
@@ -179,10 +181,12 @@ class CawaTcwvOp:
 
         sza_samples = sza_tile.getSamplesFloat()
         vza_samples = vza_tile.getSamplesFloat()
+        saa_samples = saa_tile.getSamplesFloat()
         vaa_samples = vaa_tile.getSamplesFloat()
 
         sza_data = np.array(sza_samples, dtype=np.float32)
         vza_data = np.array(vza_samples, dtype=np.float32)
+        saa_data = np.array(saa_samples, dtype=np.float32)
         vaa_data = np.array(vaa_samples, dtype=np.float32)
 
         prior_t2m_data = np.empty(sza_data.shape)
@@ -217,7 +221,7 @@ class CawaTcwvOp:
         print('start loop over tile...')
         tcwv_data = np.empty(rho_toa_13_data.shape[0], dtype=np.float32)
         for i in range(0, rho_toa_13_data.shape[0]):
-            input = {'suz': sza_data[i], 'vie': vza_data[i], 'azi': vaa_data[i],
+            input = {'suz': sza_data[i], 'vie': vza_data[i], 'azi': 180. - abs(saa_data[i] - vaa_data[i]),
                      'amf': 1. / np.cos(sza_data[i] * np.pi / 180.) + 1. / np.cos(vza_data[i] * np.pi / 180.),
                      'prs': prior_msl_data[i]/100.0, 'aot': self.aot13, 'tmp': prior_t2m_data[i],
                      'rtoa': {'13': rho_toa_13_data[i]*np.cos(sza_data[i] * np.pi / 180.),
