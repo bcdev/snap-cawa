@@ -1,29 +1,25 @@
 package org.esa.snap.dataio.nc4;
 
-import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfGeocodingPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.Constants;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
-import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
-import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 26.07.2016
- * Time: 17:09
+ * Modification of BeamGeocodingPart for CAWA purposes, i.e. do not write lat/lon bands
+ * into target netcdf file, as we want to keep products small and we still have the TPGs
  *
  * @author olafd
  */
@@ -39,73 +35,30 @@ public class SnapCawaGeocodingPart extends CfGeocodingPart {
         if (geoCoding == null) {
             return;
         }
-        final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-                addLatLonBands(ncFile, ImageManager.getPreferredTileSize(product));
+
+        // difference to BeamGeocodingPart: do not add lat/lon bands here!
+        // final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
+        //addLatLonBands(ncFile, ImageManager.getPreferredTileSize(product));
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, false);
-    }
 
-    @Override
-    public void encode(ProfileWriteContext ctx, Product product) throws IOException {
-        final int h = product.getSceneRasterHeight();
-        final int w = product.getSceneRasterWidth();
-
-        final GeoCoding geoCoding = product.getSceneGeoCoding();
-        final PixelPos pixelPos = new PixelPos();
-        final GeoPos geoPos = new GeoPos();
-
-        NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-        NVariable latVariable = ncFile.findVariable("lat");
-        NVariable lonVariable = ncFile.findVariable("lon");
-        if (isGeographicCRS(geoCoding)) {
-            final float[] lat = new float[h];
-            final float[] lon = new float[w];
-            pixelPos.x = 0 + 0.5f;
-            for (int y = 0; y < h; y++) {
-                pixelPos.y = y + 0.5f;
-                geoCoding.getGeoPos(pixelPos, geoPos);
-                lat[y] = (float) geoPos.getLat();
-            }
-            pixelPos.y = 0 + 0.5f;
-            for (int x = 0; x < w; x++) {
-                pixelPos.x = x + 0.5f;
-                geoCoding.getGeoPos(pixelPos, geoPos);
-                lon[x] = (float) geoPos.getLon();
-            }
-            latVariable.writeFully(Array.factory(lat));
-            lonVariable.writeFully(Array.factory(lon));
+        if (geoCoding instanceof TiePointGeoCoding) {
+            // this should be the normal case!
+            final TiePointGeoCoding tpGC = (TiePointGeoCoding) geoCoding;
+            final String[] names = new String[2];
+            names[LON_INDEX] = tpGC.getLonGrid().getName();
+            names[LAT_INDEX] = tpGC.getLatGrid().getName();
+            final String value = StringUtils.arrayToString(names, " ");
+            ctx.getNetcdfFileWriteable().addGlobalAttribute(TIEPOINT_COORDINATES, value);
         } else {
-            final float[] lat = new float[w];
-            final float[] lon = new float[w];
-            final boolean isYFlipped = (Boolean) ctx.getProperty(Constants.Y_FLIPPED_PROPERTY_NAME);
-            for (int y = 0; y < h; y++) {
-                pixelPos.y = y + 0.5f;
-                for (int x = 0; x < w; x++) {
-                    pixelPos.x = x + 0.5f;
-                    geoCoding.getGeoPos(pixelPos, geoPos);
-                    lat[x] = (float) geoPos.getLat();
-                    lon[x] = (float) geoPos.getLon();
-                }
-                latVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lat));
-                lonVariable.write(0, y, w, 1, isYFlipped, ProductData.createInstance(lon));
+            if (geoCoding instanceof CrsGeoCoding) {
+                addWktAsVariable(ctx.getNetcdfFileWriteable(), geoCoding);
             }
         }
     }
 
-    private void addLatLonBands(final NFileWriteable ncFile, Dimension tileSize) throws IOException {
-        final NVariable lat = ncFile.addVariable("lat", DataType.FLOAT, tileSize, "y x");
-        lat.addAttribute("units", "degrees_north");
-        lat.addAttribute("long_name", "latitude coordinate");
-        lat.addAttribute("standard_name", "latitude");
-
-        final NVariable lon = ncFile.addVariable("lon", DataType.FLOAT, tileSize, "y x");
-        lon.addAttribute("units", "degrees_east");
-        lon.addAttribute("long_name", "longitude coordinate");
-        lon.addAttribute("standard_name", "longitude");
-    }
-
-    private static boolean isGeographicCRS(final GeoCoding geoCoding) {
-        return (geoCoding instanceof CrsGeoCoding || geoCoding instanceof MapGeoCoding) &&
-                CRS.equalsIgnoreMetadata(geoCoding.getMapCRS(), DefaultGeographicCRS.WGS84);
+    @Override
+    public void encode(ProfileWriteContext ctx, Product product) throws IOException {
+//         we do not add lat/lon bands, so nothing to do here
     }
 
     private void addWktAsVariable(NFileWriteable ncFile, GeoCoding geoCoding) throws IOException {
