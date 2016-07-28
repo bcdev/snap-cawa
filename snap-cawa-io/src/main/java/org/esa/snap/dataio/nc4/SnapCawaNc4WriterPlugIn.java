@@ -7,11 +7,10 @@ import org.esa.snap.dataio.netcdf.AbstractNetCdfWriterPlugIn;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
-import org.esa.snap.dataio.netcdf.metadata.profiles.beam.*;
-import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfBandPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
+import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -44,17 +43,17 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
 
     @Override
     public ProfilePartWriter createFlagCodingPartWriter() {
-        return new BeamFlagCodingPart();
+        return new SnapCawaFlagCodingPart();
     }
 
     @Override
     public ProfilePartWriter createMetadataPartWriter() {
-        return new BeamMetadataPart();
+        return new SnapCawaMetadataPart();
     }
 
     @Override
     public ProfilePartWriter createTiePointGridPartWriter() {
-        return new BeamTiePointGridPart();
+        return new SnapCawaTiePointGridPart();
     }
 
     @Override
@@ -64,7 +63,7 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
 
     @Override
     public ProfilePartWriter createMaskPartWriter() {
-        return new BeamMaskPart();
+        return new SnapCawaMaskPart();
     }
 
     @Override
@@ -80,7 +79,7 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
     public EncodeQualification getEncodeQualification(Product product) {
         if (product.isMultiSize()) {
             return new EncodeQualification(EncodeQualification.Preservation.UNABLE,
-                    "Cannot write multisize products. Consider resampling the product first.");
+                                           "Cannot write multisize products. Consider resampling the product first.");
         }
         return new EncodeQualification(EncodeQualification.Preservation.PARTIAL);
     }
@@ -108,11 +107,9 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
 
             for (Band b : product.getBands()) {
                 final String bandName = b.getName();
-                if (bandName.equals("tcwv")) {
-                    addNc4VariableAttribute(writeable, b);
+                if (bandName.startsWith("tcwv") || bandName.equals("cloud_classif_flags")) {
+                    addNc4BandVariableAndAttributes(writeable, b);
 
-                } else if (bandName.endsWith("flags")) {
-                    addNc4VariableAttribute(writeable, b);
                 }
             }
         }
@@ -139,16 +136,52 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
             // reading this product!!
             writeable.addGlobalAttribute("metadata_profile", "beam");
             writeable.addGlobalAttribute("metadata_version", "0.5");
+
+            final MetadataElement metadataRoot = product.getMetadataRoot();
+            final MetadataElement processingGraph = metadataRoot.getElement("Processing_Graph");
+            if (processingGraph != null) {
+                metadataRoot.removeElement(processingGraph);
+            }
         }
 
-        private void addNc4VariableAttribute(NFileWriteable writeable, RasterDataNode b) throws IOException {
+        private void addNc4BandVariableAndAttributes(NFileWriteable writeable, RasterDataNode b) throws IOException {
             NVariable variable = writeable.addVariable(b.getName(),
-                    DataTypeUtils.getNetcdfDataType(b.getDataType()),
-                    tileSize, writeable.getDimensions());
+                                                       DataTypeUtils.getNetcdfDataType(b.getDataType()),
+                                                       tileSize, writeable.getDimensions());
+            writeBandAttributes(b, variable);
+        }
 
-            variable.addAttribute("coordinates", "latitude longitude");
-            CfBandPart.writeCfBandAttributes(b, variable);
-            BeamBandPart.writeBeamBandAttributes((Band) b, variable);
+        private void writeBandAttributes(RasterDataNode rasterDataNode, NVariable variable) throws IOException {
+            final String description = rasterDataNode.getDescription();
+            if (description != null) {
+                variable.addAttribute("long_name", description);
+            }
+            final String unit = rasterDataNode.getUnit();
+            if (unit != null && !unit.equals("dl")) {
+                variable.addAttribute("units", unit);
+            } else {
+                variable.addAttribute("units", "1");
+            }
+
+            double noDataValue;
+            final double scalingFactor = rasterDataNode.getScalingFactor();
+            if (scalingFactor != 1.0) {
+                variable.addAttribute(Constants.SCALE_FACTOR_ATT_NAME, scalingFactor);
+            }
+            final double scalingOffset = rasterDataNode.getScalingOffset();
+            if (scalingOffset != 0.0) {
+                variable.addAttribute(Constants.ADD_OFFSET_ATT_NAME, scalingOffset);
+            }
+            noDataValue = rasterDataNode.getNoDataValue();
+            if (rasterDataNode.isNoDataValueUsed()) {
+                Number fillValue = DataTypeUtils.convertTo(noDataValue, variable.getDataType());
+                variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, fillValue);
+            }
+
+            final String validPixelExpression = rasterDataNode.getValidPixelExpression();
+            if (validPixelExpression != null && validPixelExpression.trim().length() > 0) {
+                variable.addAttribute("valid_pixel_expression", validPixelExpression);
+            }
         }
     }
 }

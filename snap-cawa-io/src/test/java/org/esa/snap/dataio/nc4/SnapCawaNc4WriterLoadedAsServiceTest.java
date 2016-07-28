@@ -1,17 +1,14 @@
 package org.esa.snap.dataio.nc4;
 
-import junit.framework.Assert;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.junit.Test;
 
 import java.util.Iterator;
 
+import static junit.framework.TestCase.assertEquals;
+
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 11.08.2014
- * Time: 15:04
  *
  * @author olafd
  */
@@ -30,7 +27,7 @@ public class SnapCawaNc4WriterLoadedAsServiceTest {
             System.out.println("writerPlugIn.Descr = " + plugIn.getDescription(null));
         }
 
-        Assert.assertEquals(1, writerCount);
+        assertEquals(1, writerCount);
 
     }
 
