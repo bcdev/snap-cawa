@@ -77,10 +77,6 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
     }
 
     public EncodeQualification getEncodeQualification(Product product) {
-        if (product.isMultiSize()) {
-            return new EncodeQualification(EncodeQualification.Preservation.UNABLE,
-                                           "Cannot write multisize products. Consider resampling the product first.");
-        }
         return new EncodeQualification(EncodeQualification.Preservation.PARTIAL);
     }
 
@@ -129,8 +125,12 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
             writeable.addGlobalAttribute("title", "CAWA TCWV product");
             writeable.addGlobalAttribute("product_type", product.getProductType());
 
-            writeable.addGlobalAttribute("start_date", product.getStartTime().format());
-            writeable.addGlobalAttribute("stop_date", product.getEndTime().format());
+            if (product.getStartTime() != null) {
+                writeable.addGlobalAttribute("start_date", product.getStartTime().format());
+            }
+            if (product.getEndTime() != null) {
+                writeable.addGlobalAttribute("stop_date", product.getEndTime().format());
+            }
             writeable.addGlobalAttribute("TileSize", tileSize.height + ":" + tileSize.width);
             // the 'metadata_profile' attribute is required to make SNAP use the BEAM NetCDF reader when
             // reading this product!!
