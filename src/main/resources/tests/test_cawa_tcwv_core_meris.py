@@ -8,7 +8,7 @@ import numpy as np
 
 
 # noinspection PyUnresolvedReferences
-class TestCawaCore(unittest.TestCase):
+class TestCawaCoreMeris(unittest.TestCase):
     def setUp(self):
         parent_dir = os.path.dirname(os.path.normpath(os.path.dirname(__file__)))
         sys.path.append(parent_dir + '/lib-python')
@@ -55,7 +55,7 @@ class TestCawaCore(unittest.TestCase):
         t_ave = 0.0
         for i in range(1000):
             t1 = time.clock() * 1000
-            tcwv_result = self.cawa_core.compute_pixel(inp, 128, 0)['tcwv']
+            tcwv_result = self.cawa_core.compute_pixel_meris(inp, 128, 0)['tcwv']
             # print('pixel tcwv result: ', tcwv_result)
             self.assertAlmostEqual(tcwv_result, 24.17, delta=0.01)
             t2 = time.clock() * 1000
@@ -90,7 +90,7 @@ class TestCawaCore(unittest.TestCase):
         t_ave = 0.0
         for i in range(1000):
             t1 = time.clock() * 1000
-            tcwv_result = self.cawa_core.compute_pixel(inp, 0, 0)['tcwv']
+            tcwv_result = self.cawa_core.compute_pixel_meris(inp, 0, 0)['tcwv']
             # print('pixel tcwv result: ', tcwv_result)
             self.assertAlmostEqual(tcwv_result, 17.88, delta=0.01)
             t2 = time.clock() * 1000
@@ -98,24 +98,6 @@ class TestCawaCore(unittest.TestCase):
             t_ave += (t2-t1)
         print('TCWV ocean estimator average time (ms) for one pixel: ', t_ave/1000.0)
 
-    # @unittest.skip("skipping test...")
-    # def test_estimator_modis(self):
-    #     inp = {'tmp': 303.,
-    #            'prs': 1003.,
-    #            'suz': 9.7968997955322270,
-    #            'vie': 46.12860107421875,
-    #            'azi': 18.,
-    #            'aot': {'2': 0.1, '5': 0.08, '17': 0.1, '18': 0.1, '19': 0.1},
-    #            'sig_aot': {'2': 0.1, '5': 0.08, '17': 0.1, '18': 0.1, '19': 0.1},
-    #            'rtoa': {'2': 0.2 / np.pi, '5': 0.205 / np.pi, '17': 0.158 / np.pi, '18': 0.06 / np.pi, '19': 0.094 / np.pi}
-    #            }
-    #     t1 = time.clock() * 1000
-    #     tcwv_result = self.cawa_land.estimator(inp, 0, 0)['tcwv']
-    #     print('pixel MODIS tcwv result: ', tcwv_result)
-    #     self.assertAlmostEqual(tcwv_result, 15.26, delta=0.1)
-    #     t2 = time.clock() * 1000
-    #     print('TCWV estimator time (ms) for one pixel MODIS: ', (t2 - t1))
-
 print 'Testing org.esa.snap.cawa core'
-suite = unittest.TestLoader().loadTestsFromTestCase(TestCawaCore)
+suite = unittest.TestLoader().loadTestsFromTestCase(TestCawaCoreMeris)
 unittest.TextTestRunner(verbosity=2).run(suite)

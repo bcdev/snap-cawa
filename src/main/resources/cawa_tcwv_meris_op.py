@@ -14,7 +14,7 @@ import time
 TCWV_NODATA_VALUE = -999.0
 
 
-class CawaTcwvOp:
+class CawaTcwvMerisOp:
     """
     The CAWA GPF operator for total water vapour column retrieval.
     Authors: O.Danne, N.Fomferra, October 2015

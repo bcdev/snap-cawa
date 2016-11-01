@@ -19,7 +19,7 @@ class CawaTcwvCore:
         self.cawa_ocean = cawa_ocean.CawaTcwvOceanCore(ocean_lut)
         self.cawa_utils = cu.CawaUtils()
 
-    def compute_pixel(self, input, classif_flag, l1_flag):
+    def compute_pixel_meris(self, input, classif_flag, l1_flag):
         """
         derive pixel mask,identify land or water, and call algorithm accordingly
         :param input:  dict containing all necessary input (see tests)
@@ -38,7 +38,7 @@ class CawaTcwvCore:
             data['tcwv'] = -999.0  # todo: define no_data value
             data['sig_tcwv'] = -999.0
         else:
-            land_mask = self.cawa_utils.is_meris_land_pixel(classif_flag)
+            land_mask = self.cawa_utils.is_land_pixel(classif_flag)
             is_water = land_mask == 0
             if is_water:
                 data['tcwv'] = self.cawa_ocean.estimator(data)['tcwv']
@@ -48,3 +48,33 @@ class CawaTcwvCore:
             data['sig_tcwv'] = data['tcwv'] * 0.05  # todo
 
         return data
+
+    def compute_pixel_modis(self, input, classif_flag):
+        """
+        derive pixel mask,identify land or water, and call algorithm accordingly
+        :param input:  dict containing all necessary input (see tests)
+        :param classif_flag: Idepix flag
+        :return: a dict containing the input the TCWV and its uncertainty
+        """
+
+        data = input
+
+        # exclude mask pixels from computation:
+        pixel_mask = cu.CawaUtils.calculate_modis_pixel_mask(classif_flag)
+
+        valid = pixel_mask == 0
+        if not valid:
+            data['tcwv'] = -999.0  # todo: define no_data value
+            data['sig_tcwv'] = -999.0
+        else:
+            land_mask = self.cawa_utils.is_land_pixel(classif_flag)
+            is_water = land_mask == 0
+            if is_water:
+                data['tcwv'] = self.cawa_ocean.estimator(data)['tcwv']
+            else:
+                data['tcwv'] = self.cawa_land.estimator(data)['tcwv']
+
+            data['sig_tcwv'] = data['tcwv'] * 0.05  # todo
+
+        return data
+

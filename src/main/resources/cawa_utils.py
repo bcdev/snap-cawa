@@ -35,12 +35,27 @@ class CawaUtils:
                        classif_flag & F_CLOUD == F_CLOUD or \
                        classif_flag & F_CLOUD_BUFFER == F_CLOUD_BUFFER or \
                        classif_flag & F_CLOUD_SHADOW == F_CLOUD_SHADOW
-        # todo: discuss if we want cloud buffer (yes - RP 20160119) and/or cloud shadow
 
         return return_value
 
     @staticmethod
-    def is_meris_land_pixel(classif_flag):
+    def calculate_modis_pixel_mask(classif_flag):
+        """
+        Pixel mask: Exclude pixels classified as invalid, cloud, cloudbuffer, cloudshadow
+        We have no L1 flag from MODIS.
+        :param classif_flag
+        :return: 1 if pixel is invalid, 0 otherwise
+        """
+
+        return_value = classif_flag & F_INVALID == F_INVALID or \
+                       classif_flag & F_CLOUD == F_CLOUD or \
+                       classif_flag & F_CLOUD_BUFFER == F_CLOUD_BUFFER or \
+                       classif_flag & F_CLOUD_SHADOW == F_CLOUD_SHADOW
+
+        return return_value
+
+    @staticmethod
+    def is_land_pixel(classif_flag):
         """
         Determines from Idepix flag if pixel is land pixel
         :param classif_flag:
@@ -48,7 +63,6 @@ class CawaUtils:
         """
 
         return classif_flag & F_LAND == F_LAND
-        # todo: provide for MODIS accordingly
 
     @staticmethod
     def band_exists(name, band_names):

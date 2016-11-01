@@ -9,3 +9,5 @@
 # land_ops.FaparOp
 #
 cawa_tcwv_op.CawaTcwvOp
+cawa_tcwv_meris_op.CawaTcwvMerisOp
+cawa_tcwv_modis_op.CawaTcwvModisOp
