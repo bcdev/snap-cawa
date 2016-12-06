@@ -124,6 +124,7 @@ class CawaTcwvLandCore:
         self.xaa[0] = np.sqrt(data['prior_tcwv'])
         self.xaa[1] = data['prior_al0']
         self.xaa[2] = data['prior_al1']
+        #print 'par: ', self.par
 
         res = self.inverter(self.mes, fparams=self.par, jparams=self.par, se=se, sa=sa, xa=self.xaa, method=2,
                             full='fast', maxiter=3)

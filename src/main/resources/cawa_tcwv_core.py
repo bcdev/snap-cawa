@@ -38,7 +38,7 @@ class CawaTcwvCore:
             data['tcwv'] = -999.0  # todo: define no_data value
             data['sig_tcwv'] = -999.0
         else:
-            land_mask = self.cawa_utils.is_land_pixel(classif_flag)
+            land_mask = self.cawa_utils.is_land_pixel_meris(classif_flag)
             is_water = land_mask == 0
             if is_water:
                 data['tcwv'] = self.cawa_ocean.estimator(data)['tcwv']
@@ -67,7 +67,7 @@ class CawaTcwvCore:
             data['tcwv'] = -999.0  # todo: define no_data value
             data['sig_tcwv'] = -999.0
         else:
-            land_mask = self.cawa_utils.is_land_pixel(classif_flag)
+            land_mask = self.cawa_utils.is_land_pixel_modis(classif_flag)
             is_water = land_mask == 0
             if is_water:
                 data['tcwv'] = self.cawa_ocean.estimator(data)['tcwv']
