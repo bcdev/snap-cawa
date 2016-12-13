@@ -57,14 +57,18 @@ class CawaTcwvModisOp:
         if os.path.isdir(resource_root):
             land_lut = os.path.join(resource_root, 'luts/land/land_core_modis_aqua.nc4')
             ocean_lut = os.path.join(resource_root, 'luts/ocean/ocean_core_modis_aqua.nc4')
-            # shared_libs_dir = os.path.join(os.path.dirname(__file__), 'lib-python')
             shared_libs_dir = resource_root
         else:
             with zipfile.ZipFile(resource_root) as zf:
                 auxpath = SystemUtils.getAuxDataPath()
                 f.write('auxpath: ' + str(auxpath) + '\n')
-                land_lut = zf.extract('luts/land/land_core_modis_aqua.nc4', os.path.join(str(auxpath), 'cawa'))
-                ocean_lut = zf.extract('luts/ocean/ocean_core_modis_aqua.nc4', os.path.join(str(auxpath), 'cawa'))
+                lut_dir_to_extract = os.path.join(str(auxpath), 'cawa')
+                # if not os.path.exists(lut_dir_to_extract):
+                #     land_lut = zf.extract('luts/land/land_core_modis_aqua.nc4', lut_dir_to_extract)
+                #     ocean_lut = zf.extract('luts/ocean/ocean_core_modis_aqua.nc4', lut_dir_to_extract)
+                land_lut = zf.extract('luts/land/land_core_modis_aqua.nc4', lut_dir_to_extract)
+                ocean_lut = zf.extract('luts/ocean/ocean_core_modis_aqua.nc4', lut_dir_to_extract)
+
                 shared_libs_dir = tempfile.gettempdir()
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
                     zf.extract('lib-python/interpolators.so', shared_libs_dir)

@@ -40,11 +40,12 @@ class CawaTcwvCore:
         else:
             land_mask = self.cawa_utils.is_land_pixel_meris(classif_flag)
             is_water = land_mask == 0
-            if is_water:
-                data['tcwv'] = self.cawa_ocean.estimator(data)['tcwv']
-            else:
-                data['tcwv'] = self.cawa_land.estimator(data)['tcwv']
+            # if is_water:
+            #     data['tcwv'] = self.cawa_ocean.estimator(data)['tcwv']
+            # else:
+            #     data['tcwv'] = self.cawa_land.estimator(data)['tcwv']
 
+            data['tcwv'] = self.cawa_ocean.estimator(data)['tcwv'] # test!
             data['sig_tcwv'] = data['tcwv'] * 0.05  # todo
 
         return data

@@ -7,7 +7,7 @@ import time
 def test_it(what='ocean',inst='meris'):
 
     parent_dir = os.path.dirname(os.path.normpath(os.path.dirname(__file__)))
-    sys.path.append(parent_dir + '/lib-python')
+    sys.path.append(parent_dir + '/libs')
 
     import cawa_tcwv_core as cawa_core
     import cawa_tcwv_land as cawa_land

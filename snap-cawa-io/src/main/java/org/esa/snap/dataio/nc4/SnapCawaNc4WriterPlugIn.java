@@ -103,7 +103,7 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
 
             for (Band b : product.getBands()) {
                 final String bandName = b.getName();
-                if (bandName.startsWith("tcwv") || bandName.equals("cloud_classif_flags")) {
+                if (bandName.startsWith("tcwv") || bandName.equals("pixel_classif_flags")) {
                     addNc4BandVariableAndAttributes(writeable, b);
 
                 }

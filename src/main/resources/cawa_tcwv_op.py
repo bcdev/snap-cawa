@@ -59,7 +59,6 @@ class CawaTcwvOp:
         if os.path.isdir(resource_root):
             land_lut = os.path.join(resource_root, 'luts/land/land_core_meris.nc4')
             ocean_lut = os.path.join(resource_root, 'luts/ocean/ocean_core_meris.nc4')
-            # shared_libs_dir = os.path.join(os.path.dirname(__file__), 'lib-python')
             shared_libs_dir = resource_root
         else:
             with zipfile.ZipFile(resource_root) as zf:
@@ -91,15 +90,19 @@ class CawaTcwvOp:
         f.write('Source product width, height = ...' + str(width) + ', ' + str(height) + '\n')
 
         # get source bands:
-        self.rho_toa_13_band = self.get_band(source_product, 'rho_toa_13') # rho_toa is from Idepix product!
-        self.rho_toa_14_band = self.get_band(source_product, 'rho_toa_14')
-        self.rho_toa_15_band = self.get_band(source_product, 'rho_toa_15')
+        self.rho_toa_13_band = self.get_band(source_product, 'reflectance_13') # rho_toa is from Idepix product!
+        self.rho_toa_14_band = self.get_band(source_product, 'reflectance_14')
+        self.rho_toa_15_band = self.get_band(source_product, 'reflectance_15')
 
         self.sza_band = self.get_band(source_product, 'sun_zenith')
         self.vza_band = self.get_band(source_product, 'view_zenith')
         self.saa_band = self.get_band(source_product, 'sun_azimuth')
         self.vaa_band = self.get_band(source_product, 'view_azimuth')
 
+        self.prior_t2m_band = None
+        self.prior_msl_band = None
+        self.prior_tcwv_band = None
+        self.prior_wsp_band = None
         if cu.CawaUtils.band_exists('t2m', source_product.getBandNames()):
             self.prior_t2m_band = self.get_band(source_product, 't2m')
         if cu.CawaUtils.band_exists('msl', source_product.getBandNames()):
@@ -111,7 +114,7 @@ class CawaTcwvOp:
 
         self.l1_flag_band = self.get_band(source_product, 'l1_flags')
         # self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
-        self.classif_band = self.get_band(source_product, 'cloud_classif_flags')
+        self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
 
         # setup target product:
         cawa_product = snappy.Product('pyCAWA', 'CAWA TCWV', width, height)

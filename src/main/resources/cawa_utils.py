@@ -71,8 +71,8 @@ class CawaUtils:
         :return: 1 if pixel is invalid, 0 otherwise
         """
 
-        return_value = l1_flag & CAWA_MERIS_L1_INVALID == CAWA_MERIS_L1_INVALID or \
-                       classif_flag & CAWA_MERIS_IDEPIX_INVALID == CAWA_MERIS_IDEPIX_INVALID or \
+        # return_value = l1_flag & CAWA_MERIS_L1_INVALID == CAWA_MERIS_L1_INVALID or \
+        return_value = classif_flag & CAWA_MERIS_IDEPIX_INVALID == CAWA_MERIS_IDEPIX_INVALID or \
                        classif_flag & CAWA_MERIS_IDEPIX_CLOUD == CAWA_MERIS_IDEPIX_CLOUD or \
                        classif_flag & CAWA_MERIS_IDEPIX_CLOUD_BUFFER == CAWA_MERIS_IDEPIX_CLOUD_BUFFER or \
                        classif_flag & CAWA_MERIS_IDEPIX_CLOUD_SHADOW == CAWA_MERIS_IDEPIX_CLOUD_SHADOW

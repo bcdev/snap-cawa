@@ -34,7 +34,13 @@ class CawaTcwvMerisOp:
         f = open(tempfile.gettempdir() + '/cava_tcwv.log', 'w')
 
         f.write('Python module location: ' + __file__ + '\n')
+        print('Python module location: ' + __file__ + '\n')
         f.write('Python module location parent: ' + resource_root + '\n')
+        print('Python module location parent: ' + resource_root + '\n')
+
+        print('import numpy.core.multiarray')
+        import numpy.core.multiarray
+        print('done import numpy.core.multiarray')
 
         # get source product:
         source_product = operator.getSourceProduct('sourceProduct')
@@ -43,6 +49,7 @@ class CawaTcwvMerisOp:
 
         # f.write('Start initialize: source product is' + source_product.getFileLocation().getAbsolutePath() + '\n')
         f.write('Start initialize: source product is' + source_product.getName() + '\n')
+        print('Start initialize: source product is' + source_product.getName() + '\n')
 
         # get pixel classification from Idepix:
         # classif_product = operator.getSourceProduct('classifProduct')
@@ -57,26 +64,60 @@ class CawaTcwvMerisOp:
         self.aot15 = operator.getParameter('aot_15')
 
         if os.path.isdir(resource_root):
+            f.write('resource_root is dir ' + '\n')
+            print('resource_root is dir ' + '\n')
             land_lut = os.path.join(resource_root, 'luts/land/land_core_meris.nc4')
             ocean_lut = os.path.join(resource_root, 'luts/ocean/ocean_core_meris.nc4')
-            # shared_libs_dir = os.path.join(os.path.dirname(__file__), 'lib-python')
             shared_libs_dir = resource_root
         else:
+            f.write('extracting resources... ' + '\n')
+            print('extracting resources... ' + '\n')
             with zipfile.ZipFile(resource_root) as zf:
+                f.write('getting auxpath... '  + '\n')
+                print('getting auxpath.. '  + '\n')
                 auxpath = SystemUtils.getAuxDataPath()
                 f.write('auxpath: ' + str(auxpath) + '\n')
+                print('auxpath: ' + str(auxpath) + '\n')
+                # lut_path = os.path.join(str(auxpath), 'cawa')
+                # f.write('lut_path: ' + str(lut_path) + '\n')
+                # print('lut_path: ' + str(lut_path) + '\n')
+                # if not os.path.exists(lut_path):
+                #     land_lut = zf.extract('luts/land/land_core_meris.nc4', lut_path)
+                #     ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', lut_path)
+                #     f.write('LUT land: ' + land_lut + '\n')
+                #     print('LUT land: ' + land_lut + '\n')
+                #     f.write('LUT ocean: ' + ocean_lut + '\n')
+                #     print('LUT ocean: ' + ocean_lut + '\n')
+
                 land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
                 ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
-                shared_libs_dir = tempfile.gettempdir()
-                if not os.path.exists(shared_libs_dir + '/lib-python'):
-                    zf.extract('lib-python/interpolators.so', shared_libs_dir)
-                    zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
-                    zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
 
-        f.write('LUT land: ' + land_lut + '\n')
-        f.write('LUT ocean: ' + ocean_lut + '\n')
+                shared_libs_dir = tempfile.gettempdir()
+                lib_interpolator = 'a'
+                lib_nd_interpolator = 'b'
+                lib_oec = 'c'
+                if not os.path.exists(shared_libs_dir + '/lib-python'):
+                    lib_interpolator = zf.extract('lib-python/interpolators.so', shared_libs_dir)
+                    lib_nd_interpolator = zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
+                    lib_oec = zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
+
+                if os.path.exists(land_lut):
+                    print('land_lut: ' + str(land_lut) + '\n')
+                if os.path.exists(ocean_lut):
+                    print('ocean_lut: ' + str(ocean_lut) + '\n')
+                if os.path.exists(shared_libs_dir):
+                    print('shared_libs_dir: ' + str(shared_libs_dir) + '\n')
+                if os.path.exists(shared_libs_dir + '/lib-python'):
+                    print('shared_libs_dir + libs: ' + str(shared_libs_dir + '/lib-python') + '\n')
+                if os.path.exists(lib_interpolator):
+                    print('lib_interpolator: ' + str(lib_interpolator) + '\n')
+                if os.path.exists(lib_nd_interpolator):
+                    print('lib_nd_interpolator: ' + str(lib_nd_interpolator) + '\n')
+                if os.path.exists(lib_oec):
+                    print('lib_oec: ' + str(lib_oec) + '\n')
 
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
+        print('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
         sys.path.append(shared_libs_dir + '/lib-python')
 
         #time.sleep(600)
@@ -91,15 +132,19 @@ class CawaTcwvMerisOp:
         f.write('Source product width, height = ...' + str(width) + ', ' + str(height) + '\n')
 
         # get source bands:
-        self.rho_toa_13_band = self.get_band(source_product, 'rho_toa_13') # rho_toa is from Idepix product!
-        self.rho_toa_14_band = self.get_band(source_product, 'rho_toa_14')
-        self.rho_toa_15_band = self.get_band(source_product, 'rho_toa_15')
+        self.rho_toa_13_band = self.get_band(source_product, 'reflectance_13') # reflectance is from Idepix product!
+        self.rho_toa_14_band = self.get_band(source_product, 'reflectance_14')
+        self.rho_toa_15_band = self.get_band(source_product, 'reflectance_15')
 
         self.sza_band = self.get_band(source_product, 'sun_zenith')
         self.vza_band = self.get_band(source_product, 'view_zenith')
         self.saa_band = self.get_band(source_product, 'sun_azimuth')
         self.vaa_band = self.get_band(source_product, 'view_azimuth')
 
+        self.prior_t2m_band = None
+        self.prior_msl_band = None
+        self.prior_tcwv_band = None
+        self.prior_wsp_band = None
         if cu.CawaUtils.band_exists('t2m', source_product.getBandNames()):
             self.prior_t2m_band = self.get_band(source_product, 't2m')
         if cu.CawaUtils.band_exists('msl', source_product.getBandNames()):
@@ -111,7 +156,7 @@ class CawaTcwvMerisOp:
 
         self.l1_flag_band = self.get_band(source_product, 'l1_flags')
         # self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
-        self.classif_band = self.get_band(source_product, 'cloud_classif_flags')
+        self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
 
         # setup target product:
         cawa_product = snappy.Product('pyCAWA', 'CAWA TCWV', width, height)
