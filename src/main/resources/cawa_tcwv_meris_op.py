@@ -30,17 +30,11 @@ class CawaTcwvMerisOp:
         :return:
         """
         resource_root = os.path.dirname(__file__)
-        # f = open(os.path.dirname(resource_root) + '/cava_tcwv.log', 'w')
         f = open(tempfile.gettempdir() + '/cava_tcwv.log', 'w')
 
         f.write('Python module location: ' + __file__ + '\n')
-        print('Python module location: ' + __file__ + '\n')
+        # print('Python module location: ' + __file__ + '\n')
         f.write('Python module location parent: ' + resource_root + '\n')
-        print('Python module location parent: ' + resource_root + '\n')
-
-        print('import numpy.core.multiarray')
-        import numpy.core.multiarray
-        print('done import numpy.core.multiarray')
 
         # get source product:
         source_product = operator.getSourceProduct('sourceProduct')
@@ -51,11 +45,6 @@ class CawaTcwvMerisOp:
         f.write('Start initialize: source product is' + source_product.getName() + '\n')
         print('Start initialize: source product is' + source_product.getName() + '\n')
 
-        # get pixel classification from Idepix:
-        # classif_product = operator.getSourceProduct('classifProduct')
-        # if not classif_product:
-        #     raise RuntimeError('No pixel classification product specified or product not found - cannot continue.')
-        #
         # get parameters:
         self.temperature = operator.getParameter('temperature')  # todo: get temperature field from ERA-Interim
         self.pressure = operator.getParameter('pressure')  # todo: get pressure field from ERA-Interim
@@ -71,60 +60,42 @@ class CawaTcwvMerisOp:
             shared_libs_dir = resource_root
         else:
             f.write('extracting resources... ' + '\n')
-            print('extracting resources... ' + '\n')
             with zipfile.ZipFile(resource_root) as zf:
-                f.write('getting auxpath... '  + '\n')
-                print('getting auxpath.. '  + '\n')
                 auxpath = SystemUtils.getAuxDataPath()
                 f.write('auxpath: ' + str(auxpath) + '\n')
-                print('auxpath: ' + str(auxpath) + '\n')
-                # lut_path = os.path.join(str(auxpath), 'cawa')
-                # f.write('lut_path: ' + str(lut_path) + '\n')
-                # print('lut_path: ' + str(lut_path) + '\n')
-                # if not os.path.exists(lut_path):
-                #     land_lut = zf.extract('luts/land/land_core_meris.nc4', lut_path)
-                #     ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', lut_path)
-                #     f.write('LUT land: ' + land_lut + '\n')
-                #     print('LUT land: ' + land_lut + '\n')
-                #     f.write('LUT ocean: ' + ocean_lut + '\n')
-                #     print('LUT ocean: ' + ocean_lut + '\n')
 
-                land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
-                ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/land/land_core_meris.nc4')):
+                    land_lut = zf.extract('luts/land/land_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted LUT land: ' + land_lut + '\n')
+                else:
+                    land_lut = os.path.join(str(auxpath), 'cawa/luts/land/land_core_meris.nc4')
+                    f.write('existing LUT land: ' + land_lut + '\n')
+
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/ocean/ocean_core_meris.nc4')):
+                    ocean_lut = zf.extract('luts/ocean/ocean_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted LUT ocean: ' + ocean_lut + '\n')
+                else:
+                    ocean_lut = os.path.join(str(auxpath), 'cawa/luts/ocean/ocean_core_meris.nc4')
+                    f.write('existing LUT ocean: ' + ocean_lut + '\n')
 
                 shared_libs_dir = tempfile.gettempdir()
-                lib_interpolator = 'a'
-                lib_nd_interpolator = 'b'
-                lib_oec = 'c'
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
                     lib_interpolator = zf.extract('lib-python/interpolators.so', shared_libs_dir)
                     lib_nd_interpolator = zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
                     lib_oec = zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
-
-                if os.path.exists(land_lut):
-                    print('land_lut: ' + str(land_lut) + '\n')
-                if os.path.exists(ocean_lut):
-                    print('ocean_lut: ' + str(ocean_lut) + '\n')
-                if os.path.exists(shared_libs_dir):
-                    print('shared_libs_dir: ' + str(shared_libs_dir) + '\n')
-                if os.path.exists(shared_libs_dir + '/lib-python'):
-                    print('shared_libs_dir + libs: ' + str(shared_libs_dir + '/lib-python') + '\n')
-                if os.path.exists(lib_interpolator):
-                    print('lib_interpolator: ' + str(lib_interpolator) + '\n')
-                if os.path.exists(lib_nd_interpolator):
-                    print('lib_nd_interpolator: ' + str(lib_nd_interpolator) + '\n')
-                if os.path.exists(lib_oec):
-                    print('lib_oec: ' + str(lib_oec) + '\n')
+                else:
+                    lib_interpolator = os.path.join(str(shared_libs_dir), 'lib-python/interpolators.so')
+                    lib_nd_interpolator = os.path.join(str(shared_libs_dir), 'lib-python/nd_interpolator.so')
+                    lib_oec = os.path.join(str(shared_libs_dir), 'lib-python/optimal_estimation_core.so')
 
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
-        print('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
         sys.path.append(shared_libs_dir + '/lib-python')
 
         #time.sleep(600)
 
-        import cawa_tcwv_core as cawa_core
+        import cawa_tcwv_meris_core as cawa_core
         import cawa_utils as cu
-        self.cawa = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
+        self.cawa = cawa_core.CawaTcwvMerisCore(land_lut, ocean_lut)
         self.cawa_utils = cu.CawaUtils()
 
         width = source_product.getSceneRasterWidth()

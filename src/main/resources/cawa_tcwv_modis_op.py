@@ -30,7 +30,6 @@ class CawaTcwvModisOp:
         :return:
         """
         resource_root = os.path.dirname(__file__)
-        # f = open(os.path.dirname(resource_root) + '/cava_tcwv.log', 'w')
         f = open(tempfile.gettempdir() + '/cava_tcwv_modis.log', 'w')
 
         f.write('Python module location: ' + __file__ + '\n')
@@ -44,11 +43,6 @@ class CawaTcwvModisOp:
         # f.write('Start initialize: source product is' + source_product.getFileLocation().getAbsolutePath() + '\n')
         f.write('Start initialize: source product is' + source_product.getName() + '\n')
 
-        # get pixel classification from Idepix:
-        # classif_product = operator.getSourceProduct('classifProduct')
-        # if not classif_product:
-        #     raise RuntimeError('No pixel classification product specified or product not found - cannot continue.')
-        #
         # get parameters:
         self.temperature = operator.getParameter('temperature')  # todo: get temperature field from ERA-Interim
         self.pressure = operator.getParameter('pressure')  # todo: get pressure field from ERA-Interim
@@ -62,18 +56,30 @@ class CawaTcwvModisOp:
             with zipfile.ZipFile(resource_root) as zf:
                 auxpath = SystemUtils.getAuxDataPath()
                 f.write('auxpath: ' + str(auxpath) + '\n')
-                lut_dir_to_extract = os.path.join(str(auxpath), 'cawa')
-                # if not os.path.exists(lut_dir_to_extract):
-                #     land_lut = zf.extract('luts/land/land_core_modis_aqua.nc4', lut_dir_to_extract)
-                #     ocean_lut = zf.extract('luts/ocean/ocean_core_modis_aqua.nc4', lut_dir_to_extract)
-                land_lut = zf.extract('luts/land/land_core_modis_aqua.nc4', lut_dir_to_extract)
-                ocean_lut = zf.extract('luts/ocean/ocean_core_modis_aqua.nc4', lut_dir_to_extract)
+
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/land/land_core_modis_aqua.nc4')):
+                    land_lut = zf.extract('luts/land/land_core_modis_aqua.nc4', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted LUT land: ' + land_lut + '\n')
+                else:
+                    land_lut = os.path.join(str(auxpath), 'cawa/luts/land/land_core_modis_aqua.nc4')
+                    f.write('existing LUT land: ' + land_lut + '\n')
+
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/ocean/ocean_core_modis_aqua.nc4')):
+                    ocean_lut = zf.extract('luts/ocean/ocean_core_modis_aqua.nc4', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted LUT ocean: ' + ocean_lut + '\n')
+                else:
+                    ocean_lut = os.path.join(str(auxpath), 'cawa/luts/ocean/ocean_core_modis_aqua.nc4')
+                    f.write('existing LUT ocean: ' + ocean_lut + '\n')
 
                 shared_libs_dir = tempfile.gettempdir()
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
-                    zf.extract('lib-python/interpolators.so', shared_libs_dir)
-                    zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
-                    zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
+                    lib_interpolator = zf.extract('lib-python/interpolators.so', shared_libs_dir)
+                    lib_nd_interpolator = zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
+                    lib_oec = zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
+                else:
+                    lib_interpolator = os.path.join(str(shared_libs_dir), 'lib-python/interpolators.so')
+                    lib_nd_interpolator = os.path.join(str(shared_libs_dir), 'lib-python/nd_interpolator.so')
+                    lib_oec = os.path.join(str(shared_libs_dir), 'lib-python/optimal_estimation_core.so')
 
         f.write('LUT land: ' + land_lut + '\n')
         f.write('LUT ocean: ' + ocean_lut + '\n')
@@ -81,11 +87,9 @@ class CawaTcwvModisOp:
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
         sys.path.append(shared_libs_dir + '/lib-python')
 
-        #time.sleep(600)
-
-        import cawa_tcwv_core as cawa_core
+        import cawa_tcwv_modis_core as cawa_core
         import cawa_utils as cu
-        self.cawa = cawa_core.CawaTcwvCore(land_lut, ocean_lut)
+        self.cawa = cawa_core.CawaTcwvModisCore(land_lut, ocean_lut)
         self.cawa_utils = cu.CawaUtils()
 
         width = source_product.getSceneRasterWidth()
