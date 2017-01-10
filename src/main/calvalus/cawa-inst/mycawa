@@ -1,19 +1,21 @@
 #!/bin/bash
 # CAWA environment setup
-# usage:  . myidepix
+# usage:  . mycawa
 
 export CALVALUS_INST=/home/cvop/cawa-inst
 export CALVALUS_SHARE=/home/cvop/share
 
 export CALVALUS_PRODUCTION_JAR=$CALVALUS_SHARE/lib/calvalus-production-2.7-cawa-tool.jar
-export CALVALUS_BEAM_VERSION=beam-5.0.1
-export CALVALUS_CALVALUS_VERSION=calvalus-2.7
+#export CALVALUS_BEAM_VERSION=snap-4.0-bundle
+export CALVALUS_BEAM_VERSION=snap-5.0.1-SNAPSHOT
+#export CALVALUS_CALVALUS_VERSION=calvalus-2.10-SNAPSHOT
+export CALVALUS_CALVALUS_VERSION=calvalus-2.10-SNAPSHOT_for_CAWA
 
 export PYTHONPATH=$CALVALUS_INST:$CALVALUS_INST/lib:$CALVALUS_SHARE/lib:$PYTHONPATH
 export PATH=$CALVALUS_INST:$CALVALUS_INST/bin:$CALVALUS_SHARE/bin:$PATH
 
-PS1="\[\e]0;\u@\h: \w\a\]\[\e[1;32m\]\u \[\e[1;34m\]\w\[\e[0m\] \[\e[0;31m\](CAWA-Idepix)\[\e[0m\]$ "
+PS1="\[\e]0;\u@\h: \w\a\]\[\e[1;32m\]\u \[\e[1;34m\]\w\[\e[0m\] \[\e[0;31m\](CAWA)\[\e[0m\]$ "
 
 echo "using Calvalus      $CALVALUS_CALVALUS_VERSION"
-echo "using BEAM          $CALVALUS_BEAM_VERSION"
+echo "using SNAP          $CALVALUS_BEAM_VERSION"
 echo "using CAWA instance $CALVALUS_INST"
