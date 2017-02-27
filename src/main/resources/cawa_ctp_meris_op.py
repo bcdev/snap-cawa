@@ -11,12 +11,12 @@ import sys
 import time
 
 
-TCWV_NODATA_VALUE = -999.0
+CTP_NODATA_VALUE = -999.0
 
 
-class CawaTcwvModisOp:
+class CawaCtpMerisOp:
     """
-    The CAWA GPF operator for total water vapour column retrieval from MODIS (Aqua).
+    The CAWA GPF operator for total water vapour column retrieval.
     Authors: O.Danne, N.Fomferra, October 2015
     """
 
@@ -30,9 +30,10 @@ class CawaTcwvModisOp:
         :return:
         """
         resource_root = os.path.dirname(__file__)
-        f = open(tempfile.gettempdir() + '/cava_tcwv_modis.log', 'w')
+        f = open(tempfile.gettempdir() + '/cava_ctp.log', 'w')
 
         f.write('Python module location: ' + __file__ + '\n')
+        # print('Python module location: ' + __file__ + '\n')
         f.write('Python module location parent: ' + resource_root + '\n')
 
         # get source product:
@@ -42,34 +43,49 @@ class CawaTcwvModisOp:
 
         # f.write('Start initialize: source product is' + source_product.getFileLocation().getAbsolutePath() + '\n')
         f.write('Start initialize: source product is' + source_product.getName() + '\n')
+        print('Start initialize: source product is' + source_product.getName() + '\n')
 
         # get parameters:
+        # todo: check what we need --> we need MERIS bands 10, 11. we need to convert band 11  with stray_coeffs
         self.temperature = operator.getParameter('temperature')  # todo: get temperature field from ERA-Interim
         self.pressure = operator.getParameter('pressure')  # todo: get pressure field from ERA-Interim
-        self.prior_aot = operator.getParameter('prior_aot')  # todo: clarify if only one AOT is needed
+        self.aot13 = operator.getParameter('aot_13')  # todo: clarify if only one AOT is needed
+        self.aot14 = operator.getParameter('aot_14')
+        self.aot15 = operator.getParameter('aot_15')
 
         if os.path.isdir(resource_root):
-            land_lut = os.path.join(resource_root, 'luts/land/land_core_modis_aqua.nc4')
-            ocean_lut = os.path.join(resource_root, 'luts/ocean/ocean_core_modis_aqua.nc4')
+            f.write('resource_root is dir ' + '\n')
+            print('resource_root is dir ' + '\n')
+            cloud_lut = os.path.join(resource_root, 'luts/cloud_core_meris.nc4')
+            str_coeffs = os.path.join(resource_root, 'luts/stray_coeff_potenz4.nc')
+            ws_alb = os.path.join(resource_root, 'luts/ws_alb_10_2005.nc')
             shared_libs_dir = resource_root
         else:
+            f.write('extracting resources... ' + '\n')
             with zipfile.ZipFile(resource_root) as zf:
                 auxpath = SystemUtils.getAuxDataPath()
                 f.write('auxpath: ' + str(auxpath) + '\n')
 
-                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/land/land_core_modis_aqua.nc4')):
-                    land_lut = zf.extract('luts/land/land_core_modis_aqua.nc4', os.path.join(str(auxpath), 'cawa'))
-                    f.write('extracted LUT land: ' + land_lut + '\n')
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/cloud_core_meris.nc4')):
+                    cloud_lut = zf.extract('luts/cloud_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted LUT cloud: ' + cloud_lut + '\n')
                 else:
-                    land_lut = os.path.join(str(auxpath), 'cawa/luts/land/land_core_modis_aqua.nc4')
-                    f.write('existing LUT land: ' + land_lut + '\n')
+                    cloud_lut = os.path.join(str(auxpath), 'cawa/luts/cloud_core_meris.nc4')
+                    f.write('existing LUT cloud: ' + cloud_lut + '\n')
 
-                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/ocean/ocean_core_modis_aqua.nc4')):
-                    ocean_lut = zf.extract('luts/ocean/ocean_core_modis_aqua.nc4', os.path.join(str(auxpath), 'cawa'))
-                    f.write('extracted LUT ocean: ' + ocean_lut + '\n')
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/stray_coeff_potenz4.nc')):
+                    str_coeffs = zf.extract('luts/stray_coeff_potenz4.nc', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted stray_coeff: ' + str_coeffs + '\n')
                 else:
-                    ocean_lut = os.path.join(str(auxpath), 'cawa/luts/ocean/ocean_core_modis_aqua.nc4')
-                    f.write('existing LUT ocean: ' + ocean_lut + '\n')
+                    str_coeffs = os.path.join(str(auxpath), 'cawa/luts/stray_coeff_potenz4.nc')
+                    f.write('existing stray_coeff: ' + str_coeffs + '\n')
+
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/ws_alb_10_2005.nc')):
+                    ws_alb = zf.extract('luts/ws_alb_10_2005.nc', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted ws_alb_10: ' + ws_alb + '\n')
+                else:
+                    ws_alb = os.path.join(str(auxpath), 'cawa/luts/ws_alb_10_2005.nc')
+                    f.write('existing ws_alb_10: ' + ws_alb + '\n')
 
                 shared_libs_dir = tempfile.gettempdir()
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
@@ -81,16 +97,14 @@ class CawaTcwvModisOp:
                     lib_nd_interpolator = os.path.join(str(shared_libs_dir), 'lib-python/nd_interpolator.so')
                     lib_oec = os.path.join(str(shared_libs_dir), 'lib-python/optimal_estimation_core.so')
 
-        f.write('LUT land: ' + land_lut + '\n')
-        f.write('LUT ocean: ' + ocean_lut + '\n')
-
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
-        # sys.path.append(shared_libs_dir + '/lib-python')
-        sys.path.append(shared_libs_dir + '/libs')
+        sys.path.append(shared_libs_dir + '/lib-python')
 
-        import cawa_tcwv_modis_core as cawa_core
+        #time.sleep(600)
+
+        import cawa_ctp_meris_core as cawa_core
         import cawa_utils as cu
-        self.cawa = cawa_core.CawaTcwvModisCore(land_lut, ocean_lut)
+        self.cawa = cawa_core.CawaCtpMerisCore(cloud_lut)
         self.cawa_utils = cu.CawaUtils()
 
         width = source_product.getSceneRasterWidth()
@@ -98,16 +112,24 @@ class CawaTcwvModisOp:
         f.write('Source product width, height = ...' + str(width) + ', ' + str(height) + '\n')
 
         # get source bands:
-        self.rho_toa_2_band = self.get_band(source_product, 'EV_250_Aggr1km_RefSB_2') # RefSB is from Idepix product!
-        self.rho_toa_5_band = self.get_band(source_product, 'EV_500_Aggr1km_RefSB_5') # RefSB is from Idepix product!
-        self.rho_toa_17_band = self.get_band(source_product, 'EV_1KM_RefSB_17')
-        self.rho_toa_18_band = self.get_band(source_product, 'EV_1KM_RefSB_18')
-        self.rho_toa_19_band = self.get_band(source_product, 'EV_1KM_RefSB_19')
+        # todo: check what we need. we need radiance_10,11,alb, suz, vie, azi, dwl
+        # for ich,ch in enumerate(self.wb):
+        #     self.mes[ich]=data['rtoa'][ch]
+        # for ich,ch in enumerate(self.ab):
+        #     self.mes[len(self.wb)+ich]=-np.log(data['rtoa'][ch] /  data['rtoa'][self.wb[0]])
+        # self.par[0]= data['alb']
+        # self.par[1]= data['suz']
+        # self.par[2]= data['vie']
+        # self.par[3]= data['azi']
+        # self.par[4]= data['dwl']
 
-        self.sza_band = self.get_band(source_product, 'SolarZenith')
-        self.vza_band = self.get_band(source_product, 'SensorZenith')
-        self.saa_band = self.get_band(source_product, 'SolarAzimuth')
-        self.vaa_band = self.get_band(source_product, 'SensorAzimuth')
+        self.rad_10_band = self.get_band(source_product, 'radiance_10') # reflectance is from Idepix product!
+        self.rad_11_band = self.get_band(source_product, 'radiance_11')
+
+        self.sza_band = self.get_band(source_product, 'sun_zenith')
+        self.vza_band = self.get_band(source_product, 'view_zenith')
+        self.saa_band = self.get_band(source_product, 'sun_azimuth')
+        self.vaa_band = self.get_band(source_product, 'view_azimuth')
 
         self.prior_t2m_band = None
         self.prior_msl_band = None
@@ -122,6 +144,8 @@ class CawaTcwvModisOp:
         if cu.CawaUtils.band_exists('ws', source_product.getBandNames()):
             self.prior_wsp_band = self.get_band(source_product, 'ws')
 
+        self.l1_flag_band = self.get_band(source_product, 'l1_flags')
+        # self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
         self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
 
         # setup target product:
@@ -165,28 +189,26 @@ class CawaTcwvModisOp:
         #     f1 = open(tempfile.gettempdir() + '/cava_tcwv' + str(target_rectangle.x) + '_' + str(target_rectangle.y) + '.log', 'w')
         #     f1.write('enter compute: rectangle = ' + target_rectangle.toString() + '\n')
 
-        rho_toa_2_tile = operator.getSourceTile(self.rho_toa_2_band, target_rectangle)
-        rho_toa_5_tile = operator.getSourceTile(self.rho_toa_5_band, target_rectangle)
-        rho_toa_17_tile = operator.getSourceTile(self.rho_toa_17_band, target_rectangle)
-        rho_toa_18_tile = operator.getSourceTile(self.rho_toa_18_band, target_rectangle)
-        rho_toa_19_tile = operator.getSourceTile(self.rho_toa_19_band, target_rectangle)
+        rho_toa_13_tile = operator.getSourceTile(self.rad_10_band, target_rectangle)
+        rho_toa_14_tile = operator.getSourceTile(self.rad_11_band, target_rectangle)
+        rho_toa_15_tile = operator.getSourceTile(self.rho_toa_15_band, target_rectangle)
 
-        rho_toa_2_samples = rho_toa_2_tile.getSamplesFloat()
-        rho_toa_5_samples = rho_toa_5_tile.getSamplesFloat()
-        rho_toa_17_samples = rho_toa_17_tile.getSamplesFloat()
-        rho_toa_18_samples = rho_toa_18_tile.getSamplesFloat()
-        rho_toa_19_samples = rho_toa_19_tile.getSamplesFloat()
+        rho_toa_13_samples = rho_toa_13_tile.getSamplesFloat()
+        rho_toa_14_samples = rho_toa_14_tile.getSamplesFloat()
+        rho_toa_15_samples = rho_toa_15_tile.getSamplesFloat()
 
-        rho_toa_2_data = np.array(rho_toa_2_samples, dtype=np.float32)
-        rho_toa_5_data = np.array(rho_toa_5_samples, dtype=np.float32)
-        rho_toa_17_data = np.array(rho_toa_17_samples, dtype=np.float32)
-        rho_toa_18_data = np.array(rho_toa_18_samples, dtype=np.float32)
-        rho_toa_19_data = np.array(rho_toa_19_samples, dtype=np.float32)
+        rho_toa_13_data = np.array(rho_toa_13_samples, dtype=np.float32)
+        rho_toa_14_data = np.array(rho_toa_14_samples, dtype=np.float32)
+        rho_toa_15_data = np.array(rho_toa_15_samples, dtype=np.float32)
 
         sza_tile = operator.getSourceTile(self.sza_band, target_rectangle)
         vza_tile = operator.getSourceTile(self.vza_band, target_rectangle)
         saa_tile = operator.getSourceTile(self.saa_band, target_rectangle)
         vaa_tile = operator.getSourceTile(self.vaa_band, target_rectangle)
+
+        l1_flag_tile = operator.getSourceTile(self.l1_flag_band, target_rectangle)
+        l1_flag_samples = l1_flag_tile.getSamplesInt()
+        l1_flag_data = np.array(l1_flag_samples, dtype=np.int16)
 
         classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
         classif_samples = classif_tile.getSamplesInt()
@@ -232,20 +254,19 @@ class CawaTcwvModisOp:
 
         # loop over whole tile:
         print('start loop over tile...')
-        tcwv_data = np.empty(rho_toa_2_data.shape[0], dtype=np.float32)
-        for i in range(0, rho_toa_2_data.shape[0]):
+        tcwv_data = np.empty(rho_toa_13_data.shape[0], dtype=np.float32)
+        for i in range(0, rho_toa_13_data.shape[0]):
             input = {'suz': sza_data[i], 'vie': vza_data[i], 'azi': 180. - abs(saa_data[i] - vaa_data[i]),
                      'amf': 1. / np.cos(sza_data[i] * np.pi / 180.) + 1. / np.cos(vza_data[i] * np.pi / 180.),
-                     'prs': prior_msl_data[i]/100.0, 'aot': self.prior_aot, 'tmp': prior_t2m_data[i],
-                     'rtoa': {'2': rho_toa_2_data[i]*np.cos(sza_data[i] * np.pi / 180.),
-                              '5': rho_toa_5_data[i]*np.cos(sza_data[i] * np.pi / 180.),
-                              '17': rho_toa_17_data[i]*np.cos(sza_data[i] * np.pi / 180.),
-                              '18': rho_toa_18_data[i]*np.cos(sza_data[i] * np.pi / 180.),
-                              '19': rho_toa_19_data[i]*np.cos(sza_data[i] * np.pi / 180.)},
+                     'prs': prior_msl_data[i]/100.0, 'aot': self.aot13, 'tmp': prior_t2m_data[i],
+                     'rtoa': {'13': rho_toa_13_data[i]*np.cos(sza_data[i] * np.pi / 180.),
+                              '14': rho_toa_14_data[i]*np.cos(sza_data[i] * np.pi / 180.),
+                              '15': rho_toa_15_data[i]*np.cos(sza_data[i] * np.pi / 180.)},
                      'prior_wsp': prior_wsp_data[i], 'prior_aot': 0.15,
                      'prior_al0': 0.13, 'prior_al1': 0.13, 'prior_tcwv': prior_tcwv_data[i]}
 
-            tcwv_data[i] = self.cawa.compute_pixel_modis(input, classif_data[i])['tcwv']
+            tcwv_data[i] = self.cawa.compute_pixel_meris(input, classif_data[i], l1_flag_data[i])['tcwv']
+            # tcwv_data[i] = self.cawa.compute_pixel(input, 1, l1_flag_data[i])['tcwv']
 
         # fill target tiles:
         print('fill target tiles...')

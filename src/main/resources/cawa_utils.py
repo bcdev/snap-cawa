@@ -80,6 +80,21 @@ class CawaUtils:
         return return_value
 
     @staticmethod
+    def calculate_meris_ctp_pixel_mask(classif_flag):
+        """
+        Pixel mask: Exclude pixels classified as invalid or NOT cloud
+        :param classif_flag
+        :param l1_flag
+        :return: 1 if pixel is invalid, 0 otherwise
+        """
+
+        # return_value = l1_flag & CAWA_MERIS_L1_INVALID == CAWA_MERIS_L1_INVALID or \
+        return_value = classif_flag & CAWA_MERIS_IDEPIX_INVALID == CAWA_MERIS_IDEPIX_INVALID or \
+                       classif_flag & CAWA_MERIS_IDEPIX_CLOUD != CAWA_MERIS_IDEPIX_CLOUD
+
+        return return_value
+
+    @staticmethod
     def calculate_modis_pixel_mask(classif_flag):
         """
         Pixel mask: Exclude pixels classified as invalid, cloud, cloudbuffer, cloudshadow
