@@ -2,6 +2,8 @@
 # CAWA utils.
 ######################################################################################
 
+import numpy as np
+
 # Idepix flags (MERIS):
 # CAWA_MERIS_L1_INVALID = 128
 # CAWA_MERIS_IDEPIX_INVALID = 1        # 2^0 for F_INVALID = 0 in Idepix v2.2.21 (20160128)
@@ -129,6 +131,36 @@ class CawaUtils:
 
         return classif_flag & CAWA_MODIS_IDEPIX_LAND == CAWA_MODIS_IDEPIX_LAND
 
+    @staticmethod
+    def height2press(hh):
+        """
+        Simple conversion from height to pressure
+        :param hh: height (m)
+        :return: pressure (hPa)
+        """
+        return 1013.*(1.-(hh*0.0065/288.15))**5.2555
+
+    @staticmethod
+    def cosd(inn):
+        return np.cos(inn*np.pi/180.)
+
+    @staticmethod
+    def sind(inn):
+        return np.sin(inn*np.pi/180.)
+
+    @staticmethod
+    def acosd(inn):
+        return np.arccos(inn)*180./np.pi
+
+    @staticmethod
+    def azi2azid(sa, va):
+        """
+        Computes azimuth difference in degrees
+        :param sa: sun azimuth in degree
+        :param va: view azimuth in degree
+        :return: azimuth difference in degree
+        """
+        return CawaUtils.acosd(CawaUtils.cosd(sa)*CawaUtils.cosd(va) + CawaUtils.sind(sa)*CawaUtils.sind(va))
 
     @staticmethod
     def band_exists(name, band_names):

@@ -42,8 +42,6 @@ def pos_in_list(l,e):
 class CawaCtpCore:
     def __init__(self,
                  cloud_lut=os.path.join('.', 'luts', 'cloud_core_meris.nc4'),
-                 str_coeffs_lut=os.path.join('.', 'luts', 'stray_coeff_potenz4.nc'),
-                 ws_alb_lut=os.path.join('.', 'luts', 'ws_alb_10_2005.nc'),
                  used_ab=None):
         with Dataset(cloud_lut,'r') as cloud_lut_ncds:
             #get the full cloud lut
@@ -65,21 +63,7 @@ class CawaCtpCore:
                 self.ab=[used_ab,]
                 self.ab_idx=pos_in_list(cloud_lut_ncds.getncattr('abs_bnd').split(','),used_ab)[0]
 
-        with Dataset(str_coeffs_lut,'r') as stray_ncds:
-            #get the full stray coeffs
-            self.str_coeffs=np.array(stray_ncds.variables['STRAY'][:],order='F')
-            self.lmd=np.array(stray_ncds.variables['LAMBDA'][:],order='F')
-
-        with Dataset(ws_alb_lut,'r') as wsalb_ncds:
-            #get the full stray coeffs
-            #get closest day of year
-            doy_idx=np.abs(wsalb_ncds.variables['time'][:]-doy).argmin()
-            alb = wsalb_ncds.variables['albedo'][doy_idx,:,:]
-            #get closest albedo
-            #nearest neighbour
-            rad['alb10']= alb[lat_idx,lon_idx].clip(0,1.)
-
-        #generic forward 
+        #generic forward
         self._forward=lut2func.lut2func(self.lut,self.axes)
         #generic jacobian 
         self._jacobian=lut2jacobian_lut.jlut2func({'lut':self.jlut

@@ -5,7 +5,7 @@
 
 	<groupId>org.esa.snap</groupId>
     <artifactId>snap-cawa</artifactId>
-    <packaging>pom</packaging>
+    <!--<packaging>pom</packaging>-->
     <version>1.1-SNAPSHOT</version>
 	<name>SNAP Cawa Processor</name>
 
@@ -22,9 +22,9 @@
         </dependency>
     </dependencies>
 
-    <modules>
-        <module>snap-cawa-io</module>
-    </modules>
+    <!--<modules>-->
+        <!--<module>snap-cawa-io</module>-->
+    <!--</modules>-->
 
     <build>
         <plugins>

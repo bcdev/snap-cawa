@@ -12,7 +12,7 @@ class CawaCtpMerisCore:
     """
 
     def __init__(self, cloud_lut=os.path.join('.', 'luts', 'cloud_core_meris.nc4')):
-        self.cawa_ctp = cawa_ctp.CawaCtpCore(land_lut)
+        self.cawa_ctp = cawa_ctp.CawaCtpCore(cloud_lut)
         self.cawa_utils = cu.CawaUtils()
 
     def compute_pixel_meris(self, input, classif_flag, l1_flag):
@@ -27,8 +27,8 @@ class CawaCtpMerisCore:
         data = input
 
         # exclude mask pixels from computation:
-        pixel_mask = cu.CawaUtils.calculate_meris_ctp_pixel_mask(classif_flag)
-
+        # pixel_mask = cu.CawaUtils.calculate_meris_ctp_pixel_mask(classif_flag)
+        pixel_mask = 0 # todo
         valid = pixel_mask == 0
         if not valid:
             data['ctp'] = -999.0  # todo: define no_data value

@@ -10,6 +10,8 @@ import sys
 
 import time
 
+from netCDF4 import Dataset
+
 
 CTP_NODATA_VALUE = -999.0
 
@@ -41,24 +43,15 @@ class CawaCtpMerisOp:
         if not source_product:
             raise RuntimeError('No source product specified or product not found - cannot continue.')
 
-        # f.write('Start initialize: source product is' + source_product.getFileLocation().getAbsolutePath() + '\n')
         f.write('Start initialize: source product is' + source_product.getName() + '\n')
         print('Start initialize: source product is' + source_product.getName() + '\n')
-
-        # get parameters:
-        # todo: check what we need --> we need MERIS bands 10, 11. we need to convert band 11  with stray_coeffs
-        self.temperature = operator.getParameter('temperature')  # todo: get temperature field from ERA-Interim
-        self.pressure = operator.getParameter('pressure')  # todo: get pressure field from ERA-Interim
-        self.aot13 = operator.getParameter('aot_13')  # todo: clarify if only one AOT is needed
-        self.aot14 = operator.getParameter('aot_14')
-        self.aot15 = operator.getParameter('aot_15')
 
         if os.path.isdir(resource_root):
             f.write('resource_root is dir ' + '\n')
             print('resource_root is dir ' + '\n')
             cloud_lut = os.path.join(resource_root, 'luts/cloud_core_meris.nc4')
-            str_coeffs = os.path.join(resource_root, 'luts/stray_coeff_potenz4.nc')
-            ws_alb = os.path.join(resource_root, 'luts/ws_alb_10_2005.nc')
+            str_coeffs_lut = os.path.join(resource_root, 'luts/stray_coeff_potenz4.nc')
+            ws_alb_lut = os.path.join(resource_root, 'luts/ws_alb_10_2005.nc')
             shared_libs_dir = resource_root
         else:
             f.write('extracting resources... ' + '\n')
@@ -74,18 +67,18 @@ class CawaCtpMerisOp:
                     f.write('existing LUT cloud: ' + cloud_lut + '\n')
 
                 if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/stray_coeff_potenz4.nc')):
-                    str_coeffs = zf.extract('luts/stray_coeff_potenz4.nc', os.path.join(str(auxpath), 'cawa'))
-                    f.write('extracted stray_coeff: ' + str_coeffs + '\n')
+                    str_coeffs_lut = zf.extract('luts/stray_coeff_potenz4.nc', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted stray_coeff: ' + str_coeffs_lut + '\n')
                 else:
-                    str_coeffs = os.path.join(str(auxpath), 'cawa/luts/stray_coeff_potenz4.nc')
-                    f.write('existing stray_coeff: ' + str_coeffs + '\n')
+                    str_coeffs_lut = os.path.join(str(auxpath), 'cawa/luts/stray_coeff_potenz4.nc')
+                    f.write('existing stray_coeff: ' + str_coeffs_lut + '\n')
 
                 if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/ws_alb_10_2005.nc')):
-                    ws_alb = zf.extract('luts/ws_alb_10_2005.nc', os.path.join(str(auxpath), 'cawa'))
-                    f.write('extracted ws_alb_10: ' + ws_alb + '\n')
+                    ws_alb_lut = zf.extract('luts/ws_alb_10_2005.nc', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted ws_alb_10: ' + ws_alb_lut + '\n')
                 else:
-                    ws_alb = os.path.join(str(auxpath), 'cawa/luts/ws_alb_10_2005.nc')
-                    f.write('existing ws_alb_10: ' + ws_alb + '\n')
+                    ws_alb_lut = os.path.join(str(auxpath), 'cawa/luts/ws_alb_10_2005.nc')
+                    f.write('existing ws_alb_10: ' + ws_alb_lut + '\n')
 
                 shared_libs_dir = tempfile.gettempdir()
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
@@ -100,8 +93,6 @@ class CawaCtpMerisOp:
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
         sys.path.append(shared_libs_dir + '/lib-python')
 
-        #time.sleep(600)
-
         import cawa_ctp_meris_core as cawa_core
         import cawa_utils as cu
         self.cawa = cawa_core.CawaCtpMerisCore(cloud_lut)
@@ -112,63 +103,56 @@ class CawaCtpMerisOp:
         f.write('Source product width, height = ...' + str(width) + ', ' + str(height) + '\n')
 
         # get source bands:
-        # todo: check what we need. we need radiance_10,11,alb, suz, vie, azi, dwl
-        # for ich,ch in enumerate(self.wb):
-        #     self.mes[ich]=data['rtoa'][ch]
-        # for ich,ch in enumerate(self.ab):
-        #     self.mes[len(self.wb)+ich]=-np.log(data['rtoa'][ch] /  data['rtoa'][self.wb[0]])
-        # self.par[0]= data['alb']
-        # self.par[1]= data['suz']
-        # self.par[2]= data['vie']
-        # self.par[3]= data['azi']
-        # self.par[4]= data['dwl']
-
         self.rad_10_band = self.get_band(source_product, 'radiance_10') # reflectance is from Idepix product!
         self.rad_11_band = self.get_band(source_product, 'radiance_11')
+
+        self.detector_index_band = self.get_band(source_product, 'detector_index')
 
         self.sza_band = self.get_band(source_product, 'sun_zenith')
         self.vza_band = self.get_band(source_product, 'view_zenith')
         self.saa_band = self.get_band(source_product, 'sun_azimuth')
         self.vaa_band = self.get_band(source_product, 'view_azimuth')
 
-        self.prior_t2m_band = None
-        self.prior_msl_band = None
-        self.prior_tcwv_band = None
-        self.prior_wsp_band = None
-        if cu.CawaUtils.band_exists('t2m', source_product.getBandNames()):
-            self.prior_t2m_band = self.get_band(source_product, 't2m')
-        if cu.CawaUtils.band_exists('msl', source_product.getBandNames()):
-            self.prior_msl_band = self.get_band(source_product, 'msl')
-        if cu.CawaUtils.band_exists('tcwv', source_product.getBandNames()):
-            self.prior_tcwv_band = self.get_band(source_product, 'tcwv')
-        if cu.CawaUtils.band_exists('ws', source_product.getBandNames()):
-            self.prior_wsp_band = self.get_band(source_product, 'ws')
+        self.lat_band = self.get_band(source_product, 'latitude')
+        self.lon_band = self.get_band(source_product, 'longitude')
+        self.alt_band = self.get_band(source_product, 'dem_alt')
 
         self.l1_flag_band = self.get_band(source_product, 'l1_flags')
-        # self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
-        self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
+        self.classif_band = None
+        if cu.CawaUtils.band_exists('pixel_classif_flags', source_product.getBandNames()):
+            self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
 
         # setup target product:
-        cawa_product = snappy.Product('pyCAWA', 'CAWA TCWV', width, height)
-        cawa_product.setDescription('CAWA TCWV product')
+        cawa_product = snappy.Product('pyCAWA', 'CAWA CTP', width, height)
+        cawa_product.setDescription('CAWA CTP product')
         cawa_product.setStartTime(source_product.getStartTime())
         cawa_product.setEndTime(source_product.getEndTime())
 
         # setup target bands:
-        self.tcwv_band = cawa_product.addBand('tcwv', snappy.ProductData.TYPE_FLOAT32)
-        self.tcwv_band.setNoDataValue(TCWV_NODATA_VALUE)
-        self.tcwv_band.setNoDataValueUsed(True)
-        self.tcwv_band.setUnit('mm')
-        self.tcwv_band.setDescription('Total column of water vapour')
-        self.tcwv_flags_band = cawa_product.addBand('tcwv_flags', snappy.ProductData.TYPE_UINT8)
-        self.tcwv_flags_band.setUnit('dl')
-        self.tcwv_flags_band.setDescription('TCWV flags band')
+        self.ctp_band = cawa_product.addBand('ctp', snappy.ProductData.TYPE_FLOAT32)
+        self.ctp_band.setNoDataValue(CTP_NODATA_VALUE)
+        self.ctp_band.setNoDataValueUsed(True)
+        self.ctp_band.setUnit('hPa')
+        self.ctp_band.setDescription('Cloud Top Pressure')
+        self.ctp_flags_band = cawa_product.addBand('ctp_flags', snappy.ProductData.TYPE_UINT8)
+        self.ctp_flags_band.setUnit('dl')
+        self.ctp_flags_band.setDescription('CTP flags band')
 
         # copy flag bands, tie points, geocoding:
         snappy.ProductUtils.copyFlagBands(source_product, cawa_product, True)
-        # snappy.ProductUtils.copyFlagBands(classif_product, cawa_product, True)
-        # snappy.ProductUtils.copyTiePointGrids(source_product, cawa_product) # todo: wait for fix in SNAP
         source_product.transferGeoCodingTo(cawa_product, None)
+
+        with Dataset(str_coeffs_lut,'r') as stray_ncds:
+            #get the full stray coeffs
+            self.str_coeffs=np.array(stray_ncds.variables['STRAY'][:],order='F')
+            self.lmd=np.array(stray_ncds.variables['LAMBDA'][:],order='F')
+
+        doy = 28 # todo: get from input file name
+        with Dataset(ws_alb_lut,'r') as wsalb_ncds:
+            #get the full stray coeffs
+            #get closest day of year
+            doy_idx=np.abs(wsalb_ncds.variables['time'][:]-doy).argmin()
+            self.alb = wsalb_ncds.variables['albedo'][doy_idx,:,:]
 
         operator.setTargetProduct(cawa_product)
 
@@ -189,104 +173,112 @@ class CawaCtpMerisOp:
         #     f1 = open(tempfile.gettempdir() + '/cava_tcwv' + str(target_rectangle.x) + '_' + str(target_rectangle.y) + '.log', 'w')
         #     f1.write('enter compute: rectangle = ' + target_rectangle.toString() + '\n')
 
-        rho_toa_13_tile = operator.getSourceTile(self.rad_10_band, target_rectangle)
-        rho_toa_14_tile = operator.getSourceTile(self.rad_11_band, target_rectangle)
-        rho_toa_15_tile = operator.getSourceTile(self.rho_toa_15_band, target_rectangle)
+        rad_10_tile = operator.getSourceTile(self.rad_10_band, target_rectangle)
+        rad_11_tile = operator.getSourceTile(self.rad_11_band, target_rectangle)
 
-        rho_toa_13_samples = rho_toa_13_tile.getSamplesFloat()
-        rho_toa_14_samples = rho_toa_14_tile.getSamplesFloat()
-        rho_toa_15_samples = rho_toa_15_tile.getSamplesFloat()
+        detector_index_tile = operator.getSourceTile(self.rad_11_band, target_rectangle)
 
-        rho_toa_13_data = np.array(rho_toa_13_samples, dtype=np.float32)
-        rho_toa_14_data = np.array(rho_toa_14_samples, dtype=np.float32)
-        rho_toa_15_data = np.array(rho_toa_15_samples, dtype=np.float32)
+        rad_10_samples = rad_10_tile.getSamplesFloat()
+        rad_11_samples = rad_11_tile.getSamplesFloat()
+
+        detector_index_samples = detector_index_tile.getSamplesInt()
+
+        rad_10_data = np.array(rad_10_samples, dtype=np.float32)
+        rad_11_data = np.array(rad_11_samples, dtype=np.float32)
+
+        rad_norm_10_data = rad_10_data/1255.4227 # solar flux band 10
+        rad_norm_11_data = rad_11_data/1178.0286 # solar flux band 11
+
+        detector_index_data = np.array(detector_index_samples, dtype=np.int16)
 
         sza_tile = operator.getSourceTile(self.sza_band, target_rectangle)
         vza_tile = operator.getSourceTile(self.vza_band, target_rectangle)
         saa_tile = operator.getSourceTile(self.saa_band, target_rectangle)
         vaa_tile = operator.getSourceTile(self.vaa_band, target_rectangle)
 
+        lat_tile = operator.getSourceTile(self.lat_band, target_rectangle)
+        lon_tile = operator.getSourceTile(self.lon_band, target_rectangle)
+        alt_tile = operator.getSourceTile(self.alt_band, target_rectangle)
+
         l1_flag_tile = operator.getSourceTile(self.l1_flag_band, target_rectangle)
         l1_flag_samples = l1_flag_tile.getSamplesInt()
         l1_flag_data = np.array(l1_flag_samples, dtype=np.int16)
-
-        classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
-        classif_samples = classif_tile.getSamplesInt()
-        classif_data = np.array(classif_samples, dtype=np.int32)
 
         sza_samples = sza_tile.getSamplesFloat()
         vza_samples = vza_tile.getSamplesFloat()
         saa_samples = saa_tile.getSamplesFloat()
         vaa_samples = vaa_tile.getSamplesFloat()
 
+        lat_samples = lat_tile.getSamplesFloat()
+        lon_samples = lon_tile.getSamplesFloat()
+        alt_samples = alt_tile.getSamplesFloat()
+
         sza_data = np.array(sza_samples, dtype=np.float32)
         vza_data = np.array(vza_samples, dtype=np.float32)
         saa_data = np.array(saa_samples, dtype=np.float32)
         vaa_data = np.array(vaa_samples, dtype=np.float32)
 
-        prior_t2m_data = np.empty(sza_data.shape)
-        prior_t2m_data.fill(self.temperature)
-        if self.prior_t2m_band:
-            prior_t2m_tile = operator.getSourceTile(self.prior_t2m_band, target_rectangle)
-            prior_t2m_samples = prior_t2m_tile.getSamplesFloat()
-            prior_t2m_data = np.array(prior_t2m_samples, dtype=np.float32)
+        lat_data = np.array(lat_samples, dtype=np.float32)
+        lon_data = np.array(lon_samples, dtype=np.float32)
+        alt_data = np.array(alt_samples, dtype=np.float32)
 
-        prior_msl_data = np.empty(sza_data.shape)
-        prior_msl_data.fill(self.pressure)
-        if self.prior_msl_band:
-            prior_msl_tile = operator.getSourceTile(self.prior_msl_band, target_rectangle)
-            prior_msl_samples = prior_msl_tile.getSamplesFloat()
-            prior_msl_data = np.array(prior_msl_samples, dtype=np.float32)
+        lat_idx = np.round((90.0 - lat_data)*20).astype(np.int).clip(0,3599)
+        lon_idx = np.round((180.0 + lon_data)*20).astype(np.int).clip(0,7199)
 
-        prior_tcwv_data = np.empty(sza_data.shape)
-        prior_tcwv_data.fill(30.0)
-        if self.prior_tcwv_band:
-            prior_tcwv_tile = operator.getSourceTile(self.prior_tcwv_band, target_rectangle)
-            prior_tcwv_samples = prior_tcwv_tile.getSamplesFloat()
-            prior_tcwv_data = np.array(prior_tcwv_samples, dtype=np.float32)
+        # azi_data = cu.CawaUtils.azi2azid(saa_data, vaa_data)
+        azi_data = self.cawa_utils.azi2azid(saa_data, vaa_data)
+        # prs_data = cu.CawaUtils.height2press(alt_data)
+        prs_data = self.cawa_utils.height2press(alt_data)
 
-        prior_wsp_data = np.empty(sza_data.shape)
-        prior_wsp_data.fill(7.5)
-        if self.prior_wsp_band:
-            prior_wsp_tile = operator.getSourceTile(self.prior_wsp_band, target_rectangle)
-            prior_wsp_samples = prior_wsp_tile.getSamplesFloat()
-            prior_wsp_data = np.array(prior_wsp_samples, dtype=np.float32)
+        classif_data = np.empty(sza_data.shape)
+        classif_data.fill(2) # cloud
+        if self.classif_band:
+            classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
+            classif_samples = classif_tile.getSamplesInt()
+            classif_data = np.array(classif_samples, dtype=np.int32)
+
+        # classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
+        # classif_samples = classif_tile.getSamplesInt()
+        # classif_data = np.array(classif_samples, dtype=np.int32)
 
         # loop over whole tile:
         print('start loop over tile...')
-        tcwv_data = np.empty(rho_toa_13_data.shape[0], dtype=np.float32)
-        for i in range(0, rho_toa_13_data.shape[0]):
-            input = {'suz': sza_data[i], 'vie': vza_data[i], 'azi': 180. - abs(saa_data[i] - vaa_data[i]),
-                     'amf': 1. / np.cos(sza_data[i] * np.pi / 180.) + 1. / np.cos(vza_data[i] * np.pi / 180.),
-                     'prs': prior_msl_data[i]/100.0, 'aot': self.aot13, 'tmp': prior_t2m_data[i],
-                     'rtoa': {'13': rho_toa_13_data[i]*np.cos(sza_data[i] * np.pi / 180.),
-                              '14': rho_toa_14_data[i]*np.cos(sza_data[i] * np.pi / 180.),
-                              '15': rho_toa_15_data[i]*np.cos(sza_data[i] * np.pi / 180.)},
-                     'prior_wsp': prior_wsp_data[i], 'prior_aot': 0.15,
-                     'prior_al0': 0.13, 'prior_al1': 0.13, 'prior_tcwv': prior_tcwv_data[i]}
+        ctp_data = np.empty(rad_norm_10_data.shape[0], dtype=np.float32)
+        for i in range(0, rad_norm_10_data.shape[0]):
+            rad_lam11 = self.lmd[detector_index_data[i]]
+            rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_10_data[i]
+            rad_norm_11_data[i] += rad_stray
 
-            tcwv_data[i] = self.cawa.compute_pixel_meris(input, classif_data[i], l1_flag_data[i])['tcwv']
-            # tcwv_data[i] = self.cawa.compute_pixel(input, 1, l1_flag_data[i])['tcwv']
+            # get closest albedo
+            # nearest neighbour
+            # quick and dirty surface albedo (RP):
+            rad_alb10 = self.alb[lat_idx[i],lon_idx[i]].clip(0,1.)
+
+            input = {'suz': sza_data[i],
+                     'vie': vza_data[i],
+                     'azi': azi_data[i],
+                     'prs': prs_data[i],
+                     'dwl': rad_lam11 - self.cawa.cawa_ctp.cha['11']['cwvl'],    # first abs-band
+                     'alb': rad_alb10,
+                     'rtoa': {'10': rad_norm_10_data[i],
+                              '11': rad_norm_11_data[i]},
+                     }
+            ctp_data[i] = self.cawa.compute_pixel_meris(input, classif_data[i], l1_flag_data[i])['ctp']
 
         # fill target tiles:
         print('fill target tiles...')
-        tcwv_tile = target_tiles.get(self.tcwv_band)
-        tcwv_flags_tile = target_tiles.get(self.tcwv_flags_band)
+        ctp_tile = target_tiles.get(self.ctp_band)
+        ctp_flags_tile = target_tiles.get(self.ctp_flags_band)
 
-        # set TCWV flag:
+        # set CTP flag:
         # todo: define appropriate low/high flag
-        # tcwv_low = tcwv_data < 5.0
-        # tcwv_high = tcwv_data > 10.0
-        # tcwv_flags = tcwvLow + 2 * tcwvHigh
-        tcwv_flags = tcwv_data == TCWV_NODATA_VALUE
-        tcwv_flags = tcwv_flags.view(np.uint8)  # a bit faster
+        ctp_flags = ctp_data == CTP_NODATA_VALUE
+        ctp_flags = ctp_flags.view(np.uint8)  # a bit faster
 
         # set samples:
-        tcwv_tile.setSamples(tcwv_data)
-        tcwv_flags_tile.setSamples(tcwv_flags)
+        ctp_tile.setSamples(ctp_data)
+        ctp_flags_tile.setSamples(ctp_flags)
 
-        # if target_rectangle.y == 0:
-        #     f1.close()
 
     def dispose(self, operator):
         """
