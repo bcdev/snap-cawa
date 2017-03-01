@@ -127,7 +127,12 @@ class CawaTcwvMerisOp:
 
         self.l1_flag_band = self.get_band(source_product, 'l1_flags')
         # self.classif_band = self.get_band(classif_product, 'cloud_classif_flags')
-        self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
+        # self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
+        self.classif_band = None
+        if cu.CawaUtils.band_exists('pixel_classif_flags', source_product.getBandNames()):
+            self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
+        elif cu.CawaUtils.band_exists('cloud_classif_flags', source_product.getBandNames()):
+            self.classif_band = self.get_band(source_product, 'cloud_classif_flags')
 
         # setup target product:
         cawa_product = snappy.Product('pyCAWA', 'CAWA TCWV', width, height)

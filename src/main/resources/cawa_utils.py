@@ -3,6 +3,7 @@
 ######################################################################################
 
 import numpy as np
+import csv
 
 # Idepix flags (MERIS):
 # CAWA_MERIS_L1_INVALID = 128
@@ -168,3 +169,16 @@ class CawaUtils:
             if name == band_name:
                 return True
         return False
+
+    @staticmethod
+    def get_table_from_csvfile(input_file, delimiter, quotechar):
+        with open(input_file, 'r') as csv_file_handle:
+            # reader = csv.DictReader(csv_file_handle, delimiter=delimiter, quotechar=quotechar)
+            reader = csv.DictReader(csv_file_handle, delimiter=delimiter)
+            csv_table = {}
+            for h in reader.fieldnames:
+                csv_table[h] = []
+            for row in reader:
+                for h in reader.fieldnames:
+                    csv_table[h].append(row[h])
+        return csv_table

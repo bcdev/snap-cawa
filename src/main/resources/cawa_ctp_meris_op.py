@@ -121,6 +121,8 @@ class CawaCtpMerisOp:
         self.classif_band = None
         if cu.CawaUtils.band_exists('pixel_classif_flags', source_product.getBandNames()):
             self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
+        elif cu.CawaUtils.band_exists('cloud_classif_flags', source_product.getBandNames()):
+            self.classif_band = self.get_band(source_product, 'cloud_classif_flags')
 
         # setup target product:
         cawa_product = snappy.Product('pyCAWA', 'CAWA CTP', width, height)
@@ -147,12 +149,17 @@ class CawaCtpMerisOp:
             self.str_coeffs=np.array(stray_ncds.variables['STRAY'][:],order='F')
             self.lmd=np.array(stray_ncds.variables['LAMBDA'][:],order='F')
 
-        doy = 28 # todo: get from input file name
+        doy = 363 # todo: get from input file name
         with Dataset(ws_alb_lut,'r') as wsalb_ncds:
             #get the full stray coeffs
             #get closest day of year
             doy_idx=np.abs(wsalb_ncds.variables['time'][:]-doy).argmin()
             self.alb = wsalb_ncds.variables['albedo'][doy_idx,:,:]
+
+        spectral_fluxes_input_path = os.path.join(resource_root, 'meris_sun_spectral_flux_rr_10_11.txt')
+        spectral_fluxes_table = cu.CawaUtils.get_table_from_csvfile(spectral_fluxes_input_path, ',', "")
+        self.spectral_flux_10 = np.array(spectral_fluxes_table['E0_band10'])
+        self.spectral_flux_11 = np.array(spectral_fluxes_table['E0_band11'])
 
         operator.setTargetProduct(cawa_product)
 
@@ -186,8 +193,9 @@ class CawaCtpMerisOp:
         rad_10_data = np.array(rad_10_samples, dtype=np.float32)
         rad_11_data = np.array(rad_11_samples, dtype=np.float32)
 
-        rad_norm_10_data = rad_10_data/1255.4227 # solar flux band 10
-        rad_norm_11_data = rad_11_data/1178.0286 # solar flux band 11
+        # rad_norm_10_data = rad_10_data/1265.5425 # solar flux band 10
+        # rad_norm_11_data = rad_11_data/1255.4227 # solar flux band 11
+        # todo: better use exact solar fluxes (depend on detector index) as given in SNAP in sun_spectral_flux_rr.txt
 
         detector_index_data = np.array(detector_index_samples, dtype=np.int16)
 
@@ -243,11 +251,16 @@ class CawaCtpMerisOp:
 
         # loop over whole tile:
         print('start loop over tile...')
-        ctp_data = np.empty(rad_norm_10_data.shape[0], dtype=np.float32)
-        for i in range(0, rad_norm_10_data.shape[0]):
+        ctp_data = np.empty(rad_10_data.shape[0], dtype=np.float32)
+        for i in range(0, rad_10_data.shape[0]):
+            rad_norm_10 = rad_10_data[i]/float(self.spectral_flux_10[detector_index_data[i]])
+            rad_norm_11 = rad_11_data[i]/float(self.spectral_flux_11[detector_index_data[i]])
+
             rad_lam11 = self.lmd[detector_index_data[i]]
-            rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_10_data[i]
-            rad_norm_11_data[i] += rad_stray
+            # rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_10_data[i]
+            # rad_norm_11_data[i] += rad_stray
+            rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_10
+            rad_norm_11 += rad_stray
 
             # get closest albedo
             # nearest neighbour
@@ -260,8 +273,10 @@ class CawaCtpMerisOp:
                      'prs': prs_data[i],
                      'dwl': rad_lam11 - self.cawa.cawa_ctp.cha['11']['cwvl'],    # first abs-band
                      'alb': rad_alb10,
-                     'rtoa': {'10': rad_norm_10_data[i],
-                              '11': rad_norm_11_data[i]},
+                     # 'rtoa': {'10': rad_norm_10_data[i],
+                     #          '11': rad_norm_11_data[i]},
+                     'rtoa': {'10': rad_norm_10,
+                              '11': rad_norm_11}
                      }
             ctp_data[i] = self.cawa.compute_pixel_meris(input, classif_data[i], l1_flag_data[i])['ctp']
 

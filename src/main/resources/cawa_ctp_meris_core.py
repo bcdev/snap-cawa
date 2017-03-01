@@ -27,8 +27,8 @@ class CawaCtpMerisCore:
         data = input
 
         # exclude mask pixels from computation:
-        # pixel_mask = cu.CawaUtils.calculate_meris_ctp_pixel_mask(classif_flag)
-        pixel_mask = 0 # todo
+        pixel_mask = cu.CawaUtils.calculate_meris_ctp_pixel_mask(classif_flag)
+        # pixel_mask = 0 # todo
         valid = pixel_mask == 0
         if not valid:
             data['ctp'] = -999.0  # todo: define no_data value
