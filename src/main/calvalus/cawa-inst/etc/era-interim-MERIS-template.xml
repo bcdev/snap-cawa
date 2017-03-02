@@ -20,7 +20,7 @@
       </wps:Input>
       <wps:Input>
           <ows:Identifier>processorBundleVersion</ows:Identifier>
-          <wps:Data><wps:LiteralData>1.2-SNAPSHOT</wps:LiteralData></wps:Data>
+          <wps:Data><wps:LiteralData>1.1-SNAPSHOT</wps:LiteralData></wps:Data>
       </wps:Input>
       <wps:Input>
           <ows:Identifier>processorName</ows:Identifier>
@@ -29,11 +29,11 @@
       
       <wps:Input>
           <ows:Identifier>inputPath</ows:Identifier>
-          <wps:Data><wps:LiteralData>${input}/${yyyy}/${MM}/${dd}/MER_.*N1$</wps:LiteralData></wps:Data>
+          <wps:Data><wps:LiteralData>${input}/${dd}/MER_..._1.*${yyyy}${MM}${dd}.*.N1$</wps:LiteralData></wps:Data>
       </wps:Input>
       <wps:Input>
-      <ows:Identifier>minDate</ows:Identifier>
-      <wps:Data><wps:LiteralData>${minDate}</wps:LiteralData></wps:Data>
+          <ows:Identifier>minDate</ows:Identifier>
+          <wps:Data><wps:LiteralData>${minDate}</wps:LiteralData></wps:Data>
       </wps:Input>
       <wps:Input>
           <ows:Identifier>maxDate</ows:Identifier>

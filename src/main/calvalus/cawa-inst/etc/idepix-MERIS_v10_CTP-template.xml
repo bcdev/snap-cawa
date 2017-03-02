@@ -12,27 +12,28 @@
     <wps:Input>
       <ows:Identifier>productionName</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>cawa-idepix-MODIS-${minDate}-${maxDate}</wps:LiteralData>
+        <wps:LiteralData>cawa-idepix-MERIS-CTP-${minDate}-${maxDate}</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
       <ows:Identifier>processorBundleName</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>snap-cawa</wps:LiteralData>
+        <wps:LiteralData>beam-idepix-cawa</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
     <wps:Input>
       <ows:Identifier>processorBundleVersion</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>1.1-SNAPSHOT</wps:LiteralData>
+        <wps:LiteralData>2.2.47-SNAPSHOT</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
     <wps:Input>
       <ows:Identifier>processorName</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>cawa-idepix-modis</wps:LiteralData>
+        <!-- Refers to cawa-idepix-ctp-graph.xml: -->
+        <wps:LiteralData>cawa-idepix-ctp</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
@@ -47,7 +48,7 @@
     <wps:Input>
       <ows:Identifier>inputPath</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>${input}/MYD021.*hdf$</wps:LiteralData>
+        <wps:LiteralData>${input}/${dd}/MER_..._1.*${yyyy}${MM}${dd}.*.N1$</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
@@ -70,8 +71,7 @@
       <wps:Data>
          <wps:ComplexData>
                     <parameters>
-                        <erainterim>${erainterim}</erainterim>
-                        <modis>${input}</modis>
+                        <meris>${input}</meris>
                     </parameters>
  
           </wps:ComplexData>
@@ -105,7 +105,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.map.failures.maxpercent</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>10</wps:LiteralData>
+        <wps:LiteralData>5</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 

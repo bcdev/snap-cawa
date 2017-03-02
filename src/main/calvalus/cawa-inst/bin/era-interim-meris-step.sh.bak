@@ -6,8 +6,7 @@ set -e
 sensor=$1
 minDate=$2
 maxDate=$3
-#input=$(dirname $(dirname $4))
-input=$4
+input=$(dirname $(dirname $4))
 output=$5
 
 request=requests/era-interim-$sensor-${minDate}-${maxDate}.xml

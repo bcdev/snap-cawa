@@ -1,0 +1,5 @@
+# From MB, 20170302. E.g. to move job to queue 'test':
+yarn application -movetoqueue application_1487056014494_14551 -queue test
+
+# high and test are fastest queues. A job hanging in 'ACCEPTED' will get next available slot when moved to test.
+# Running jobs should be killed before moved to other queue, oherwise Calvalus job counters will get screwed up.

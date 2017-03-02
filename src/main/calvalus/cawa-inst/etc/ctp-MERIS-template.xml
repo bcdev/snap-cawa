@@ -12,7 +12,7 @@
     <wps:Input>
       <ows:Identifier>productionName</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>cawa-idepix-MODIS-${minDate}-${maxDate}</wps:LiteralData>
+        <wps:LiteralData>cawa-ctp-MERIS-${minDate}-${maxDate}</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
@@ -25,29 +25,31 @@
     <wps:Input>
       <ows:Identifier>processorBundleVersion</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>1.1-SNAPSHOT</wps:LiteralData>
+        <wps:LiteralData>1.2-SNAPSHOT</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
     <wps:Input>
       <ows:Identifier>processorName</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>cawa-idepix-modis</wps:LiteralData>
+        <wps:LiteralData>cawa_ctp_meris_op</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
     <wps:Input>
       <ows:Identifier>calvalus.output.dir</ows:Identifier>
       <wps:Data>
-        <!-- <wps:Reference xlink:href="hdfs://calvalus${output}" /> -->
-        <wps:LiteralData>${output}</wps:LiteralData>
+        <wps:Reference xlink:href="hdfs://calvalus${output}" />
       </wps:Data>
     </wps:Input>
 
     <wps:Input>
       <ows:Identifier>inputPath</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>${input}/MYD021.*hdf$</wps:LiteralData>
+<!--
+        <wps:LiteralData>${input}/L2_of_MER_RR__1.*${yyyy}${MM}${dd}_.*.seq$</wps:LiteralData>
+-->    
+    <wps:LiteralData>${input}/L2_of_MER_RR__1.*${yyyy}${MM}${dd}_.*.nc$</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
@@ -70,10 +72,10 @@
       <wps:Data>
          <wps:ComplexData>
                     <parameters>
-                        <erainterim>${erainterim}</erainterim>
-                        <modis>${input}</modis>
+<!--
+                        <outputRad2Refl>true</outputRad2Refl>
+-->
                     </parameters>
- 
           </wps:ComplexData>
       </wps:Data>
     </wps:Input>
@@ -103,18 +105,30 @@
       </wps:Data>
     </wps:Input>
     <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+      <wps:Data>
+<!--
+        <wps:LiteralData>other</wps:LiteralData>
+-->    
+    <wps:LiteralData>test</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.map.failures.maxpercent</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>10</wps:LiteralData>
+        <wps:LiteralData>5</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
     <wps:Input>
-      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
-      <wps:Data>
-        <wps:LiteralData>other</wps:LiteralData>
-      </wps:Data>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.java.opts</ows:Identifier>
+      <wps:Data><wps:LiteralData>-Djava.awt.headless=true -Xmx1536M</wps:LiteralData></wps:Data>
     </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.memory.mb</ows:Identifier>
+      <wps:Data><wps:LiteralData>2048</wps:LiteralData></wps:Data>
+    </wps:Input>
+
   </wps:DataInputs>
 
 </wps:Execute>

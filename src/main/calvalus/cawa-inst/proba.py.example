@@ -1,0 +1,135 @@
+import datetime
+import calendar
+from pmonitor import PMonitor
+
+# process years decreasing for seasonal input overlap!
+#years = [ 2013, 2014, 2015 ]
+#months = range(1,13)
+#weeks = range(52)
+# 2014-03-13 .. 2014-06-15
+years = [ 2014 ]
+months = [ 6 ]
+weeks = [ 10,11,12,13,14,15,16,17,18,19,20,21,22,23 ]
+
+seasons = [ ('01',  1, '20030101', 52, '20031231'),
+            ('02',  1, '20030101', 22, '20030603'),
+            ('03', 14, '20030402', 26, '20030701'),
+            ('04', 16, '20030416', 22, '20030603'),
+            ('05', 16, '20030416', 28, '20030715'),
+            ('06', 16, '20030416', 32, '20030812'),
+            ('07', 23, '20030604', 35, '20030902'),
+            ('08', 25, '20030618', 39, '20030930'),
+            ('09', 29, '20030716', 35, '20030902'),
+            ('10', 31, '20030730', 43, '20031028'),
+            ('11', 33, '20030813', 45, '20031111'),
+            ('12', 36, '20030903', 48, '20031202'),
+            ('13', 40, '20031001', 52, '20031231'),
+            ('14', 49, '20031203',  9, '20040304'),
+            ('15', 49, '20031203', 13, '20040401') ]
+seasons = [ ('81', 11, '20030312', 24, '20030617') ]
+
+l1b_root = '/calvalus/eodata/PROBAV_S1_TOA/v2'
+inventory_root = '/calvalus/inventory'
+era_root = '/calvalus/projects/lc/era-interim-proba'
+sdr_root = '/calvalus/projects/lc/sdr-proba'
+sr_root = '/calvalus/projects/lc/sr-proba'
+nc_root = '/calvalus/projects/lc/sr-proba-nc'
+ql_root = '/calvalus/projects/lc/sr-proba-ql'
+seasonal_root = '/calvalus/projects/lc/seasonal-proba'
+
+# --------------------
+
+def next_stop(year, week, start):
+    if week == 8:
+        return datetime.date(year, 3, 4)
+    elif week == 51:
+        return datetime.date(year, 12, 31)
+    else:
+        return start + datetime.timedelta(6)
+
+def next_start(stop):
+    return stop + datetime.timedelta(1)
+
+def half_covered_date_range(start, stop, period):
+    half_period = datetime.timedelta(period) / 2
+    i1 = datetime.date(2013,5,7)
+    i2 = datetime.date.today()
+    if i1 < stop and start < i2:
+        if i1 < start:
+            j1 = start
+        else:
+            j1 = i1
+        if i2 > stop:
+            j2 = stop
+        else:
+            j2 = i2
+        if j2 - j1 >= half_period:
+            return True
+    return False
+
+# --------------------
+
+inputs = []
+for year in years:
+    for month in months:
+        inputs.append('%s/%4d/%02d' % (l1b_root, year, month));
+
+# --------------------
+
+pm = PMonitor(inputs, request='proba', hosts=[('localhost',18)],
+              types=[('era-interim', 4),('sdr',4),('sr',10),('nccopy',4),('qll3',3),('seasonal-compositing',15)],
+              logdir='log', script='lc2-step.py', simulation=False)
+
+for year in years:
+    # SDR per month
+    for month in months:
+        if year == 2013 and month < 5 or datetime.date(year, month, 1) > datetime.date.today():
+            continue
+        start = str(datetime.date(year, month, 1))
+        stop = str(datetime.date(year, month, calendar.monthrange(year, month)[1]))
+        l1b = '%s/%4d/%02d' % (l1b_root, year, month)
+        era = '%s/%4d/%02d' % (era_root, year, month)
+        sdr = '%s/%4d/%02d'% (sdr_root, year, month)
+        sdr_year = '%s/%4d' % (sdr_root, year)
+        pm.execute('era-interim', [l1b], [era], parameters=['proba', str(start), str(stop) ])
+        pm.execute('sdr', [era, l1b], [sdr, sdr_year], parameters=['proba', str(start), str(stop), 'default' ])
+
+    continue
+
+    # SR per week
+    start = datetime.date(year, 1, 1)
+    for week in range(52):
+        stop = next_stop(year, week, start)
+        if week in weeks and stop >= datetime.date(2013,5,7) and start < datetime.date.today():
+            sr = '%s/%4d' % (sr_root, year)
+            nc = '%s/%4d' % (nc_root, year)
+            ql = '%s/%4d' % (ql_root, year)
+            inv = '%s/proba-v/%4d' % (inventory_root, year)
+            pm.execute('sr', [sdr_year], [sr], parameters=['proba', str(start), str(stop), '0'])
+            pm.execute('nccopy', [sr], [nc+'/'+str(start),nc], parameters=['proba', str(start), str(stop), 'default'])
+            pm.execute('qll3', [sr], [ql], parameters=['proba', str(start), str(stop), str((stop-start).days+1), 'default'])
+        start = next_start(stop)
+
+    # seasonals per year
+    for (season_no, season_first_week, season_start, season_last_week, season_stop) in seasons:
+        start = datetime.datetime.strptime(season_start, '%Y%m%d').date()
+        start = start.replace(year=int(year)+start.year-2003)
+        stop = datetime.datetime.strptime(season_stop, '%Y%m%d').date()
+        stop = stop.replace(year=int(year)+stop.year-2003)
+        period = (stop - start).days + 1
+        if half_covered_date_range(start, stop, period):
+            print start, stop, season_no
+            if season_last_week >= season_first_week:
+                season_weeks = season_last_week - season_first_week + 1
+            else:
+                season_weeks = season_last_week + 52 - season_first_week + 1
+            season = '%s-P%dW' % (str(start), season_weeks)
+            nc = '%s/%4d' % (nc_root, year)
+            seasonal = '%s/%4d/%s' % (seasonal_root, year, season)
+            if (stop.year == year and year < 1999):
+                pm.execute('seasonal-compositing', [nc], [seasonal], parameters=['proba',season,str(start),str(stop),str(period)])
+            else:
+                nc1 = '%s/%4d' % (nc_root, stop.year)
+                pm.execute('seasonal-compositing', [nc,nc1], [seasonal], parameters=['proba',season,str(start),str(stop),str(period)])
+
+pm.wait_for_completion()

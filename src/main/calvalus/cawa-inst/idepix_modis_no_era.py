@@ -21,7 +21,6 @@ years   = [ '2008' ]
 
 # to process a rest:
 days = [60, 90, 120, 121]
-#days = [120]
 
 base_date = datetime.date(2008,1,1)
 
@@ -35,6 +34,7 @@ for year in years:
     for day in days:
         doy = str(day).zfill(3)
         inputs.append('/calvalus/projects/cawa/MODIS_MYD021KM/' + year + '/' + doy)
+        inputs.append('/calvalus/projects/cawa/era-interim/modis/' + year + '/' + doy)
 
 hosts  = [('localhost',16)]
 types  = [('idepix-step.sh',16), 
@@ -58,10 +58,10 @@ for year in years:
         doy = str(day).zfill(3)
         current_date = base_date + timedelta(day-1)
         datestring = current_date.strftime("%Y-%m-%d")
-        pm.execute('era-interim-modis-step.sh', \
-                   [ '/calvalus/projects/cawa/MODIS_MYD021KM/' + year + '/' + doy ], \
-                   [ '/calvalus/projects/cawa/era-interim/modis/' + year + '/' + doy ], \
-                   parameters=['MODIS', datestring, datestring])
+        #pm.execute('era-interim-modis-step.sh', \
+        #           [ '/calvalus/projects/cawa/MODIS_MYD021KM/' + year + '/' + doy ], \
+        #           [ '/calvalus/projects/cawa/era-interim/modis/' + year + '/' + doy ], \
+        #           parameters=['MODIS', datestring, datestring])
         pm.execute('idepix-step.sh', \
                    [ '/calvalus/projects/cawa/MODIS_MYD021KM/' + year + '/' + doy ,
                      '/calvalus/projects/cawa/era-interim/modis/' + year + '/' + doy], \

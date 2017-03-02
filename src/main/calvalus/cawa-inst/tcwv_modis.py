@@ -20,13 +20,17 @@ def getMinMaxDate(year, month):
 years   = [ '2008' ]
 months  = [ '01', '02', '03', '04' ]
 
+#days = [2, 20]
+days = [90, 120]
+
 base_date = datetime.date(2008,1,1)
 
 inputs = []
 for year in years:
-    for day in range(122): # 20080101 - 20080430
+    #for day in range(122): # 20080101 - 20080430
     #for day in range(15,17): # 20080115, 20080116
     #for day in range(1,58): # Jan, Feb
+    for day in days:
         doy = str(day).zfill(3)
         #inputs.append('/calvalus/projects/cawa/idepix/modis-nc/' + year + '/' + doy)
         inputs.append('/calvalus/projects/cawa/idepix/modis/' + year + '/' + doy)
@@ -41,9 +45,10 @@ pm = PMonitor(inputs, \
               types=types)
 
 for year in years:
-    for day in range(122): # 20080101 - 20080430
+    #for day in range(122): # 20080101 - 20080430
     #for day in range(15,17): # 20080115, 20080116
     #for day in range(1,58): # Jan, Feb
+    for day in days:
         doy = str(day).zfill(3)
         current_date = base_date + timedelta(day-1)
         datestring = current_date.strftime("%Y-%m-%d")
