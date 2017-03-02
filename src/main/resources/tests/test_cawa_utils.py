@@ -31,6 +31,33 @@ class TestCawaUtils(unittest.TestCase):
         self.assertAlmostEqual(float(spectral_flux_11[924]), 1251.573, delta=0.001)
         print('done test_read_sun_spectral_fluxes_csv')
 
+    def test_get_meris_rr_product_datestring(self):
+        product_name = 'bla__1PRACR20041229_090630_000026192033_00222_14805_0000_IDEPIX.dim'
+        datestring = cu.CawaUtils.get_meris_rr_product_datestring(product_name)
+        self.assertIsNone(datestring)
+
+        product_name = 'MER_RR__1PRACR20041229_090630_000026192033_00222_14805_0000_IDEPIX.NC'
+        datestring = cu.CawaUtils.get_meris_rr_product_datestring(product_name)
+        self.assertEqual('20041229', datestring)
+
+        product_name = 'L2_of_MER_RR__1PRACR19971023_090630_000026192033_00222_14805_0000_IDEPIX.nc'
+        datestring = cu.CawaUtils.get_meris_rr_product_datestring(product_name)
+        self.assertEqual('19971023', datestring)
+
+        product_name = 'subset_0_of_MER_RR__1PRACR19971023_090630_000026192033_00222_14805_0000.nc'
+        datestring = cu.CawaUtils.get_meris_rr_product_datestring(product_name)
+        self.assertEqual('19971023', datestring)
+        print('done test_get_meris_rr_product_datestring')
+
+    def test_get_doy_from_yyyymmdd(self):
+        datestring = '20000101'
+        doy = cu.CawaUtils.get_doy_from_yyyymmdd(datestring)
+        self.assertEqual(1, int(doy))
+
+        datestring = '20041229'
+        doy = cu.CawaUtils.get_doy_from_yyyymmdd(datestring)
+        self.assertEqual(364, int(doy))
+
 
 print 'Testing org.esa.snap.cawa utils'
 suite = unittest.TestLoader().loadTestsFromTestCase(TestCawaUtils)

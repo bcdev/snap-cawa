@@ -11,22 +11,6 @@ import optimal_estimation as oe
 import lut2func
 import lut2jacobian_lut
 
-def about_me():
-    dct = {}
-    dct['scriptname'] = __file__
-    dct['scriptdir'] = os.path.realpath(os.path.abspath(os.path.split(dct['scriptname'])[0]))
-    dct['cawadir'] = os.path.realpath(os.path.abspath(os.path.dirname(__file__)))
-    versfile = os.path.join(dct['scriptdir'], 'current_version.txt')
-    dct['version'] = file(versfile).readlines()[0][:-1]
-    dct['cwd'] = os.path.abspath(os.getcwd())
-    dct['date']=time.ctime()
-    return dct
-
-HIER = about_me()['scriptdir']
-__author__ = 'rene'
-__version__ = next(open(os.path.join(HIER,'current_version.txt'))).rstrip()
-__version_info__ = tuple([int(num) for num in __version__.split('.')])
-
 #apriori error covariance 1d
 # defacto nothing is known before
 SAcot=2.   # log_10 cot units

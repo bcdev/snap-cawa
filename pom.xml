@@ -5,12 +5,24 @@
 
 	<groupId>org.esa.snap</groupId>
     <artifactId>snap-cawa</artifactId>
-    <!--<packaging>pom</packaging>-->
-    <version>1.1-SNAPSHOT</version>
+    <!--- set packaging to jar to generate overall jar snap-cawa-x.y-SNAPSHOT.jar for Calvalus deployment -->
+    <!--
+        However, better create main jar from command line and then deploy on Calvalus like this:
+            - go into folder ../src/main/resources
+            - jar cvf snap-cawa-1.2-SNAPSHOT.jar lib-python/ libs/ tests/ joblib/ luts/ fortran_src/ META-INF/ *.py *.pyc *.xml
+            - cp -p snap-cawa-1.2-SNAPSHOT.jar /media/sf_ubuntu_shared
+            - both jars (snap-cawa-1.2-SNAPSHOT.jar, snap-cawa-io-1.2-SNAPSHOT.jar) WinSCP to /home/olaf/temp on
+              cvfeeder01
+            - hadoop fs -put snap-cawa*jar /calvalus/software/1.0/snap-cawa-1.2-SNAPSHOT
+    -->
+    <!--- set packaging to pom to generate IO jar snap-cawa-io-x.y-SNAPSHOT.jar -->
+    <packaging>pom</packaging>
+    <!--<packaging>jar</packaging>-->
+    <version>1.2-SNAPSHOT</version>
 	<name>SNAP Cawa Processor</name>
 
     <properties>
-        <cawa.version>1.1-SNAPSHOT</cawa.version>
+        <cawa.version>1.2-SNAPSHOT</cawa.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -22,9 +34,11 @@
         </dependency>
     </dependencies>
 
-    <!--<modules>-->
-        <!--<module>snap-cawa-io</module>-->
-    <!--</modules>-->
+    <!--- comment this to generate overall jar snap-cawa-x.y-SNAPSHOT.jar for Calvalus deployment -->
+    <!--- uncomment this to generate IO jar snap-cawa-io-x.y-SNAPSHOT.jar -->
+    <modules>
+        <module>snap-cawa-io</module>
+    </modules>
 
     <build>
         <plugins>

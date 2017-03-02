@@ -4,6 +4,8 @@
 
 import numpy as np
 import csv
+import re
+import datetime
 
 # Idepix flags (MERIS):
 # CAWA_MERIS_L1_INVALID = 128
@@ -182,3 +184,30 @@ class CawaUtils:
                 for h in reader.fieldnames:
                     csv_table[h].append(row[h])
         return csv_table
+
+    @staticmethod
+    def get_doy_from_yyyymmdd(yyyymmdd):
+        year = int(yyyymmdd[0:4])
+        month = int(yyyymmdd[4:6])
+        day = int(yyyymmdd[6:8])
+        the_date = datetime.date(year, month,day)
+        return the_date.timetuple()[7]
+
+    @staticmethod
+    def get_meris_rr_product_datestring(product_name):
+        start_index = product_name.find("MER_RR__1")
+        if start_index < 0:
+            return None
+        product_base_name = product_name[start_index:]
+        # e.g. MER_RR__1PRACR20041229_090630_000026192033_00222_14805_0000_IDEPIX.nc
+        #m = re.match( r'MER_RR__1(.....)(........)_(.*).(?i)nc', product_base_name)
+        #m = re.search( r'MER_RR__1(.....)(........)_(.*).(?i)nc', product_base_name)
+        m = re.search( r'MER_RR__1(.....)(........)_(.*)', product_base_name)
+        #mgroup = m.group()
+        #mgroup1 = m.group(1)
+        #mgroup2 = m.group(2)
+        #mgroup3 = m.group(3)
+        if m:
+            return m.group(2)
+        else:
+            return None

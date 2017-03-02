@@ -103,7 +103,7 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
 
             for (Band b : product.getBands()) {
                 final String bandName = b.getName();
-                if (bandName.startsWith("tcwv") || bandName.equals("pixel_classif_flags")) {
+                if (bandName.startsWith("tcwv") || bandName.startsWith("ctp") || bandName.endsWith("_classif_flags")) {
                     addNc4BandVariableAndAttributes(writeable, b);
 
                 }
@@ -122,7 +122,7 @@ public class SnapCawaNc4WriterPlugIn extends AbstractNetCdfWriterPlugIn {
 
         private void addGlobalAttributes(NFileWriteable writeable, Product product) throws IOException {
             writeable.addGlobalAttribute("Conventions", "CF-1.4");
-            writeable.addGlobalAttribute("title", "CAWA TCWV product");
+            writeable.addGlobalAttribute("title", "CAWA product");
             writeable.addGlobalAttribute("product_type", product.getProductType());
 
             if (product.getStartTime() != null) {

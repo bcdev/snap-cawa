@@ -20,7 +20,7 @@
       </wps:Input>
       <wps:Input>
           <ows:Identifier>processorBundleVersion</ows:Identifier>
-          <wps:Data><wps:LiteralData>1.1-SNAPSHOT</wps:LiteralData></wps:Data>
+          <wps:Data><wps:LiteralData>1.2-SNAPSHOT</wps:LiteralData></wps:Data>
       </wps:Input>
       <wps:Input>
           <ows:Identifier>processorName</ows:Identifier>

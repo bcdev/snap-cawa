@@ -25,7 +25,7 @@
     <wps:Input>
       <ows:Identifier>processorBundleVersion</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>1.1-SNAPSHOT</wps:LiteralData>
+        <wps:LiteralData>1.2-SNAPSHOT</wps:LiteralData>
 <!--       
  <wps:LiteralData>1.0-SNAPSHOT</wps:LiteralData>
 -->

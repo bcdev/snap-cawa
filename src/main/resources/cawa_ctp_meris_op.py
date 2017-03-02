@@ -43,8 +43,8 @@ class CawaCtpMerisOp:
         if not source_product:
             raise RuntimeError('No source product specified or product not found - cannot continue.')
 
-        f.write('Start initialize: source product is' + source_product.getName() + '\n')
-        print('Start initialize: source product is' + source_product.getName() + '\n')
+        f.write('Start initialize: source product is ' + source_product.getName() + '\n')
+        print('Start initialize: source product is ' + source_product.getName() + '\n')
 
         if os.path.isdir(resource_root):
             f.write('resource_root is dir ' + '\n')
@@ -52,6 +52,7 @@ class CawaCtpMerisOp:
             cloud_lut = os.path.join(resource_root, 'luts/cloud_core_meris.nc4')
             str_coeffs_lut = os.path.join(resource_root, 'luts/stray_coeff_potenz4.nc')
             ws_alb_lut = os.path.join(resource_root, 'luts/ws_alb_10_2005.nc')
+            spectral_fluxes_input_path = os.path.join(resource_root, 'luts/meris_sun_spectral_flux_rr_10_11.txt')
             shared_libs_dir = resource_root
         else:
             f.write('extracting resources... ' + '\n')
@@ -79,6 +80,13 @@ class CawaCtpMerisOp:
                 else:
                     ws_alb_lut = os.path.join(str(auxpath), 'cawa/luts/ws_alb_10_2005.nc')
                     f.write('existing ws_alb_10: ' + ws_alb_lut + '\n')
+
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/meris_sun_spectral_flux_rr_10_11.txt')):
+                    spectral_fluxes_input_path = zf.extract('luts/meris_sun_spectral_flux_rr_10_11.txt', os.path.join(str(auxpath), 'cawa'))
+                    f.write('extracted meris_sun_spectral_flux_rr_10_11: ' + spectral_fluxes_input_path + '\n')
+                else:
+                    spectral_fluxes_input_path = os.path.join(str(auxpath), 'cawa/luts/meris_sun_spectral_flux_rr_10_11.txt')
+                    f.write('existing meris_sun_spectral_flux_rr_10_11: ' + spectral_fluxes_input_path + '\n')
 
                 shared_libs_dir = tempfile.gettempdir()
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
@@ -149,14 +157,19 @@ class CawaCtpMerisOp:
             self.str_coeffs=np.array(stray_ncds.variables['STRAY'][:],order='F')
             self.lmd=np.array(stray_ncds.variables['LAMBDA'][:],order='F')
 
-        doy = 363 # todo: get from input file name
+        # doy = 363
+        datestring = cu.CawaUtils.get_meris_rr_product_datestring(source_product.getName())
+        print('datestring: ' + datestring + '\n')
+        doy = int(cu.CawaUtils.get_doy_from_yyyymmdd(datestring))
+        print('doy: ' + str(doy) + '\n')
+
         with Dataset(ws_alb_lut,'r') as wsalb_ncds:
             #get the full stray coeffs
             #get closest day of year
             doy_idx=np.abs(wsalb_ncds.variables['time'][:]-doy).argmin()
             self.alb = wsalb_ncds.variables['albedo'][doy_idx,:,:]
 
-        spectral_fluxes_input_path = os.path.join(resource_root, 'meris_sun_spectral_flux_rr_10_11.txt')
+        # spectral_fluxes_input_path = os.path.join(resource_root, 'luts/meris_sun_spectral_flux_rr_10_11.txt')
         spectral_fluxes_table = cu.CawaUtils.get_table_from_csvfile(spectral_fluxes_input_path, ',', "")
         self.spectral_flux_10 = np.array(spectral_fluxes_table['E0_band10'])
         self.spectral_flux_11 = np.array(spectral_fluxes_table['E0_band11'])
