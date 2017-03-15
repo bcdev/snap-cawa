@@ -60,7 +60,7 @@ copyright = '2016, Brockmann Consult GmbH'
 author1 = 'Brockmann Consult GmbH'
 author2 = 'MPI for Biogeochemistry Jena'
 author3 = 'Stockholm Resilience Centre'
-cablab_logo = "pix/CablabLogo2.png"
+cablab_logo = "pix/cawa_logo.png"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

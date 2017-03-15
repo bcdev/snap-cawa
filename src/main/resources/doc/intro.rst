@@ -26,8 +26,8 @@ and Stockholm Resilience Center are financed by the European Space Agency (ESA) 
 develop the software for CAB-LAB, to collect and analyze the EO data, and to disseminate the idea of the project and its preliminary results.
 
 
-Purpose
-=======
+Purpose and Scope
+=================
 
 This Product Handbook is a living document that is under active development just as the CAB-LAB project itself.
 Its purpose is to facilitate the usage of the BAVL and primarily targets scientists from various disciplines with a good
@@ -36,12 +36,8 @@ and `R <http://www.>`_), a solid background in the analysis of
 large data-sets, and a sound understanding of the Earth System.
 The focus of this document is therefore clearly on the description of the data and on the methods to access and manipulate the data.
 
-
 In the final version, it is meant to be a self-contained documentation that enables the user to independently reap the full potential of the Earth System Data Cube (ESDC).
 Developers may find a visit of the `project's git-hub pages <https://github.com/CAB-LAB>`_ worthwile.
-
-Scope
-=====
 
 The Product Handbook gives a general overview of the `ESCD's structure <cube_explanation.html#What is the Earth System Data Cube?>`__
 and provide some examples to illustrate `potential uses of the system <cube_scenarios.html#What can I do with the Earth System Data Cube?>`__ .
@@ -58,31 +54,19 @@ References
 
 2.  CAB-LAB's github repository: https://github.com/CAB-LAB
 
-Terms and Abbreviations
-=======================
+Acronyms and Abbreviations
+==========================
 
-.. todo:: GB keep this section up-to-date
+.. todo:: OD to complete
 
 =======================  =============================================================================================
-Term                     Description
+Acronym                     Definition
 =======================  =============================================================================================
-BAST                     Biosphere-Atmosphere System Trajectory
+CAWA                     advanced Clouds, Aerosols and WAter vapour products
 -----------------------  ---------------------------------------------------------------------------------------------
-BAVL                     Biosphere Atmosphere Virtual Laboratory
+CTP                      Cloud Top Pressure
 -----------------------  ---------------------------------------------------------------------------------------------
-CAB-LAB                  Coupled Atmosphere Biosphere virtual LABoratory
------------------------  ---------------------------------------------------------------------------------------------
-DAT                      Data Analytics Toolkit
------------------------  ---------------------------------------------------------------------------------------------
-EDSC                     Earth System Data Cube
------------------------  ---------------------------------------------------------------------------------------------
-EO                       Earth Observations
------------------------  ---------------------------------------------------------------------------------------------
-ESA                      European Space Agency
------------------------  ---------------------------------------------------------------------------------------------
-Grid                     The Data Cube's layout given by its spatial and temporal resolution and its variables.
------------------------  ---------------------------------------------------------------------------------------------
-Image                    An 2D data cube subset with dimension (lat, lon)
+TCWV                     Total Column of Water Vapour
 =======================  =============================================================================================
 
 .. index:: Legal information
@@ -90,11 +74,7 @@ Image                    An 2D data cube subset with dimension (lat, lon)
 Legal information
 =================
 
-The Earth System Data Cube consists of a variety of source data sets from different providers, the Data Cube software, which
-transforms all data to the common Data Cube format and allows for convenient data access, and the Data Analytics Toolkit, which
-provides methods for scientific analysis.
-
-The Data Cube software and the Data Analytics Toolkit are free software:
+The CAWA TCWV and CTP processing software is free software:
 you can redistribute it and/or modify it under the terms of the GNU General
 Public License as published by the Free Software Foundation, either version 3
 of the License, or (at your option) any later version.
@@ -107,7 +87,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see http://www.gnu.org/licenses/.
 
-Copyright (C) 2016  The CAB-LAB developer team.
+Copyright (C) 2014-2017  The CAWA developer team.
 
 .. index:: Data Policy
 
