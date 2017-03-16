@@ -1,8 +1,8 @@
-.. index:: Earth System Data Cube
+.. index:: SNAP Cawa TCWV and CTP Processing System
 
-===================================
-What is the Earth System Data Cube?
-===================================
+============================================
+The SNAP Cawa TCWV and CTP Processing System
+============================================
 
 .. BC
 
@@ -23,10 +23,11 @@ the ESDC. While all observational values are conserved, gaps are filled with syn
 adequate gap-filling algorithm. Proper data flags ensure an unambiguous distinction between observational and
 synthetic data values.
 
-.. index:: ESDC Macro Structure
 
-ESDC Macro Structure
-=========================
+.. index:: Theoretical Background Summary
+
+Theoretical Background Summary
+==============================
 
 The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
 of the subsystems of interest:
@@ -35,25 +36,44 @@ of the subsystems of interest:
 * Atmospheric forcing
 * Socio-economic data
 
-.. index:: Cube Spatial and Temporal Coverage
 
-Spatial and Temporal Coverage
-=============================
+.. index:: Processing Flow
 
-The fine grid of the ESDC has a spatial resolution of 0.083° (5”), which is properly nested within a coarse grid of
-0.25° (15”). Hence, the ESDC is available in two versions
+Processing Flow
+===============
 
-* **High resolution version**: 0.083° (5”) spatial resolution,
-* **Low resolution version**:  0.25° (15”) spatial resolution.
+The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
+of the subsystems of interest:
 
-While the latter contains all variables, the former only comprises those variables that are natively available at this resolution.
-The high-resolution data are nested on the low-resolution data set such that one can analyse these in tandem.
-In particular data from the socio-economic subsystem are often organised according to administrative units, typically national states, rather than on regular grids.
-These data are dispersed to the coarse grid by means of a national state mask, which is created by assigning a national state property to each grid point.
+* Land surface
+* Atmospheric forcing
+* Socio-economic data
 
-The **temporal resolution** is 8 days.
 
-The **time span** currently covered is 2001-2011. We are dedicated to expand this period on both ends, but to preserve the ESDC's characteristics, a reasonable coverage of data streams is required.
+
+.. index:: Processing Environment
+
+Processing Environment
+======================
+
+The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
+of the subsystems of interest:
+
+* Land surface
+* Atmospheric forcing
+* Socio-economic data
+
+.. index:: Processor Components
+
+Processor Components
+====================
+
+The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
+of the subsystems of interest:
+
+* Land surface
+* Atmospheric forcing
+* Socio-economic data
 
 
 

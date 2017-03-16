@@ -9,12 +9,13 @@ Contents:
    :numbered:
 
    intro
-   cawa_explanation
-   cawa_scenarios
+   cawa_processing_system
+   cawa_products
+   cawa_installation
    cawa_usage
-   dat_usage
-   collaboration
-   api_reference
+   cawa_scenarios
+   cawa_monitoring
+   cawa_troubleshooting
    annex
 
 
