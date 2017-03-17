@@ -2,29 +2,22 @@
 Introduction
 ============
 
-.. BC
-
 Project background
 ==================
 
-The steadily growing Earth Observation (EO) archives are currently mostly investigated
-by means of disciplinary approaches. It would be, however, desirable to adopt a more holistic approach in understanding land-atmosphere interactions and
-the role of humans in the earth system. The potential of a simultaneous exploration of multiple EO data streams
-has so far been widely neglected in the scientific community.
-The Coupled Atmosphere Biosphere virtual LABoratory project (CAB-LAB) aims at filling this gap by providing
-a virtual laboratory that facilitates the co-exploration of multiple EOs for a better understanding of land ecosystem trajectories.
+The SEOM S3 ‘advanced Clouds, Aerosols and WAter vapour products for Sentinel-3/OLCI’ CAWA project aims to the
+development and improvement of advanced atmospheric retrieval algorithms for the Envisat/MERIS and Sentinel-3/OLCI
+mission. A sensor comprehensive and consistent 1D-Var water vapour algorithm has been developed and applied to the MERIS,
+MODIS and first available OLCI measurements. An innovative and consistent cloud top pressure 1D-Var procedure was defined
+for MERIS and all three OLCI O2 A-band channels, which will significantly improve the retrieval accuracy. The
+challenging and innovative GRASP algorithm for the retrieval of aerosols and surface properties has already shown
+its advantage in comparison to conventional aerosol retrieval methods. All three algorithms will be further improved,
+applied to the complete MERIS dataset, to a four months MODIS global time series and six months of OLCI data. We expect
+to create improved consistent datasets of water vapour, cloud properties, namely cloud top pressure, and aerosol and
+surface pressure. The intention of the CAWA team is to establish new and improved procedures to estimate atmospheric
+properties, which also improve the retrieval of land and ocean properties.
 
-
-The idea is to build on the existing data-sets and to offer novel tools and technical methods to detect dependencies in the coupled human-nature system.
-CAB-LAB's central service to the scientific community will be a Biosphere Atmosphere Virtual Laboratory (BAVL), which comprises a Data
-Cube populated with a wide range of EOs and convenient methods to access and analyze this data remotely by means of the Jupiter framework.
-Moreover, the project aims at advancing the scientific analysis capacities by developing data-driven exploration strategies that identify and attribute major changes
-in the biosphere-atmosphere system. Ultimately, CAB-LAB will develop a set of indices
-characterizing the major relevant Biosphere-Atmosphere System Trajectories, BASTs.
-The project partners, Max-Planck-Institute for Biogeochemistry, Brockmann Consult GmbH,
-and Stockholm Resilience Center are financed by the European Space Agency (ESA) for three years (2015 to 2017) to
-develop the software for CAB-LAB, to collect and analyze the EO data, and to disseminate the idea of the project and its preliminary results.
-
+.. bla
 
 Purpose and Scope
 =================
