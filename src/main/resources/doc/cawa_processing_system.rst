@@ -4,43 +4,80 @@
 The SNAP Cawa TCWV and CTP Processing System
 ============================================
 
-.. BC
-
 Overview
 ========
 
-Earth observations (EOs) are usually produced and treated as 3- dimensional singular data cubes, i.e. for each
-longitude u ∈ {1, ..., Lon}, each latitude v ∈ {1, …, Lat}, and each time step t ∈ {1,...,T} an observation
-X = {x(u,v,t)} ∈ R is defined. The challenge is, however, to take advantage of the numerous
-EO streams and to explore them simultaneously.
-Hence, the idea is to concatenate data streams such that we obtain a 4-dimensional data cube of the form x(u,v,t,k)
-where k ∈ {1, …, N} denotes the index of the data stream. The focus of this project is therefore on learning how
-to efficiently and reliably create, curate, and explore a 4-dimensional Earth System Data Cube (ESDC).
-If feasible, the included data-sets contain uncertainty information. Limitations associated with the transformation
-from source format into the ESDC format are explained in the `description of the data sets <annex.html#Annexes>`__.
-The ESDC does not exhibit spatial or temporal gaps, since gaps in the source data are filled during ingestion into
-the ESDC. While all observational values are conserved, gaps are filled with synthetic data, i.e. with data that is created by an
-adequate gap-filling algorithm. Proper data flags ensure an unambiguous distinction between observational and
-synthetic data values.
-
+The key goal of the CAWA project regarding software development, production and dissemination was to
+implement the proposed algorithms for TCWV and CTP in free and easily accessible open source toolboxes, notably and
+foremost ESA’s SNAP toolbox. After successful implementation, TCWV and CTP datasets from the full MERIS archive were
+generated with BC's 'Calvalus' Linux cluster following the project targets. In addition, TCWV from several months
+of 'OLCI-like' input datasets (i.e. MODIS Aqua/Terra products MOD021 and MYD021) were generated. However, the SNAP
+TCWV and CTP processors are in principle fully portable and can be run on any Linux platform. The procedure for
+installation and operation is described in this chapter.
 
 .. index:: Theoretical Background Summary
 
-Theoretical Background Summary
-==============================
+Theoretical Background
+======================
 
-The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
-of the subsystems of interest:
-
-* Land surface
-* Atmospheric forcing
-* Socio-economic data
-
+The motivation and theoretical background for the TCWV and CTP retrieval is summarized in the CAWA project
+proposal [`1 <intro.html#References>`_].
+The underlying algorithms are described in detail in the corresponding ATBDs for TCWV [`2 <intro.html#References>`_]
+and CTP [`3 <intro.html#References>`_], respectively.
 
 .. index:: Processing Flow
 
 Processing Flow
 ===============
+
+Although the TCWV and CTP processors are completely independent of each other, their individual processing flow is very
+similar as shown and explained below.
+
+The SNAP Graph Processing Framework
+-----------------------------------
+
+A common architecture for all Sentinel Toolboxes is being jointly developed by Brockmann Consult, Array Systems
+Computing and C-S called the Sentinel Application Platform (SNAP).
+
+The SNAP architecture is ideal for Earth Observation processing and analysis due to various technological
+innovations as well as approved concepts from the BEAM toolbox. One of the key components in SNAP is the Graph
+Processing Framework (GPF) for creating user-defined processing chains. Both CAWA TCWV and CTP processors make use of this
+framework.
+
+A good starting point for more detailed information is the SNAP homepage [`4 <intro.html#References>`_] and also the help
+documentation integrated in the SNAP desktop application.
+
+The SNAP-Python Interface (SNAPPY)
+----------------------------------
+
+A new concept provided in SNAP is the possibility to develop preocessing scripts using Python. This is realized by a new
+SNAP-Python interface (SNAPPY). This component can also be used from the Graph Processing Framework so that in SNAP scientific
+GPF processors can be developed not only in Java, but now also in Python. In CAWA, both TCWV and CTP processors
+are making use of this and were written in Python, whereas the pre-processing (i.e. the IdePix pixel classification) uses a
+GPF processor which was written in Java.
+
+More detailed information on SNAPPY can be found in [`5 <intro.html#References>`_].
+
+
+TCWV Processor
+--------------
+
+The overall processing flow of the SNAP TCWV processor is shown in tcwv_chain_.
+
+.. _tcwv_chain:
+.. figure::  pix/tcwv_chain.png
+    :align:   center
+
+
+CTP Processor
+-------------
+
+The overall processing flow of the SNAP CTP processor is shown in ctp_chain_.
+
+.. _ctp_chain:
+.. figure::  pix/ctp_chain.png
+    :align:   center
+
 
 The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
 of the subsystems of interest:

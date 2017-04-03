@@ -22,30 +22,42 @@ properties, which also improve the retrieval of land and ocean properties.
 Purpose and Scope
 =================
 
-This Product Handbook is a living document that is under active development just as the CAB-LAB project itself.
-Its purpose is to facilitate the usage of the BAVL and primarily targets scientists from various disciplines with a good
-command of one of the supported high-level programming languages (`Python <http://www.python.org>`_, `Julia <http://julialang.org/>`_,
-and `R <http://www.>`_), a solid background in the analysis of
-large data-sets, and a sound understanding of the Earth System.
-The focus of this document is therefore clearly on the description of the data and on the methods to access and manipulate the data.
+This document is the User Manual for the SNAP TCWV and CTP processors written in `Python <http://www.python.org>`_ and
+`Java <http://www.oracle.com/java>`_ which have been developed in the frame of the CAWA
+project. Its purpose is to describe in detail how to obtain, install and operate these processors. Also, a
+comprehensive overview of all related data products (input as well as intermediate and final products) is provided.
 
-In the final version, it is meant to be a self-contained documentation that enables the user to independently reap the full potential of the Earth System Data Cube (ESDC).
-Developers may find a visit of the `project's git-hub pages <https://github.com/CAB-LAB>`_ worthwile.
+The explicit structure of the document is as follows:
 
-The Product Handbook gives a general overview of the `ESCD's structure <cube_explanation.html#What is the Earth System Data Cube?>`__
-and provide some examples to illustrate `potential uses of the system <cube_scenarios.html#What can I do with the Earth System Data Cube?>`__ .
-The main part is considered with a detailed `technical description of the ESDC <cube_usage.html#How can I use the Earth System Data Cube?>`__
-, which is accompanied by the full `specification of the API <api_reference.html#CAB-LAB API Reference>`__.
-Finally, all data-sets included in the ESDC are listed and described in the `annex of the Product Handbook <annex.html#Annexes>`__.
+* Chapter 1 is this introduction.
+* `Chapter 2 <cawa_processing_system.html>`_ gives an overview of the SNAP CAWA TCWV and CTP processing system.
+* `Chapter 3 <cawa_products.html>`_ describes all relevant SNAP CAWA products.
+* `Chapter 4 <cawa_installation.html>`_ explains how to get and install the processing software.
+* `Chapter 5 <cawa_usage.html>`_ explains how to run the processing software.
+* `Chapter 6 <cawa_scenarios.html>`_ gives an example for a typical CAWA processing use case.
+* `Chapter 7 <cawa_monitoring.html>`_ shows possibilities how to monitor the processing.
+* `Chapter 8 <cawa_troubleshooting.html>`_ describes troubleshooting options.
+* `Chapter 9 <annex.html>`_ contains various annexes.
 
 References
 ==========
 
-.. todo:: GB add more references here
+.. todo:: OD to complete
 
-1.  CAB-LAB's webpage: http://www.earthsystemdatacube.net
+1.  ADVANCED CLOUDS, AEROSOLS AND WATER VAPOUR PRODUCTS FOR SENTINEL-3/OLCI: Technical, Management and
+    Financial Proposal. Issue 1.0, 28.03.2014.
 
-2.  CAB-LAB's github repository: https://github.com/CAB-LAB
+2.  Retrieval for Total Coulumn Water Vapor from MERIS/OLCI and MODIS for Land- and Ocean Surfaces. CAWA TCWV ATBD,
+    available at: https://earth.esa.int/web/sppa/activities/cawa/projects-documents
+
+3.  Retrieval of Cloud Top Pressure from MERIS and  OLCI O2 A-Band Measurements. CAWA CTP ATBD,
+    available at: https://earth.esa.int/web/sppa/activities/cawa/projects-documents
+
+4.  The Sentinel Application Platform (SNAP),
+    available at: http://step.esa.int/main/toolboxes/snap/
+
+5.  Configure Python to use the SNAP-Python (snappy) interface,
+    available at: https://senbox.atlassian.net/wiki/display/SNAP/Configure+Python+to+use+the+SNAP-Python+%28snappy%29+interface
 
 Acronyms and Abbreviations
 ==========================
@@ -86,6 +98,8 @@ Copyright (C) 2014-2017  The CAWA developer team.
 
 Data Policy
 ===========
+
+.. todo:: OD to complete
 
 The CAB-LAB team processes and distributes the data in the ESDC in good faith, but makes no warranty, expressed or implied,
 nor assumes any legal liability or responsibility for any purpose for which the data are used.
