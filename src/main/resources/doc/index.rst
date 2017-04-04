@@ -1,11 +1,9 @@
 
-CAWA User Manual
+CAWA Software User Manual
 ==================
 
-Contents:
-
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :numbered:
 
    intro
@@ -18,11 +16,9 @@ Contents:
    cawa_troubleshooting
    annex
 
+.. raw:: latex
 
-Indices and Tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
+   \listoffigures
+   \listoftables
 
 

@@ -62,22 +62,28 @@ More detailed information on SNAPPY can be found in [`5 <intro.html#References>`
 TCWV Processor
 --------------
 
-The overall processing flow of the SNAP TCWV processor is shown in tcwv_chain_.
+The overall processing flow of the SNAP TCWV processor is shown in :numref:`tcwv_chain`.
 
 .. _tcwv_chain:
 .. figure::  pix/tcwv_chain.png
-    :align:   center
+   :align:   center
+   :scale: 80 %
+
+   Processing flow of the SNAP TCWV processor.
+
 
 
 CTP Processor
 -------------
 
-The overall processing flow of the SNAP CTP processor is shown in ctp_chain_.
+The overall processing flow of the SNAP CTP processor is shown in :numref:`ctp_chain`.
 
 .. _ctp_chain:
 .. figure::  pix/ctp_chain.png
     :align:   center
+    :scale: 80 %
 
+    Processing flow of the SNAP CTP processor.
 
 The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
 of the subsystems of interest:

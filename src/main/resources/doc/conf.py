@@ -130,7 +130,7 @@ html_theme = 'sphinxdoc'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "CAWA Processor User Manual"
+html_title = "CAWA Software User Manual"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -216,25 +216,31 @@ htmlhelp_basename = 'CAWAdoc'
 
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+'papersize': 'a4paper',
 
 # The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+'pointsize': '11pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': r'\usepackage{mystyle}',
+
+'printindex': '',
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',
 }
 
+latex_additional_files = ["mystyle.sty"]
+
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'CAWA.tex', 'CAWA Documentation',
-   r'Brockmann Consult GmbH', 'manual'),
+  (master_doc, 'CAWA.tex', 'CAWA D-9: Software User Manual',
+   r'Brockmann Consult GmbH', 'howto'),
 ]
+
+latex_toplevel_sectioning = 'section'
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -363,3 +369,6 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+numfig = True
+numfig_format = {'figure': 'Figure %s', 'table': 'Table %s', 'code-block': 'Code %s'}
