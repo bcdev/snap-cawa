@@ -224,6 +224,7 @@ latex_elements = {
 # Additional stuff for the LaTeX preamble.
 'preamble': r'\usepackage{mystyle}',
 
+# omit the index for the moment, as this page switches back to default page style
 'printindex': '',
 
 # Latex figure (float) alignment
