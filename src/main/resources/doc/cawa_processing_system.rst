@@ -65,6 +65,8 @@ The SNAP TCWV and CTP processing system consists of the following SNAP software 
 - *snap-cawa* plug-in
 - *snap-cawa-io* plug-in
 
+.. todo:: explain shared libs!
+
 These components are described in more detail in the following subsections.
 
 The Sentinel Application Platform (SNAP)
@@ -138,6 +140,57 @@ The SNAP NetCDF module provides comprehensive capabilities for NetCDF file I/O w
 software packages provided by UCAR Unidata. In return the SNAP NetCDF module is used by the *snap-cawa-io* module
 which ensures a project-related generation of TCWV and CTP products in CF-compliant NetCDF format. See
 section :ref:`cawa_products` for more detailed description of the CAWA TCWV and CTP products.
+
+
+The IdePix Pixel Classification Module
+--------------------------------------
+
+IdePix (Identification of Pixels) is a pixel classification tool developed by BC, which is used in a
+variety of projects i.e. for cloud screening. It was used in the GlobAlbedo project to perform the pixel
+classification for the MERIS and VGT L1b products used as input for the BBDR retrieval. The underlying algorithms
+were described in detail in the GlobAlbedo ATBD [reference] and validated in the frame of the GlobAlbedo project
+[reference: GlobAlbedo_FVR_v1_2 (2013): GlobAlbedo Final Validation Report. V1.2, 16 July 2013.]
+
+Although Idepix has been tested and successively improved within GlobAlbedo using a wide selection of regions, also
+taking into account seasonal variations, some limitations and weaknesses in cloud detection (most of them well
+known from other existing cloud masking approaches) could not be solved to 100%. These are i.e.
+
+- distinction of cloud and snow/ice is often difficult
+- detection of optically very thin clouds
+- possible misclassifications over very bright land areas, e.g. deserts or bright beaches
+
+Therefore, within the frame of various projects, the IdePix tool is continuously being extended.
+
+.. todo:: continue
+
+The TCWV GPF Processor
+----------------------
+
+Scope
+
+CAWA TCWV core is meant to be the core of a L1B --> L2 processor,
+for the retrieval of total column water vapor.
+It is sensor independend, curently MERIS and MODIS
+look up tables are provided. It works only for cloud
+free pixel
+
+It needs:
+
+- normalized radiance (TOA radiance divided by solar constant) [sr-1]
+  at the window and absorption bands (note the difference between MODIS
+  and MERIS as mentioned below!!!)
+- geometry
+- surface (or 2m) temperature [K]
+- surface pressure [hPa]
+- aerosol optical thickness at the short wave window band
+- prior windspeed for ocean pixel
+- land sea discrimination (actually two different processors
+  are used for land and sea respectivly)
+
+The CTP GPF Processor
+---------------------
+
+The
 
 
 .. index:: Processing Flow
