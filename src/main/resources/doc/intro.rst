@@ -92,7 +92,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see http://www.gnu.org/licenses/.
 
-Copyright (C) 2014-2017  The CAWA developer team.
+Copyright (C) 2014-2017  ESA / Brockmann Consult.
 
 .. index:: Data Policy
 
@@ -100,18 +100,3 @@ Data Policy
 ===========
 
 .. todo:: OD to complete
-
-The CAB-LAB team processes and distributes the data in the ESDC in good faith, but makes no warranty, expressed or implied,
-nor assumes any legal liability or responsibility for any purpose for which the data are used.
-In particular, the CAB-LAB team does not claim ownership of the data distributed through the ESDC nor does it alter the data
-policy of the data owner. Therefore, the user is referred to the data owner for specific questions of data use.
-References and more details of the data sets are listed in the `annex of the Product Handbook <annex.html#Annexes>`_.
-
-The CAB-LAB team is thankful to have received permissions for re-distribution of all data contained in the ESDC from
-the respective data owners.
-
-.. note::
-
-    Please cite the Earth System Data Cube as:
-
-    The CAB-LAB developer team (2016). The Earth System Data Cube (Version 0.1), available at: https://github.com/CAB-LAB.

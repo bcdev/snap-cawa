@@ -1,6 +1,6 @@
 
 CAWA Software User Manual
-==================
+=========================
 
 .. toctree::
    :maxdepth: 4

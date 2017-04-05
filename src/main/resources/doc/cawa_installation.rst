@@ -25,12 +25,7 @@ Operating System
 Hardware Requirements
 ---------------------
 
-The data is organised in the described 4-dimensional form x(u,v,t,k), but additionally each data stream k is assigned to one
-of the subsystems of interest:
-
-* Land surface
-* Atmospheric forcing
-* Socio-economic data
+.. todo:: OD to complete
 
 
 .. index:: Contents of Software Bundle
