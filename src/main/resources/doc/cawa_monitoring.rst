@@ -1,3 +1,5 @@
+.. _cawa_monitoring:
+
 ==============================
 Monitoring the CAWA Processing
 ==============================

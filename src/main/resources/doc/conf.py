@@ -237,7 +237,7 @@ latex_additional_files = ["mystyle.sty"]
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'CAWA.tex', 'CAWA D-9: Software User Manual',
+  (master_doc, 'CAWA_D9_SUM.tex', 'CAWA D-9: Software User Manual',
    r'Brockmann Consult GmbH', 'howto'),
 ]
 

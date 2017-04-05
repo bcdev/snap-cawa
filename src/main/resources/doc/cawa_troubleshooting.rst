@@ -1,3 +1,5 @@
+.. _cawa_troubleshooting:
+
 ===============
 Troubleshooting
 ===============

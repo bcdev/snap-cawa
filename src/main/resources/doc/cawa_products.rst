@@ -1,4 +1,5 @@
 .. index:: SNAP Cawa Products
+.. _cawa_products:
 
 ======================
 The SNAP CAWA Products
