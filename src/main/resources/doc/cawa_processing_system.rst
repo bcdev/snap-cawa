@@ -145,8 +145,8 @@ section :ref:`cawa_products` for more detailed description of the CAWA TCWV and 
 The IdePix Pixel Classification Module
 --------------------------------------
 
-IdePix (Identification of Pixels) is a pixel classification tool developed by BC, which is used in a
-variety of projects i.e. for cloud screening. It was used in the GlobAlbedo project to perform the pixel
+IdePix (Identification of Pixels) is a pixel classification tool which has been developed by BC and is continuously
+being improved for a variety of projects. It was e.g. used in the GlobAlbedo project to perform the pixel
 classification for the MERIS and VGT L1b products used as input for the BBDR retrieval. The underlying algorithms
 were described in detail in the GlobAlbedo ATBD [reference] and validated in the frame of the GlobAlbedo project
 [reference: GlobAlbedo_FVR_v1_2 (2013): GlobAlbedo Final Validation Report. V1.2, 16 July 2013.]
@@ -190,8 +190,48 @@ It needs:
 The CTP GPF Processor
 ---------------------
 
-The
+CAWA cloud core is meant to be the core of a L1B --> L2 processor,
+for the retrieval of oxygen cloud top pressure.
+It is sensor independend, curently MERIS and OLCI
+look up tables are provided. It works for all pixel,
+however only cloudy pixel deliver sensible results.
+The cloud optical thickness does not account for
+optical effective radius (missing SWIR Bands), thus
+it will not be accurate in particular close to cloud/rain
+bows.
 
+There are two versions of the core processor:
+
+- 'Cloud_core'. A slim and faster version, only retrieving
+   cloud top pressure and cloud optical thickness. Use this for
+   MERIS
+
+- 'cloud_complete_core', the full version, additionally retrieving
+   cloud profile information. Use this for OLCI.
+
+It needs:
+
+- normalized radiance (TOA radiance divided by solar constant) [sr-1]
+  at the window and absorption bands
+- surface pressure [hPa]
+- surface albedo around 750 nm. A examplarily climatology
+  is provided. (study the demo)
+- the precise deviation of the central wavelength from the nominal
+
+Satellite specifics
+
+- MERIS:
+Needed Bands. 10(W), 11(A).
+The content of L1b (radiance) must be divided by the corresponding solar constant.
+It should be the precise solar constant respecting the real spectral position (using the detector index) and sun earth distance.
+
+In order to retrieve sensible values, it is necessary to preprocess Band 11 using 'stray_coeff_potenz4.nc'.
+
+- OLCI
+Needed Bands. 12(W), 13(A), 14A), 15(A).
+The content of L1b (radiance) must be divided by the corresponding solar constant.
+It should be the precise solar constant respecting the real spectral position (using the detector index) and sun earth
+distance. Fortunately this is already part otf the L1B file.
 
 .. index:: Processing Flow
 
