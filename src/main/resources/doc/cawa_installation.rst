@@ -1,5 +1,5 @@
 .. index:: Cawa Processor Installation
-.. _cawa_processor_installation:
+.. _cawa_installation:
 
 ================================
 Processing Software Installation

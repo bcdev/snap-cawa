@@ -61,6 +61,26 @@ References
 5.  Configure Python to use the SNAP-Python (snappy) interface,
     available at: https://senbox.atlassian.net/wiki/display/SNAP/Configure+Python+to+use+the+SNAP-Python+%28snappy%29+interface
 
+6.  CoastColour Project Web Site,
+    available at: http://www.coastcolour.org
+
+7.  OceanColour Project Web Site,
+    available at: http://www.esa-oceancolour-cci.org
+
+8.  Bourg, L. (2009): MERIS Level 2 Detailed Processing Model. ACRI-ST, Document No. PO-TN-MEL-GS-0006, 15 July 2009.
+
+9. GlobAlbedo Project Web Site,
+    available at: http://globalbedo.org
+
+10. LandCover Project Web Site,
+    available at: http://www.esa-landcover-cci.org
+
+11. GlobAlbedo ATBD 'Pixel Classification'. Version 4.1, 26 June 2012.
+
+12. ERA-Interim global atmospheric reanalysis dataset,
+    available at: http://www.ecmwf.int/en/research/climate-reanalysis/era-interim
+
+
 Acronyms and Abbreviations
 ==========================
 

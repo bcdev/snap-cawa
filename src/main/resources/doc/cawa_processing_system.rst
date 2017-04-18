@@ -55,7 +55,7 @@ This is described in more detail in section :ref:`cawa_processor_installation`.
 Processor Components
 ====================
 
-The SNAP TCWV and CTP processing system consists of the following SNAP software components:
+The SNAP TCWV and CTP processing system consists of the following SNAP software components and auxiliary datasets:
 
 - *snap-core* module
 - *snap-gpf* module
@@ -64,8 +64,9 @@ The SNAP TCWV and CTP processing system consists of the following SNAP software 
 - *s3tbx-idepix* module
 - *snap-cawa* plug-in
 - *snap-cawa-io* plug-in
+- FORTRAN shared libraries providing high-performance utility functions used in *snap-cawa*
+- lookup tables for TCWV and CTP retrieval
 
-.. todo:: explain shared libs!
 
 These components are described in more detail in the following subsections.
 
@@ -145,11 +146,20 @@ section :ref:`cawa_products` for more detailed description of the CAWA TCWV and 
 The IdePix Pixel Classification Module
 --------------------------------------
 
-IdePix (Identification of Pixels) is a pixel classification tool which has been developed by BC and is continuously
-being improved for a variety of projects. It was e.g. used in the GlobAlbedo project to perform the pixel
-classification for the MERIS and VGT L1b products used as input for the BBDR retrieval. The underlying algorithms
-were described in detail in the GlobAlbedo ATBD [reference] and validated in the frame of the GlobAlbedo project
-[reference: GlobAlbedo_FVR_v1_2 (2013): GlobAlbedo Final Validation Report. V1.2, 16 July 2013.]
+IdePix (Identification of Pixels) is a pixel classification tool which has been developed by BC as BEAM plugin
+and has been used for a variety of projects.
+The tool works over both land and water and supports a variety of sensors.
+Among these are MERIS and MODIS, which made IdePix the most appropriate candidate for cloud and snow identification in
+the CAWA project.
+
+The IdePix tool for water pixel classification was developed in the frame of the ESA DUE project 'CoastColour'
+[`6 <intro.html#References>`_],
+and the ESA OceanColour CCI project [`7 <intro.html#References>`_]. The classification is mainly based on the
+algorithms described in [`8 <intro.html#References>`_], chapter 5.
+
+The IdePix tool for land pixel classification was developed in the frame of the ESA DUE project 'GlobAlbedo'
+[`9 <intro.html#References>`_], and the ESA LandCover CCI project [`10 <intro.html#References>`_].
+The classification is mainly based on the algorithm used for GlobAlbedo as described in [`11 <intro.html#References>`_].
 
 Although Idepix has been tested and successively improved within GlobAlbedo using a wide selection of regions, also
 taking into account seasonal variations, some limitations and weaknesses in cloud detection (most of them well
@@ -159,14 +169,23 @@ known from other existing cloud masking approaches) could not be solved to 100%.
 - detection of optically very thin clouds
 - possible misclassifications over very bright land areas, e.g. deserts or bright beaches
 
-Therefore, within the frame of various projects, the IdePix tool is continuously being extended.
+Therefore, within the frame of various projects, the IdePix algorithms are continuously further developed.
 
-.. todo:: continue
+In the meantime IdePix has also been integrated in SNAP as modules
+for both the Sentinel 2 and the Sentinel 3 toolboxes. The latter module ('s3tbx-idepix') provides the support for
+MERIS and MODIS which is needed for CAWA. This module in return makes use of the SNAP Graph
+Processing Framework (GPF) described above.
+
+The pixel classification with IdePix is the first processing step in CAWA, applied on the MERIS/MODIS L1b products as
+preprocessing towards the generation of both TCWV and CTP (see :numref:`tcwv_chain`).
+
 
 The TCWV GPF Processor
 ----------------------
 
-Scope
+The TCWV GPF processor is the key component of the SNAP TCWV processing chain. This processor also makes use of the SNAP
+GPF framework, and also of the SNAP Python interface (SNAPPY) described above. The processor provides the implementation
+of the TCWV algorithm described in detail in [`2 <intro.html#References>`_].
 
 CAWA TCWV core is meant to be the core of a L1B --> L2 processor,
 for the retrieval of total column water vapor.
@@ -174,64 +193,67 @@ It is sensor independend, curently MERIS and MODIS
 look up tables are provided. It works only for cloud
 free pixel
 
-It needs:
+Basically, the processor is sensor-independent. However, specific lookup tables are required which are currently
+provided for MERIS and MODIS. In summary, the processor needs the following inputs:
 
-- normalized radiance (TOA radiance divided by solar constant) [sr-1]
-  at the window and absorption bands (note the difference between MODIS
-  and MERIS as mentioned below!!!)
+- normalized radiance (TOA radiance divided by solar constant) at the window and absorption bands [sr-1]
 - geometry
 - surface (or 2m) temperature [K]
 - surface pressure [hPa]
 - aerosol optical thickness at the short wave window band
-- prior windspeed for ocean pixel
-- land sea discrimination (actually two different processors
-  are used for land and sea respectivly)
+- prior windspeed (for ocean pixels)
+- land sea discrimination (as implementations for land and sea slightly differ)
+
+The output of the processor is TCWV [mm] and a TCWV flag (i.e. valid data mask).
 
 The CTP GPF Processor
 ---------------------
 
-CAWA cloud core is meant to be the core of a L1B --> L2 processor,
-for the retrieval of oxygen cloud top pressure.
-It is sensor independend, curently MERIS and OLCI
-look up tables are provided. It works for all pixel,
-however only cloudy pixel deliver sensible results.
-The cloud optical thickness does not account for
-optical effective radius (missing SWIR Bands), thus
-it will not be accurate in particular close to cloud/rain
-bows.
+The CTP GPF processor is the key component of the SNAP CTP processing chain. As the TCWV processor, the CTP processor also
+makes use of the SNAP
+GPF framework, and also of the SNAP Python interface (SNAPPY) described above. The processor provides the implementation
+of the CTP algorithm described in detail in [`3 <intro.html#References>`_].
 
-There are two versions of the core processor:
+Basically, the processor is also sensor-independent. Again, specific lookup tables are required which are currently
+provided for MERIS and OLCI. The processor works for all pixel, however only cloudy pixel deliver sensible results.
+The cloud optical thickness does not account for optical effective radius (missing SWIR Bands), thus it will not be
+accurate in particular close to cloud/rain bows.
 
-- 'Cloud_core'. A slim and faster version, only retrieving
-   cloud top pressure and cloud optical thickness. Use this for
-   MERIS
+The underlying algorithm has been designed in two versions:
 
-- 'cloud_complete_core', the full version, additionally retrieving
-   cloud profile information. Use this for OLCI.
+- 'cloud_core'. A slim and faster version being used for MERIS, only retrieving cloud top pressure and cloud optical thickness.
 
-It needs:
+- 'cloud_complete_core', the full version, additionally retrieving cloud profile information. This version had been foreseen for OLCI, but in the end was not realized as GPF processor, as the optional 'OLCI' workpackage had been descoped from the CAWA project.
 
-- normalized radiance (TOA radiance divided by solar constant) [sr-1]
-  at the window and absorption bands
+In summary, the processor needs the following inputs:
+
+- normalized radiance (TOA radiance divided by solar constant) [sr-1] at the window and absorption bands
+  (Band 10 and 11 in case of MERIS. The MERIS band 11 is corrected for straylight using coefficients
+  which are provided with the processor module.)
 - surface pressure [hPa]
-- surface albedo around 750 nm. A examplarily climatology
-  is provided. (study the demo)
+- surface albedo around 750 nm. (An examplarily climatology is provided with the processor module.)
 - the precise deviation of the central wavelength from the nominal
 
-Satellite specifics
+The output of the processor is CTP [hPa] and a CTP flag (i.e. valid data mask).
 
-- MERIS:
-Needed Bands. 10(W), 11(A).
-The content of L1b (radiance) must be divided by the corresponding solar constant.
-It should be the precise solar constant respecting the real spectral position (using the detector index) and sun earth distance.
 
-In order to retrieve sensible values, it is necessary to preprocess Band 11 using 'stray_coeff_potenz4.nc'.
+FORTRAN shared libraries
+------------------------
 
-- OLCI
-Needed Bands. 12(W), 13(A), 14A), 15(A).
-The content of L1b (radiance) must be divided by the corresponding solar constant.
-It should be the precise solar constant respecting the real spectral position (using the detector index) and sun earth
-distance. Fortunately this is already part otf the L1B file.
+The core algorithms for both TCWV and CTP processors are implemented in Python, which is convenient and popular.
+However, compared to others, it is usually not the fastest programming languages. Therefore, for the most
+computation intensive parts of the code as well as for frequently used utility functions, equivalent high-performance
+FORTRAN modules have been developed. These modules need to be pre-compiled and provided to the processor as appropriate
+shared libraries on the given platform. This step is described in more detail in :ref:`cawa_installation`.
+
+
+Lookup Tables
+-------------
+
+Various lookup tables are used for both TCWV and CTP retrieval, as described in more detail in
+[`2 <intro.html#References>`_] and [`3 <intro.html#References>`_]. The smaller ones are included in the processor
+modules, but some of them are exceeding a reasonable package size. Therefore, these lookup tables need to be
+installed manually on the processing platform(s). This step is also described in more detail in :ref:`cawa_installation`.
 
 .. index:: Processing Flow
 
@@ -254,7 +276,17 @@ The overall processing flow of the SNAP TCWV processor is shown in :numref:`tcwv
 
    Processing flow of the SNAP TCWV processor.
 
+As mentioned, L1b products from MERIS or MODIS are used as input. These products are pre-processed with the IdePix
+pixel classification module. Idepix provides a classification flag and the reflectance bands (converted from radiances
+in case of MERIS) needed for the TCWV retrieval. Further optional input (per pixel) are prior values for temperature,
+pressure, wind speed, and an initial TCWV guess. Ideally, these priors are taken from an external data source to provide
+values of good quality. For the CAWA TCWV processing on Calvalus, these data were taken from ERA-Interim
+[`12 <intro.html#References>`_] products
+which were interpolated and collocated onto the initial L1b/IdePix product grid. If no priors are provided, the
+processor will use reasonable constant values, but this is not recommended for good TCWV retrievals.
 
+The IdePix products (optionally including the prior bands) are the input for the TCWV processing step, which
+provides the final TCWV products (TCWV + flag band).
 
 CTP Processor
 -------------
@@ -268,6 +300,11 @@ The overall processing flow of the SNAP CTP processor is shown in :numref:`ctp_c
 
     Processing flow of the SNAP CTP processor.
 
+The setup and structure of the CTP processor is very similar to the TCWV processor. Again, the L1b products
+are pre-processed with the IdePix pixel classification module. A surface albedo climatology value (white sky albedo)
+is added to the IdePix products, using an internal climatology product (20-day averages) which is included in
+the processor module. The IdePix products are the input for the CTP processing step, which
+provides the final CTP products (CTP + flag band).
 
 
 
