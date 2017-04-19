@@ -19,7 +19,6 @@ to create improved consistent datasets of water vapour, cloud properties, namely
 surface pressure. The intention of the CAWA team is to establish new and improved procedures to estimate atmospheric
 properties, which also improve the retrieval of land and ocean properties.
 
-.. bla
 
 Purpose and Scope
 =================
@@ -44,12 +43,11 @@ The explicit structure of the document is as follows:
 References
 ==========
 
-.. todo:: OD to complete
-
 1.  ADVANCED CLOUDS, AEROSOLS AND WATER VAPOUR PRODUCTS FOR SENTINEL-3/OLCI: Technical, Management and
     Financial Proposal. Issue 1.0, 28.03.2014.
 
-2.  Retrieval for Total Coulumn Water Vapor from MERIS/OLCI and MODIS for Land- and Ocean Surfaces. CAWA TCWV ATBD,
+2.  Retrieval for Total Coulumn Water Vapor from MERIS/OLCI and MODIS for Land- and Ocean Surfaces.
+    CAWA TCWV ATBD,
     available at: https://earth.esa.int/web/sppa/activities/cawa/projects-documents
 
 3.  Retrieval of Cloud Top Pressure from MERIS and  OLCI O2 A-Band Measurements. CAWA CTP ATBD,
@@ -69,7 +67,7 @@ References
 
 8.  Bourg, L. (2009): MERIS Level 2 Detailed Processing Model. ACRI-ST, Document No. PO-TN-MEL-GS-0006, 15 July 2009.
 
-9. GlobAlbedo Project Web Site,
+9.  GlobAlbedo Project Web Site,
     available at: http://globalbedo.org
 
 10. LandCover Project Web Site,
@@ -79,6 +77,11 @@ References
 
 12. ERA-Interim global atmospheric reanalysis dataset,
     available at: http://www.ecmwf.int/en/research/climate-reanalysis/era-interim
+
+13. European Space Agency: Meris Product Handbook, Issue 3.0, 1 August 2011.
+
+14. MODIS Level 1B Product User’s Guide. For Level 1B Version 6.1.0 (Terra) and Version 6.1.1 (Aqua).
+    MODIS Characterization Support Team, Document PUB-01-U-0202- REV C, February 27, 2009.
 
 
 Acronyms and Abbreviations

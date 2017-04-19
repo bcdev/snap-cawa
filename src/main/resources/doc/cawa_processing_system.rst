@@ -47,7 +47,7 @@ Actually the Calvalus system has ~90 cores, ~ 1 PetaByte data storage volume. It
 projects.
 
 However, as said, the SNAP TCWV and CTP processors can in principle be set up and run on every Linux based computing systems.
-This is described in more detail in section :ref:`cawa_processor_installation`.
+This is described in more detail in section :ref:`cawa_installation`.
 
 
 .. index:: Processor Components
@@ -206,6 +206,8 @@ provided for MERIS and MODIS. In summary, the processor needs the following inpu
 
 The output of the processor is TCWV [mm] and a TCWV flag (i.e. valid data mask).
 
+The TCWV processing flow is illustrated in Figure :numref:`tcwv_chain`.
+
 The CTP GPF Processor
 ---------------------
 
@@ -236,6 +238,7 @@ In summary, the processor needs the following inputs:
 
 The output of the processor is CTP [hPa] and a CTP flag (i.e. valid data mask).
 
+The CTP processing flow is illustrated in Figure :numref:`ctp_chain`.
 
 FORTRAN shared libraries
 ------------------------
@@ -244,7 +247,7 @@ The core algorithms for both TCWV and CTP processors are implemented in Python, 
 However, compared to others, it is usually not the fastest programming languages. Therefore, for the most
 computation intensive parts of the code as well as for frequently used utility functions, equivalent high-performance
 FORTRAN modules have been developed. These modules need to be pre-compiled and provided to the processor as appropriate
-shared libraries on the given platform. This step is described in more detail in :ref:`cawa_installation`.
+shared libraries on the given platform. This step is described in more detail in section :ref:`cawa_installation`.
 
 
 Lookup Tables
@@ -253,7 +256,8 @@ Lookup Tables
 Various lookup tables are used for both TCWV and CTP retrieval, as described in more detail in
 [`2 <intro.html#References>`_] and [`3 <intro.html#References>`_]. The smaller ones are included in the processor
 modules, but some of them are exceeding a reasonable package size. Therefore, these lookup tables need to be
-installed manually on the processing platform(s). This step is also described in more detail in :ref:`cawa_installation`.
+installed manually on the processing platform(s). This step is also described in more detail
+in section :ref:`cawa_installation`.
 
 .. index:: Processing Flow
 
