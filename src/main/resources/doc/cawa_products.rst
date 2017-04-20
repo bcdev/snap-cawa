@@ -264,9 +264,12 @@ The CAWA TCWV algorithm uses the following prior variables:
 - windspeed at 10m, u-component
 - windspeed at 10m, v-component
 
-As said, in the CAWA TCWV processing on the BC Calvalus cluster, these variables were taken from available ERA-Interim
+As said, the way of providing these prior variables to the algorithms is somewhat arbitrary.
+In the CAWA TCWV processing on the BC Calvalus cluster, the variables were taken from available ERA-Interim
 reanalysis datasets. The ERA-Interim data extraction and preparation was done with specific scripts which were
-developed in the frame of other projects and which are running on Calvalus only. They are not part of the CAWA software.
+developed in the frame of other projects and which are running on Calvalus, making use of the collection of
+Climate Data Operators (CDO) developed at Max-Planck-Institute for Meteorology Hamburg [`15 <intro.html#References>`_].
+All these components are not part of the CAWA software package.
 However, the content of the ERA-Interim products being resampled and collocated with the MERIS/MODIS L1b input
 products is given in Table :numref:`erainterim_bands`.
 

@@ -53,7 +53,7 @@ References
 3.  Retrieval of Cloud Top Pressure from MERIS and  OLCI O2 A-Band Measurements. CAWA CTP ATBD,
     available at: https://earth.esa.int/web/sppa/activities/cawa/projects-documents
 
-4.  The Sentinel Application Platform (SNAP),
+4.  The Sentinel Application Platform (SNAP) Web Site,
     available at: http://step.esa.int/main/toolboxes/snap/
 
 5.  Configure Python to use the SNAP-Python (snappy) interface,
@@ -83,6 +83,14 @@ References
 14. MODIS Level 1B Product User’s Guide. For Level 1B Version 6.1.0 (Terra) and Version 6.1.1 (Aqua).
     MODIS Characterization Support Team, Document PUB-01-U-0202- REV C, February 27, 2009.
 
+15. Climate Data Operators (CDO) Web Site,
+    available at: https://code.zmaw.de/projects/cdo
+
+16. The Python Download Web Site,
+    available at: https://www.python.org/downloads/
+
+17. SNAP Wiki: Configure Python to use the SNAP-Python (snappy) interface,
+    available at: https://senbox.atlassian.net/wiki/display/SNAP/Configure+Python+to+use+the+SNAP-Python+%28snappy%29+interface
 
 Acronyms and Abbreviations
 ==========================
@@ -99,29 +107,3 @@ CTP                      Cloud Top Pressure
 TCWV                     Total Column of Water Vapour
 =======================  =============================================================================================
 
-.. index:: Legal information
-
-Legal information
-=================
-
-The CAWA TCWV and CTP processing software is free software:
-you can redistribute it and/or modify it under the terms of the GNU General
-Public License as published by the Free Software Foundation, either version 3
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see http://www.gnu.org/licenses/.
-
-Copyright (C) 2014-2017  ESA / Brockmann Consult.
-
-.. index:: Data Policy
-
-Data Policy
-===========
-
-.. todo:: OD to complete

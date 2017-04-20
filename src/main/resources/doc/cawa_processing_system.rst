@@ -35,8 +35,6 @@ and CTP [`3 <intro.html#References>`_], respectively.
 Processing Environment
 ======================
 
-.. todo:: OD to complete
-
 Most of the TCWV and CTP processing in the frame of the CAWA project has been carried out on BC's Linux-based
 processing system
 (’*Calvalus*’ = CAL/VAL and User Services), based on the so-called MapReduce (MR) programming model, combined with a
@@ -246,18 +244,16 @@ FORTRAN shared libraries
 The core algorithms for both TCWV and CTP processors are implemented in Python, which is convenient and popular.
 However, compared to others, it is usually not the fastest programming languages. Therefore, for the most
 computation intensive parts of the code as well as for frequently used utility functions, equivalent high-performance
-FORTRAN modules have been developed. These modules need to be pre-compiled and provided to the processor as appropriate
-shared libraries on the given platform. This step is described in more detail in section :ref:`cawa_installation`.
+FORTRAN modules have been developed. These modules were pre-compiled, and appropriate
+shared libraries for Linux are provided to the processing software package.
 
 
 Lookup Tables
 -------------
 
 Various lookup tables are used for both TCWV and CTP retrieval, as described in more detail in
-[`2 <intro.html#References>`_] and [`3 <intro.html#References>`_]. The smaller ones are included in the processor
-modules, but some of them are exceeding a reasonable package size. Therefore, these lookup tables need to be
-installed manually on the processing platform(s). This step is also described in more detail
-in section :ref:`cawa_installation`.
+[`2 <intro.html#References>`_] and [`3 <intro.html#References>`_]. These lookup table are also provided to the
+processing software package.
 
 .. index:: Processing Flow
 
