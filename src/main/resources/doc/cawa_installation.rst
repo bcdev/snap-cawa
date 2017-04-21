@@ -107,10 +107,12 @@ Installation of the CAWA Processor modules
 The SNAP TCWV and CTP processor modules need to be installed as follows:
 
 - download the *snap-cawa-1.2.jar* and *snap-cawa-io-1.2.jar* into an arbitrary directory
-- unpack the *snap-cawa-1.2.jar* into an arbitrary *snap-cawa* directory, e.g. */home/snap-cawa/resources*
-- To link the snap-cawa resources to SNAP, edit the file $SNAP_INSTALL_DIR/etc/snap.conf
+- copy the file *snap-cawa-io-1.2.jar* to $SNAP_INSTALL_DIR/snap/modules
+- unpack the *snap-cawa-1.2.jar* into an arbitrary *snap-cawa* directory, e.g. */home/snap-cawa*
+- now all required resources should be in another subdirectory */home/snap-cawa/resources_bundle*
+- To link the snap-cawa directory to SNAP, edit the file $SNAP_INSTALL_DIR/etc/snap.properties
 - In this file, at the end of the file, add the line:
-        pythonExtraPaths = *parent of snap-cawa directory*
+        snap.pythonExtraPaths = *snap-cawa directory*
   e.g.
-        pythonExtraPaths = /home/snap-cawa
+        snap.pythonExtraPaths = /home/snap-cawa
 
