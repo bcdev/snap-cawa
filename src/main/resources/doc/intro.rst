@@ -1,3 +1,5 @@
+.. _intro:
+
 ============
 Introduction
 ============
@@ -17,7 +19,6 @@ to create improved consistent datasets of water vapour, cloud properties, namely
 surface pressure. The intention of the CAWA team is to establish new and improved procedures to estimate atmospheric
 properties, which also improve the retrieval of land and ocean properties.
 
-.. bla
 
 Purpose and Scope
 =================
@@ -42,21 +43,53 @@ The explicit structure of the document is as follows:
 References
 ==========
 
-.. todo:: OD to complete
-
 1.  ADVANCED CLOUDS, AEROSOLS AND WATER VAPOUR PRODUCTS FOR SENTINEL-3/OLCI: Technical, Management and
     Financial Proposal. Issue 1.0, 28.03.2014.
 
-2.  Retrieval for Total Coulumn Water Vapor from MERIS/OLCI and MODIS for Land- and Ocean Surfaces. CAWA TCWV ATBD,
+2.  Retrieval for Total Coulumn Water Vapor from MERIS/OLCI and MODIS for Land- and Ocean Surfaces.
+    CAWA TCWV ATBD,
     available at: https://earth.esa.int/web/sppa/activities/cawa/projects-documents
 
 3.  Retrieval of Cloud Top Pressure from MERIS and  OLCI O2 A-Band Measurements. CAWA CTP ATBD,
     available at: https://earth.esa.int/web/sppa/activities/cawa/projects-documents
 
-4.  The Sentinel Application Platform (SNAP),
+4.  The Sentinel Application Platform (SNAP) Web Site,
     available at: http://step.esa.int/main/toolboxes/snap/
 
 5.  Configure Python to use the SNAP-Python (snappy) interface,
+    available at: https://senbox.atlassian.net/wiki/display/SNAP/Configure+Python+to+use+the+SNAP-Python+%28snappy%29+interface
+
+6.  CoastColour Project Web Site,
+    available at: http://www.coastcolour.org
+
+7.  OceanColour Project Web Site,
+    available at: http://www.esa-oceancolour-cci.org
+
+8.  Bourg, L. (2009): MERIS Level 2 Detailed Processing Model. ACRI-ST, Document No. PO-TN-MEL-GS-0006, 15 July 2009.
+
+9.  GlobAlbedo Project Web Site,
+    available at: http://globalbedo.org
+
+10. LandCover Project Web Site,
+    available at: http://www.esa-landcover-cci.org
+
+11. GlobAlbedo ATBD 'Pixel Classification'. Version 4.1, 26 June 2012.
+
+12. ERA-Interim global atmospheric reanalysis dataset,
+    available at: http://www.ecmwf.int/en/research/climate-reanalysis/era-interim
+
+13. European Space Agency: Meris Product Handbook, Issue 3.0, 1 August 2011.
+
+14. MODIS Level 1B Product User’s Guide. For Level 1B Version 6.1.0 (Terra) and Version 6.1.1 (Aqua).
+    MODIS Characterization Support Team, Document PUB-01-U-0202- REV C, February 27, 2009.
+
+15. Climate Data Operators (CDO) Web Site,
+    available at: https://code.zmaw.de/projects/cdo
+
+16. The Python Download Web Site,
+    available at: https://www.python.org/downloads/
+
+17. SNAP Wiki: Configure Python to use the SNAP-Python (snappy) interface,
     available at: https://senbox.atlassian.net/wiki/display/SNAP/Configure+Python+to+use+the+SNAP-Python+%28snappy%29+interface
 
 Acronyms and Abbreviations
@@ -74,44 +107,3 @@ CTP                      Cloud Top Pressure
 TCWV                     Total Column of Water Vapour
 =======================  =============================================================================================
 
-.. index:: Legal information
-
-Legal information
-=================
-
-The CAWA TCWV and CTP processing software is free software:
-you can redistribute it and/or modify it under the terms of the GNU General
-Public License as published by the Free Software Foundation, either version 3
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see http://www.gnu.org/licenses/.
-
-Copyright (C) 2014-2017  The CAWA developer team.
-
-.. index:: Data Policy
-
-Data Policy
-===========
-
-.. todo:: OD to complete
-
-The CAB-LAB team processes and distributes the data in the ESDC in good faith, but makes no warranty, expressed or implied,
-nor assumes any legal liability or responsibility for any purpose for which the data are used.
-In particular, the CAB-LAB team does not claim ownership of the data distributed through the ESDC nor does it alter the data
-policy of the data owner. Therefore, the user is referred to the data owner for specific questions of data use.
-References and more details of the data sets are listed in the `annex of the Product Handbook <annex.html#Annexes>`_.
-
-The CAB-LAB team is thankful to have received permissions for re-distribution of all data contained in the ESDC from
-the respective data owners.
-
-.. note::
-
-    Please cite the Earth System Data Cube as:
-
-    The CAB-LAB developer team (2016). The Earth System Data Cube (Version 0.1), available at: https://github.com/CAB-LAB.
