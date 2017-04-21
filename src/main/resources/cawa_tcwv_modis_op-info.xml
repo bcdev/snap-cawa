@@ -6,14 +6,14 @@
     <!-- The name uniquely identifies the operator within SNAP -->
     <name>org.esa.snap.cawa.CawaTcwvModisOp</name>
     <!-- The alias is a more user-friendly name, e.g. to be used on the command line -->
-    <alias>cawa_tcwv_modis_op</alias>
+    <alias>CawaTCWV.Modis</alias>
     <operatorClass>org.esa.snap.python.gpf.PyOperator</operatorClass>
 
-    <version>1.0</version>
+    <version>1.2</version>
     <authors>Brockmann Consult GmbH</authors>
-    <copyright>(C) 2014 Brockmann Consult GmbH</copyright>
+    <copyright>(C) 2014-2016 ESA, Brockmann Consult GmbH</copyright>
 
-    <description>This is the Cawa TCWV operator for MODIS (Aqua).</description>
+    <description>Operator for MODIS total column of water vapour (TCWV) retrieval as developed in CAWA project.</description>
 
     <namedSourceProducts>
         <!-- One or more source products can be specified.
@@ -28,22 +28,23 @@
     <parameters>
         <parameter>
             <name>temperature</name>
-            <description>The input temperature.</description>
+            <description>A constant 2m temperature (K) prior value. Used as fallback.</description>
             <dataType>double</dataType>
             <defaultValue>303.0</defaultValue>
         </parameter>
+
         <parameter>
             <name>pressure</name>
-            <description>The input pressure.</description>
-            <label>Input Pressure</label>
+            <description>A constant mean sea level pressure (hPa) prior value. Used as fallback.</description>
+            <label>MSL pressure prior value.</label>
             <dataType>double</dataType>
             <defaultValue>1003.0</defaultValue>
         </parameter>
 
         <parameter>
             <name>prior_aot</name>
-            <description>The prior AOT</description>
-            <label>AOT</label>
+            <description>A constant AOT prior value.</description>
+            <label>Prior AOT</label>
             <dataType>double</dataType>
             <defaultValue>0.1</defaultValue>
         </parameter>

@@ -14,15 +14,28 @@
             - both jars (snap-cawa-1.2-SNAPSHOT.jar, snap-cawa-io-1.2-SNAPSHOT.jar) WinSCP to /home/olaf/temp on
               cvfeeder01
             - hadoop fs -put snap-cawa*jar /calvalus/software/1.0/snap-cawa-1.2-SNAPSHOT
+
+        For external delivery (April 2017, for gpt usage on any Linux machine) do like this:
+            - to generate snap-cawa-io-<version>.jar, mvn clean package on this pom. Set packaging to pom (see below)!
+            - go into folder ../src/main
+            - update folder resources_bundle with latest contents of folder resources
+            - jar cvf snap-cawa-<version>.jar resources_bundle
+            - cp -p snap-cawa-<version>.jar /media/sf_ubuntu_shared
+            - upload both jars (snap-cawa-<version>.jar, snap-cawa-io-<version>.jar) to CAWA BC ftp
+            - for testing on gamaster:
+                 # WinSCP snap-cawa-<version>.jar to /home/globalbedo/od/cawa/snap-cawa-version>, unpack there
+                 # WinSCP snap-cawa-io-<version>.jar to /home/globalbedo/snap/snap/modules
+            - SNAP: add pythonExtraPaths accordingly at the end of /home/globalbedo/snap/etc/snap.properties
+            - then, gpt test processing in home/globalbedo/od/cawa/processing
     -->
     <!--- set packaging to pom to generate IO jar snap-cawa-io-x.y-SNAPSHOT.jar -->
     <packaging>pom</packaging>
     <!--<packaging>jar</packaging>-->
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
 	<name>SNAP Cawa Processor</name>
 
     <properties>
-        <cawa.version>1.2-SNAPSHOT</cawa.version>
+        <cawa.version>1.2</cawa.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -35,7 +48,7 @@
     </dependencies>
 
     <!--- comment this to generate overall jar snap-cawa-x.y-SNAPSHOT.jar for Calvalus deployment -->
-    <!--- uncomment this to generate IO jar snap-cawa-io-x.y-SNAPSHOT.jar -->
+    <!--- uncomment this to generate IO jar snap-cawa-io-x.y-SNAPSHOT.jar. The usual case!! -->
     <modules>
         <module>snap-cawa-io</module>
     </modules>

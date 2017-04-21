@@ -6,14 +6,14 @@
     <!-- The name uniquely identifies the operator within SNAP -->
     <name>org.esa.snap.cawa.CawaCtpMerisOp</name>
     <!-- The alias is a more user-friendly name, e.g. to be used on the command line -->
-    <alias>cawa_ctp_meris_op</alias>
+    <alias>CawaCTP.Meris</alias>
     <operatorClass>org.esa.snap.python.gpf.PyOperator</operatorClass>
 
-    <version>1.0</version>
+    <version>1.2</version>
     <authors>Brockmann Consult GmbH</authors>
-    <copyright>(C) 2014 Brockmann Consult GmbH</copyright>
+    <copyright>(C) 2014-2016 ESA, Brockmann Consult GmbH</copyright>
 
-    <description>This is the Cawa CTP operator.</description>
+    <description>Operator for MERIS cloud top pressure (CTP) retrieval as developed in CAWA project.</description>
 
     <namedSourceProducts>
         <!-- One or more source products can be specified.

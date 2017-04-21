@@ -49,8 +49,6 @@ class CawaTcwvMerisOp:
         self.temperature = operator.getParameter('temperature')  # todo: get temperature field from ERA-Interim
         self.pressure = operator.getParameter('pressure')  # todo: get pressure field from ERA-Interim
         self.aot13 = operator.getParameter('aot_13')  # todo: clarify if only one AOT is needed
-        self.aot14 = operator.getParameter('aot_14')
-        self.aot15 = operator.getParameter('aot_15')
 
         if os.path.isdir(resource_root):
             f.write('resource_root is dir ' + '\n')
