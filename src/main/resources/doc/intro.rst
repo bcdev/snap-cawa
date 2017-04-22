@@ -35,10 +35,7 @@ The explicit structure of the document is as follows:
 * `Chapter 3 <cawa_products.html>`_ describes all relevant SNAP CAWA products.
 * `Chapter 4 <cawa_installation.html>`_ explains how to get and install the processing software.
 * `Chapter 5 <cawa_usage.html>`_ explains how to run the processing software.
-* `Chapter 6 <cawa_scenarios.html>`_ gives an example for a typical CAWA processing use case.
-* `Chapter 7 <cawa_monitoring.html>`_ shows possibilities how to monitor the processing.
-* `Chapter 8 <cawa_troubleshooting.html>`_ describes troubleshooting options.
-* `Chapter 9 <annex.html>`_ contains various annexes.
+* `The annex <annex.html>`_ contains various annexes.
 
 References
 ==========
