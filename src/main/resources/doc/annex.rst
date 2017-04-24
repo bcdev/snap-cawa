@@ -1,8 +1,8 @@
 .. _annex:
 
-=======
-Annexes
-=======
+=====
+Annex
+=====
 
 Example of IdePix NetCDF4 product header:
 ::

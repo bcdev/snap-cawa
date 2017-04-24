@@ -19,6 +19,7 @@ Test of the Installation
 If all installation steps described in :ref:`cawa_installation` were finished successfully, the CAWA TCWV and CTP
 GPF processors are now ready to run. First, test their availability with:
 ::
+
     $SNAP_INSTALL_DIR/bin/gpt -h
 
 
@@ -44,10 +45,12 @@ should also appear in the listing of available SNAP operators, together with a s
 
 A more detailed information on the distinct operator can be obtained with
 ::
+
     $SNAP_INSTALL_DIR/bin/gpt -h <operator-name>
 
 e.g.
 ::
+
     $SNAP_INSTALL_DIR/bin/gpt -h Idepix.Modis
 
 (see :numref:`gpt_h_idepix_modis`).
@@ -87,17 +90,20 @@ Applying these processing parameters, the calls for Idepix.Meris (TCWV, CTP) and
 
 IdePix MERIS TCWV:
 ::
+
     gpt Idepix.Meris -SsourceProduct=<path-to-MERIS-L1b-product>
     -PreflBandsToCopy=reflectance_13,reflectance_14,reflectance_15
     -f NetCDF4-BEAM -t <path-to-idepix-meris-for-tcwv-product>
 
 IdePix MERIS CTP:
 ::
+
     gpt Idepix.Meris -SsourceProduct=<path-to-MERIS-L1b-product>
     -f NetCDF4-BEAM -t <path-to-idepix-meris-for-ctp-product>
 
 IdePix MODIS TCWV:
 ::
+
     gpt Idepix.Modis -SsourceProduct=<path-to-MERIS-L1b-product>
     -PreflBandsToCopy=reflectance_13,reflectance_14,reflectance_15
     -f NetCDF4-BEAM -t <path-to-idepix-meris-for-tcwv-product>
@@ -136,14 +142,18 @@ The operators for MERIS and MODIS
 
 do not require any non-default parameters and are invoked via the SNAP gpt tool like:
 ::
-    <operator-name> -SsourceProduct=<path-to-IdePix-product> -f NetCDF4-CAWA -t <path-to-target-product>
+
+    <operator-name> -SsourceProduct=<path-to-IdePix-product> -f NetCDF4-CAWA -t
+    <path-to-target-product>
 
 However, as discussed in :ref:`cawa_products`, it is strongly recommended to use IdePix 'extended' products
 containing ERA-Interim data which provides more realistic prior variables. If these are not available, the processor
 will use processor parameters for prior 2m temperature, mean sea level pressure and AOT. They can be explicitly
 provided by the user, so a TCWV processor call may look like:
 ::
-    CawaTCWV.Meris -SsourceProduct=<path-to-IdePix-product> -Ptemperature=285.0 -Ppressure=990.0 -Paot_13=0.25
+
+    CawaTCWV.Meris -SsourceProduct=<path-to-IdePix-product> -Ptemperature=285.0
+    -Ppressure=990.0 -Paot_13=0.25
     -f NetCDF4-CAWA -t <path-to-target-product>
 
 However, these values would be constant for all pixels of the given scene, so the resulting TCWV retrieval may be poor.
@@ -171,7 +181,9 @@ The operators for MERIS
 
 does not require any non-default parameters and is invoked via the SNAP gpt tool like:
 ::
-    CawaCTP.Meris -SsourceProduct=<path-to-IdePix-product> -f NetCDF4-CAWA -t <path-to-target-product>
+
+    CawaCTP.Meris -SsourceProduct=<path-to-IdePix-product> -f NetCDF4-CAWA
+    -t <path-to-target-product>
 
 
 Data Analysis Tools
