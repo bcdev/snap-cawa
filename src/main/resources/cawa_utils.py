@@ -57,6 +57,9 @@ CAWA_MODIS_IDEPIX_CLOUD_BUFFER = 16   # 2^4 for F_CLOUD_BUFFER = 4
 #CAWA_MODIS_IDEPIX_LAND = 8192         # 2^13 for F_LAND = 13
 CAWA_MODIS_IDEPIX_LAND = 1024         # SNAP Idepix!
 
+CAWA_OLCI_IDEPIX_INVALID = 1        # 2^0 for F_INVALID = 0 in SNAP Idepix
+CAWA_OLCI_IDEPIX_CLOUD = 2          # 2^1 for F_CLOUD = 1   in SNAP Idepix
+
 # noinspection PyUnresolvedReferences
 class CawaUtils:
     """
@@ -89,13 +92,25 @@ class CawaUtils:
         """
         Pixel mask: Exclude pixels classified as invalid or NOT cloud
         :param classif_flag
-        :param l1_flag
         :return: 1 if pixel is invalid, 0 otherwise
         """
 
         # return_value = l1_flag & CAWA_MERIS_L1_INVALID == CAWA_MERIS_L1_INVALID or \
         return_value = classif_flag & CAWA_MERIS_IDEPIX_INVALID == CAWA_MERIS_IDEPIX_INVALID or \
                        classif_flag & CAWA_MERIS_IDEPIX_CLOUD != CAWA_MERIS_IDEPIX_CLOUD
+
+        return return_value
+
+    @staticmethod
+    def calculate_olci_ctp_pixel_mask(classif_flag):
+        """
+        Pixel mask: Exclude pixels classified as invalid or NOT cloud
+        :param classif_flag
+        :return: 1 if pixel is invalid, 0 otherwise
+        """
+
+        return_value = classif_flag & CAWA_OLCI_IDEPIX_INVALID == CAWA_OLCI_IDEPIX_INVALID or \
+                       classif_flag & CAWA_OLCI_IDEPIX_CLOUD != CAWA_OLCI_IDEPIX_CLOUD
 
         return return_value
 
@@ -209,5 +224,18 @@ class CawaUtils:
         #mgroup3 = m.group(3)
         if m:
             return m.group(2)
+        else:
+            return None
+
+    @staticmethod
+    def get_olci_product_datestring(product_name):
+        start_index = product_name.find("S3A_OL_1_EFR____")
+        if start_index < 0:
+            return None
+        product_base_name = product_name[start_index:]
+        # e.g. S3A_OL_1_EFR____20160428T135236_20160428T135436_20161217T072041_0119_003_281______MR1_R_NT_002.SEN3_IDEPIX.nc
+        m = re.search( r'S3A_OL_1_EFR____(........)(.......)_(.*)', product_base_name)
+        if m:
+            return m.group(1)
         else:
             return None

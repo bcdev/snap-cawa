@@ -16,10 +16,10 @@ from netCDF4 import Dataset
 CTP_NODATA_VALUE = -999.0
 
 
-class CawaCtpMerisOp:
+class CawaCtpOlciOp:
     """
-    The CAWA GPF operator for total water vapour column retrieval.
-    Authors: O.Danne, N.Fomferra, October 2015
+    The CAWA GPF operator for total water vapour column retrieval (OLCI).
+    Authors: O.Danne, N.Fomferra, October 2017
     """
 
     def __init__(self):
@@ -49,7 +49,7 @@ class CawaCtpMerisOp:
         if os.path.isdir(resource_root):
             f.write('resource_root is dir ' + '\n')
             print('resource_root is dir ' + '\n')
-            cloud_lut = os.path.join(resource_root, 'luts/cloud_core_meris.nc4')
+            cloud_lut = os.path.join(resource_root, 'luts/cloud_core_olci.nc4')
             str_coeffs_lut = os.path.join(resource_root, 'luts/stray_coeff_potenz4.nc')
             ws_alb_lut = os.path.join(resource_root, 'luts/ws_alb_10_2005.nc')
             spectral_fluxes_input_path = os.path.join(resource_root, 'luts/meris_sun_spectral_flux_rr_10_11.txt')
@@ -60,11 +60,11 @@ class CawaCtpMerisOp:
                 auxpath = SystemUtils.getAuxDataPath()
                 f.write('auxpath: ' + str(auxpath) + '\n')
 
-                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/cloud_core_meris.nc4')):
-                    cloud_lut = zf.extract('luts/cloud_core_meris.nc4', os.path.join(str(auxpath), 'cawa'))
+                if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/cloud_core_olci.nc4')):
+                    cloud_lut = zf.extract('luts/cloud_core_olci.nc4', os.path.join(str(auxpath), 'cawa'))
                     f.write('extracted LUT cloud: ' + cloud_lut + '\n')
                 else:
-                    cloud_lut = os.path.join(str(auxpath), 'cawa/luts/cloud_core_meris.nc4')
+                    cloud_lut = os.path.join(str(auxpath), 'cawa/luts/cloud_core_olci.nc4')
                     f.write('existing LUT cloud: ' + cloud_lut + '\n')
 
                 if not os.path.exists(os.path.join(str(auxpath), 'cawa/luts/stray_coeff_potenz4.nc')):
@@ -90,20 +90,20 @@ class CawaCtpMerisOp:
 
                 shared_libs_dir = tempfile.gettempdir()
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
-                    lib_interpolator = zf.extract('lib-python/interpolators.so', shared_libs_dir)
-                    lib_nd_interpolator = zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
-                    lib_oec = zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
+                    zf.extract('lib-python/interpolators.so', shared_libs_dir)
+                    zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
+                    zf.extract('lib-python/optimal_estimation_core.so', shared_libs_dir)
                 else:
-                    lib_interpolator = os.path.join(str(shared_libs_dir), 'lib-python/interpolators.so')
-                    lib_nd_interpolator = os.path.join(str(shared_libs_dir), 'lib-python/nd_interpolator.so')
-                    lib_oec = os.path.join(str(shared_libs_dir), 'lib-python/optimal_estimation_core.so')
+                    os.path.join(str(shared_libs_dir), 'lib-python/interpolators.so')
+                    os.path.join(str(shared_libs_dir), 'lib-python/nd_interpolator.so')
+                    os.path.join(str(shared_libs_dir), 'lib-python/optimal_estimation_core.so')
 
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
         sys.path.append(shared_libs_dir + '/lib-python')
 
-        import cawa_ctp_meris_core as cawa_core
+        import cawa_ctp_olci_core as cawa_core
         import cawa_utils as cu
-        self.cawa = cawa_core.CawaCtpMerisCore(cloud_lut)
+        self.cawa = cawa_core.CawaCtpOlciCore(cloud_lut)
         self.cawa_utils = cu.CawaUtils()
 
         width = source_product.getSceneRasterWidth()
@@ -111,26 +111,29 @@ class CawaCtpMerisOp:
         f.write('Source product width, height = ...' + str(width) + ', ' + str(height) + '\n')
 
         # get source bands:
-        self.rad_10_band = self.get_band(source_product, 'radiance_10') # reflectance is from Idepix product!
-        self.rad_11_band = self.get_band(source_product, 'radiance_11')
+        self.rad_12_band = self.get_band(source_product, 'Oa12_radiance')
+        self.rad_13_band = self.get_band(source_product, 'Oa13_radiance')
+        self.rad_14_band = self.get_band(source_product, 'Oa14_radiance')
+        self.rad_15_band = self.get_band(source_product, 'Oa15_radiance')
+
+        self.solar_flux_12_band = self.get_band(source_product, 'solar_flux_band_12')
+        self.solar_flux_13_band = self.get_band(source_product, 'solar_flux_band_13')
+        self.solar_flux_14_band = self.get_band(source_product, 'solar_flux_band_14')
+        self.solar_flux_15_band = self.get_band(source_product, 'solar_flux_band_15')
 
         self.detector_index_band = self.get_band(source_product, 'detector_index')
 
-        self.sza_band = self.get_band(source_product, 'sun_zenith')
-        self.vza_band = self.get_band(source_product, 'view_zenith')
-        self.saa_band = self.get_band(source_product, 'sun_azimuth')
-        self.vaa_band = self.get_band(source_product, 'view_azimuth')
+        self.sza_band = self.get_band(source_product, 'SZA')
+        self.vza_band = self.get_band(source_product, 'OZA')
+        self.saa_band = self.get_band(source_product, 'SAA')
+        self.vaa_band = self.get_band(source_product, 'OAA')
 
         self.lat_band = self.get_band(source_product, 'latitude')
         self.lon_band = self.get_band(source_product, 'longitude')
-        self.alt_band = self.get_band(source_product, 'dem_alt')
+        self.alt_band = self.get_band(source_product, 'altitude')
 
-        self.l1_flag_band = self.get_band(source_product, 'l1_flags')
-        self.classif_band = None
-        if cu.CawaUtils.band_exists('pixel_classif_flags', source_product.getBandNames()):
-            self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
-        elif cu.CawaUtils.band_exists('cloud_classif_flags', source_product.getBandNames()):
-            self.classif_band = self.get_band(source_product, 'cloud_classif_flags')
+        self.l1_flag_band = self.get_band(source_product, 'quality_flags')
+        self.classif_band = self.get_band(source_product, 'pixel_classif_flags')
 
         # setup target product:
         cawa_product = snappy.Product('pyCAWA', 'CAWA CTP', width, height)
@@ -157,8 +160,7 @@ class CawaCtpMerisOp:
             self.str_coeffs=np.array(stray_ncds.variables['STRAY'][:],order='F')
             self.lmd=np.array(stray_ncds.variables['LAMBDA'][:],order='F')
 
-        # doy = 363
-        datestring = cu.CawaUtils.get_meris_rr_product_datestring(source_product.getName())
+        datestring = cu.CawaUtils.get_olci_rr_product_datestring(source_product.getName())
         print('datestring: ' + datestring + '\n')
         doy = int(cu.CawaUtils.get_doy_from_yyyymmdd(datestring))
         print('doy: ' + str(doy) + '\n')
@@ -193,18 +195,39 @@ class CawaCtpMerisOp:
         #     f1 = open(tempfile.gettempdir() + '/cava_tcwv' + str(target_rectangle.x) + '_' + str(target_rectangle.y) + '.log', 'w')
         #     f1.write('enter compute: rectangle = ' + target_rectangle.toString() + '\n')
 
-        rad_10_tile = operator.getSourceTile(self.rad_10_band, target_rectangle)
-        rad_11_tile = operator.getSourceTile(self.rad_11_band, target_rectangle)
+        rad_12_tile = operator.getSourceTile(self.rad_12_band, target_rectangle)
+        rad_13_tile = operator.getSourceTile(self.rad_13_band, target_rectangle)
+        rad_14_tile = operator.getSourceTile(self.rad_14_band, target_rectangle)
+        rad_15_tile = operator.getSourceTile(self.rad_15_band, target_rectangle)
+
+        solar_flux_12_tile = operator.getSourceTile(self.solar_flux_12_band, target_rectangle)
+        solar_flux_13_tile = operator.getSourceTile(self.solar_flux_13_band, target_rectangle)
+        solar_flux_14_tile = operator.getSourceTile(self.solar_flux_14_band, target_rectangle)
+        solar_flux_15_tile = operator.getSourceTile(self.solar_flux_15_band, target_rectangle)
 
         detector_index_tile = operator.getSourceTile(self.detector_index_band, target_rectangle)
 
-        rad_10_samples = rad_10_tile.getSamplesFloat()
-        rad_11_samples = rad_11_tile.getSamplesFloat()
+        rad_12_samples = rad_12_tile.getSamplesFloat()
+        rad_13_samples = rad_13_tile.getSamplesFloat()
+        rad_14_samples = rad_14_tile.getSamplesFloat()
+        rad_15_samples = rad_15_tile.getSamplesFloat()
+
+        solar_flux_12_samples = solar_flux_12_tile.getSamplesFloat()
+        solar_flux_13_samples = solar_flux_13_tile.getSamplesFloat()
+        solar_flux_14_samples = solar_flux_14_tile.getSamplesFloat()
+        solar_flux_15_samples = solar_flux_15_tile.getSamplesFloat()
 
         detector_index_samples = detector_index_tile.getSamplesInt()
 
-        rad_10_data = np.array(rad_10_samples, dtype=np.float32)
-        rad_11_data = np.array(rad_11_samples, dtype=np.float32)
+        rad_12_data = np.array(rad_12_samples, dtype=np.float32)
+        rad_13_data = np.array(rad_13_samples, dtype=np.float32)
+        rad_14_data = np.array(rad_14_samples, dtype=np.float32)
+        rad_15_data = np.array(rad_15_samples, dtype=np.float32)
+
+        solar_flux_12_data = np.array(solar_flux_12_samples, dtype=np.float32)
+        solar_flux_13_data = np.array(solar_flux_13_samples, dtype=np.float32)
+        solar_flux_14_data = np.array(solar_flux_14_samples, dtype=np.float32)
+        solar_flux_15_data = np.array(solar_flux_15_samples, dtype=np.float32)
 
         detector_index_data = np.array(detector_index_samples, dtype=np.int16)
 
@@ -245,7 +268,7 @@ class CawaCtpMerisOp:
         # azi_data = cu.CawaUtils.azi2azid(saa_data, vaa_data)
         azi_data = self.cawa_utils.azi2azid(saa_data, vaa_data)
         # prs_data = cu.CawaUtils.height2press(alt_data)
-        prs_data = self.cawa_utils.height2press(alt_data)
+        # prs_data = self.cawa_utils.height2press(alt_data) # not yet used
 
         classif_data = np.empty(sza_data.shape)
         classif_data.fill(2) # cloud
@@ -254,40 +277,40 @@ class CawaCtpMerisOp:
             classif_samples = classif_tile.getSamplesInt()
             classif_data = np.array(classif_samples, dtype=np.int32)
 
-        # classif_tile = operator.getSourceTile(self.classif_band, target_rectangle)
-        # classif_samples = classif_tile.getSamplesInt()
-        # classif_data = np.array(classif_samples, dtype=np.int32)
-
         # loop over whole tile:
         print('start loop over tile...')
-        ctp_data = np.empty(rad_10_data.shape[0], dtype=np.float32)
-        for i in range(0, rad_10_data.shape[0]):
-            rad_norm_10 = rad_10_data[i]/float(self.spectral_flux_10[detector_index_data[i]])
-            rad_norm_11 = rad_11_data[i]/float(self.spectral_flux_11[detector_index_data[i]])
+        ctp_data = np.empty(rad_12_data.shape[0], dtype=np.float32)
+        for i in range(0, rad_12_data.shape[0]):
+            rad_norm_12 = rad_12_data[i]/solar_flux_12_data[i]
+            rad_norm_13 = rad_13_data[i]/solar_flux_13_data[i]
+            rad_norm_14 = rad_14_data[i]/solar_flux_13_data[i]
+            rad_norm_15 = rad_15_data[i]/solar_flux_13_data[i]
 
-            rad_lam11 = self.lmd[detector_index_data[i]]
+            rad_lam13 = self.lmd[detector_index_data[i]]
             # rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_10_data[i]
             # rad_norm_11_data[i] += rad_stray
-            rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_10
-            rad_norm_11 += rad_stray
+            rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_12
+            rad_norm_13 += rad_stray
 
             # get closest albedo
             # nearest neighbour
             # quick and dirty surface albedo (RP):
             rad_alb10 = self.alb[lat_idx[i],lon_idx[i]].clip(0,1.)
 
+            #inp={'suz':10.,'vie':40.,'azi':170.,'alb':0.1,'dwl':-0.2
+            #    ,'rtoa':{'12':0.188,'13':0.10,'14':0.13,'15':0.18}}
+
             input = {'suz': sza_data[i],
                      'vie': vza_data[i],
                      'azi': azi_data[i],
-                     'prs': prs_data[i],
-                     'dwl': rad_lam11 - self.cawa.cawa_ctp.cha['11']['cwvl'],    # first abs-band
+                     'dwl': rad_lam13 - self.cawa.cawa_ctp.cha['13']['cwvl'],    # first abs-band
                      'alb': rad_alb10,
-                     # 'rtoa': {'10': rad_norm_10_data[i],
-                     #          '11': rad_norm_11_data[i]},
-                     'rtoa': {'10': rad_norm_10,
-                              '11': rad_norm_11}
+                     'rtoa': {'12': rad_norm_12,
+                              '13': rad_norm_13,
+                              '14': rad_norm_14,
+                              '15': rad_norm_15}
                      }
-            ctp_data[i] = self.cawa.compute_pixel_meris(input, classif_data[i], l1_flag_data[i])['ctp']
+            ctp_data[i] = self.cawa.compute_pixel_olci(input, classif_data[i], l1_flag_data[i])['ctp']
 
         # fill target tiles:
         print('fill target tiles...')

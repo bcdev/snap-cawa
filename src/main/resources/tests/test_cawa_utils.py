@@ -16,7 +16,7 @@ class TestCawaUtils(unittest.TestCase):
         sys.path.append(self.parent_dir + '/libs')
 
     def test_read_sun_spectral_fluxes_csv(self):
-        spectral_fluxes_input_path = os.path.join(self.parent_dir, 'meris_sun_spectral_flux_rr_10_11.txt')
+        spectral_fluxes_input_path = os.path.join(self.parent_dir, 'luts/meris_sun_spectral_flux_rr_10_11.txt')
         spectral_fluxes_table = cu.CawaUtils.get_table_from_csvfile(spectral_fluxes_input_path, ',', "")
 
         spectral_flux_10 = np.array(spectral_fluxes_table['E0_band10'])
@@ -48,6 +48,29 @@ class TestCawaUtils(unittest.TestCase):
         datestring = cu.CawaUtils.get_meris_rr_product_datestring(product_name)
         self.assertEqual('19971023', datestring)
         print('done test_get_meris_rr_product_datestring')
+
+    def test_get_olci_product_datestring(self):
+        product_name = \
+            'bla_20160428T135236_20160428T135436_20161217T072041_0119_003_281______MR1_R_NT_002.SEN3_IDEPIX.dim'
+        datestring = cu.CawaUtils.get_olci_product_datestring(product_name)
+        self.assertIsNone(datestring)
+
+        product_name = \
+            'S3A_OL_1_EFR____20160116T135236_20160428T135436_20161217T072041_0119_003_281______MR1_R_NT_002.SEN3_IDEPIX.NC'
+        datestring = cu.CawaUtils.get_olci_product_datestring(product_name)
+        self.assertEqual('20160116', datestring)
+
+        product_name = \
+            'L2_of_S3A_OL_1_EFR____19971023T135236_20160428T135436_20161217T072041_0119_003_281______MR1_R_NT_002.SEN3_IDEPIX.nc'
+        datestring = cu.CawaUtils.get_olci_product_datestring(product_name)
+        self.assertEqual('19971023', datestring)
+
+        product_name = \
+            'subset_0_of_S3A_OL_1_EFR____19980308T135236_20160428T135436_20161217T072041_0119_003_281______MR1_R_NT_002.SEN3_IDEPIX.nc'
+        datestring = cu.CawaUtils.get_olci_product_datestring(product_name)
+        self.assertEqual('19980308', datestring)
+        print('done test_get_olci_product_datestring')
+
 
     def test_get_doy_from_yyyymmdd(self):
         datestring = '20000101'
