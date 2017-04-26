@@ -121,6 +121,7 @@ class CawaCtpOlciOp:
         self.solar_flux_14_band = self.get_band(source_product, 'solar_flux_band_14')
         self.solar_flux_15_band = self.get_band(source_product, 'solar_flux_band_15')
 
+        self.lambda0_13_band = self.get_band(source_product, 'lambda0_band_13')
         self.detector_index_band = self.get_band(source_product, 'detector_index')
 
         self.sza_band = self.get_band(source_product, 'SZA')
@@ -155,12 +156,7 @@ class CawaCtpOlciOp:
         snappy.ProductUtils.copyFlagBands(source_product, cawa_product, True)
         source_product.transferGeoCodingTo(cawa_product, None)
 
-        with Dataset(str_coeffs_lut,'r') as stray_ncds:
-            #get the full stray coeffs
-            self.str_coeffs=np.array(stray_ncds.variables['STRAY'][:],order='F')
-            self.lmd=np.array(stray_ncds.variables['LAMBDA'][:],order='F')
-
-        datestring = cu.CawaUtils.get_olci_rr_product_datestring(source_product.getName())
+        datestring = cu.CawaUtils.get_olci_product_datestring(source_product.getName())
         print('datestring: ' + datestring + '\n')
         doy = int(cu.CawaUtils.get_doy_from_yyyymmdd(datestring))
         print('doy: ' + str(doy) + '\n')
@@ -170,11 +166,6 @@ class CawaCtpOlciOp:
             #get closest day of year
             doy_idx=np.abs(wsalb_ncds.variables['time'][:]-doy).argmin()
             self.alb = wsalb_ncds.variables['albedo'][doy_idx,:,:]
-
-        # spectral_fluxes_input_path = os.path.join(resource_root, 'luts/meris_sun_spectral_flux_rr_10_11.txt')
-        spectral_fluxes_table = cu.CawaUtils.get_table_from_csvfile(spectral_fluxes_input_path, ',', "")
-        self.spectral_flux_10 = np.array(spectral_fluxes_table['E0_band10'])
-        self.spectral_flux_11 = np.array(spectral_fluxes_table['E0_band11'])
 
         operator.setTargetProduct(cawa_product)
 
@@ -205,6 +196,7 @@ class CawaCtpOlciOp:
         solar_flux_14_tile = operator.getSourceTile(self.solar_flux_14_band, target_rectangle)
         solar_flux_15_tile = operator.getSourceTile(self.solar_flux_15_band, target_rectangle)
 
+        lambda0_13_tile = operator.getSourceTile(self.lambda0_13_band, target_rectangle)
         detector_index_tile = operator.getSourceTile(self.detector_index_band, target_rectangle)
 
         rad_12_samples = rad_12_tile.getSamplesFloat()
@@ -217,6 +209,7 @@ class CawaCtpOlciOp:
         solar_flux_14_samples = solar_flux_14_tile.getSamplesFloat()
         solar_flux_15_samples = solar_flux_15_tile.getSamplesFloat()
 
+        lambda0_13_samples = lambda0_13_tile.getSamplesFloat()
         detector_index_samples = detector_index_tile.getSamplesInt()
 
         rad_12_data = np.array(rad_12_samples, dtype=np.float32)
@@ -229,6 +222,7 @@ class CawaCtpOlciOp:
         solar_flux_14_data = np.array(solar_flux_14_samples, dtype=np.float32)
         solar_flux_15_data = np.array(solar_flux_15_samples, dtype=np.float32)
 
+        lambda0_13_data = np.array(lambda0_13_samples, dtype=np.float32)
         detector_index_data = np.array(detector_index_samples, dtype=np.int16)
 
         sza_tile = operator.getSourceTile(self.sza_band, target_rectangle)
@@ -283,22 +277,15 @@ class CawaCtpOlciOp:
         for i in range(0, rad_12_data.shape[0]):
             rad_norm_12 = rad_12_data[i]/solar_flux_12_data[i]
             rad_norm_13 = rad_13_data[i]/solar_flux_13_data[i]
-            rad_norm_14 = rad_14_data[i]/solar_flux_13_data[i]
-            rad_norm_15 = rad_15_data[i]/solar_flux_13_data[i]
+            rad_norm_14 = rad_14_data[i]/solar_flux_14_data[i]
+            rad_norm_15 = rad_15_data[i]/solar_flux_15_data[i]
 
-            rad_lam13 = self.lmd[detector_index_data[i]]
-            # rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_10_data[i]
-            # rad_norm_11_data[i] += rad_stray
-            rad_stray = self.str_coeffs[detector_index_data[i]] * rad_norm_12
-            rad_norm_13 += rad_stray
+            rad_lam13 = lambda0_13_data[i]
 
             # get closest albedo
             # nearest neighbour
             # quick and dirty surface albedo (RP):
             rad_alb10 = self.alb[lat_idx[i],lon_idx[i]].clip(0,1.)
-
-            #inp={'suz':10.,'vie':40.,'azi':170.,'alb':0.1,'dwl':-0.2
-            #    ,'rtoa':{'12':0.188,'13':0.10,'14':0.13,'15':0.18}}
 
             input = {'suz': sza_data[i],
                      'vie': vza_data[i],
