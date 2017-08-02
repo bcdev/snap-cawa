@@ -3,6 +3,7 @@ from numpy.linalg import inv as npinv
 
 
 def inverse(inn):
+    # print 'calling optimal_estimation_core_pure_python: inverse'
     try:
         out=npinv(inn)
     except np.linalg.LinAlgError:
@@ -13,14 +14,17 @@ def inverse(inn):
     return out
 
 def right_inverse(inn):
+    # print 'calling optimal_estimation_core_pure_python: right_inverse'
     return np.dot(inn.T, inverse(np.dot(inn, inn.T)))
 
 def left_inverse(inn):
+    # print 'calling optimal_estimation_core_pure_python: left_inverse'
     return np.dot(inverse(np.dot(inn.T, inn)), inn.T)
 
 #bit useless
 #Todo refactor
 def clipper(a, b, x):
+    # print 'calling optimal_estimation_core_pure_python: clipper'
     return np.clip(x, a, b)
 
 
@@ -29,6 +33,7 @@ def norm_error_weighted_x(ix, sri):
     # see Rodgers for details
     # ix : increment of x = x_i -x_i+1
     # sri: inverse of retrieval error co-variance
+    # print 'calling optimal_estimation_core_pure_python: norm_error_weighted_x'
     return np.dot(ix.T, np.dot(sri, ix))
 
 def norm_y(inn):
@@ -53,6 +58,7 @@ def newton_operator(a, b, x, y, k):
     :param k: dfnc(x)
     :return: cnx (clipped) root of fnc for the linear case, last y=fnc(x), last increment of x
     '''
+    # print 'calling optimal_estimation_core_pure_python: newton_operator'
     ki = left_inverse(k)
     incr_x = np.dot(ki, y)
     cnx = clipper(a, b, x - incr_x)
@@ -64,6 +70,7 @@ def newton_cost(x,fnc):
     :param fnc:
     :return:
     '''
+    # print 'calling optimal_estimation_core_pure_python: newton_cost'
     y=fnc(x)
     cost = np.dot(y.T, y)
     return cost
@@ -80,6 +87,7 @@ def newton_gain_aver_cost(x, y, k):
     :param k:
     :return:
     '''
+    # print 'calling optimal_estimation_core_pure_python: newton_gain_aver_cost'
     # gain matrix
     gain = left_inverse(k)
     # averaging kernel
@@ -106,6 +114,7 @@ def newton_operator_with_se(a, b, x, y, k, sei):
     :return: cnx (clipped) root of fnc for the linear case, last y=fnc(x), last increment of x, last
             retrieval error co.-variance
     '''
+    # print 'calling optimal_estimation_core_pure_python: newton_operator_with_se'
     #print 'sei',sei
     kt_sei = np.dot(k.T, sei)
     #print 'kt_sei',kt_sei
@@ -159,6 +168,7 @@ def optimal_estimation_gauss_newton_operator(a, b, x, y, k, sei, sai, xa):
     :return: cnx (clipped) optimal solution for  fnc-1 for the linear case, last y=fnc(x), last increment of x, last
             retrieval error co.-variance
     '''
+    # print 'calling optimal_estimation_core_pure_python: optimal_estimation_gauss_newton_operator'
     kt_sei = np.dot(k.T, sei)
     kt_sei_k = (np.dot(kt_sei, k))
     # inverse retrieval error co-variance

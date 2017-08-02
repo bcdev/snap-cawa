@@ -15,12 +15,11 @@ class CawaCtpMerisCore:
         self.cawa_ctp = cawa_ctp.CawaCtpCore(cloud_lut)
         self.cawa_utils = cu.CawaUtils()
 
-    def compute_pixel_meris(self, input, classif_flag, l1_flag):
+    def compute_pixel_ctp_meris(self, input, classif_flag):
         """
         derive pixel mask and call algorithm accordingly
         :param input:  dict containing all necessary input (see tests)
         :param classif_flag: Idepix flag
-        :param l1_flag: L1 flag
         :return: a dict containing the input the TCWV and its uncertainty
         """
 

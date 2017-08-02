@@ -297,7 +297,9 @@ class CawaCtpOlciOp:
                               '14': rad_norm_14,
                               '15': rad_norm_15}
                      }
-            ctp_data[i] = self.cawa.compute_pixel_olci(input, classif_data[i], l1_flag_data[i])['ctp']
+            print('input: ', input)
+            ctp_data[i] = self.cawa.compute_pixel_ctp_olci(input, classif_data[i])['ctp']
+            print('ctp_data[i]: ', ctp_data[i])
 
         # fill target tiles:
         print('fill target tiles...')

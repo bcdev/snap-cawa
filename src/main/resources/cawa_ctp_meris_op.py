@@ -287,7 +287,9 @@ class CawaCtpMerisOp:
                      'rtoa': {'10': rad_norm_10,
                               '11': rad_norm_11}
                      }
-            ctp_data[i] = self.cawa.compute_pixel_meris(input, classif_data[i], l1_flag_data[i])['ctp']
+            #print('input: ', input)
+            ctp_data[i] = self.cawa.compute_pixel_ctp_meris(input, classif_data[i])['ctp']
+            #print('ctp_data[i]: ', ctp_data[i])
 
         # fill target tiles:
         print('fill target tiles...')

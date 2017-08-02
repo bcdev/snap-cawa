@@ -18,9 +18,11 @@ def checklut(x): pass
     
 
 def linint2index(x,xtab):
+    # print 'calling interpolators_pure_python: linint2index'
     return np.interp(x,xtab,np.arange(len(xtab)))
 
 def interpol_1(wo,lut):
+    # print 'calling interpolators_pure_python: interpol_1'
     out=0.
     sha=lut.shape
     #swgt=0.
