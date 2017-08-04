@@ -1,10 +1,8 @@
 import os
-import sys
-
 import unittest
-import time
 
 import numpy as np
+
 import cawa_utils as cu
 
 
@@ -13,7 +11,6 @@ class TestCawaUtils(unittest.TestCase):
     def setUp(self):
         self.parent_dir = os.path.dirname(os.path.normpath(os.path.dirname(__file__)))
         print('parentDir: ', self.parent_dir)
-        sys.path.append(self.parent_dir + '/libs')
 
     def test_read_sun_spectral_fluxes_csv(self):
         spectral_fluxes_input_path = os.path.join(self.parent_dir, 'luts/meris_sun_spectral_flux_rr_10_11.txt')
@@ -70,7 +67,6 @@ class TestCawaUtils(unittest.TestCase):
         datestring = cu.CawaUtils.get_olci_product_datestring(product_name)
         self.assertEqual('19980308', datestring)
         print('done test_get_olci_product_datestring')
-
 
     def test_get_doy_from_yyyymmdd(self):
         datestring = '20000101'

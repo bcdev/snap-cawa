@@ -8,7 +8,8 @@ import numpy as np
 import tempfile
 import sys
 
-import time
+for a in sys.path:
+    print(a)
 
 from netCDF4 import Dataset
 
@@ -297,9 +298,9 @@ class CawaCtpOlciOp:
                               '14': rad_norm_14,
                               '15': rad_norm_15}
                      }
-            print('input: ', input)
+            # print('input: ', input)
             ctp_data[i] = self.cawa.compute_pixel_ctp_olci(input, classif_data[i])['ctp']
-            print('ctp_data[i]: ', ctp_data[i])
+            # print('ctp_data[i]: ', ctp_data[i])
 
         # fill target tiles:
         print('fill target tiles...')

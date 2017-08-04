@@ -49,7 +49,7 @@ class TestCawaCtpCoreOlci(unittest.TestCase):
             t_ave += (t2-t1)
         print('CTP OLCI estimator average time (ms) for one pixel: ', t_ave/1000.0)
 
-    #@unittest.skip("skipping test...")
+    @unittest.skip("skipping test...")
     def test_estimator_olci_ctp_via_core(self):
         t_ave = 0.0
         for i in range(1):
