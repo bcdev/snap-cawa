@@ -13,8 +13,15 @@ import cawa_utils as cu
 class TestCawaCtpCoreMeris(unittest.TestCase):
     def setUp(self):
         parent_dir = os.path.dirname(os.path.normpath(os.path.dirname(__file__)))
-        sys.path.append(parent_dir + '/libs')
+        # sys.path.append(parent_dir + '/libs')
+        sys.path.append(parent_dir + '/lib-python')
+        lib_dir = os.path.join(parent_dir, 'lib-python')
+        print 'lib_dir: ', lib_dir
+        sys.path.append(lib_dir)
 
+        import interpolators
+        import nd_interpolator
+        import optimal_estimation_core
         import cawa_ctp_meris_core as cawa_ctp_core
         import cawa_ctp as cawa_ctp
 

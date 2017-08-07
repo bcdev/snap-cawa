@@ -6,8 +6,8 @@ __author__ = 'Rene Preusker, rene.preusker@fu-berlin.de'
 #Todo catch math errors
 import numpy as np
 import collections
-import optimal_estimation_core_pure_python as oec
-# import optimal_estimation_core as oec
+# import optimal_estimation_core_pure_python as oec
+import optimal_estimation_core as oec
 
 EPSIX = np.finfo(float).resolution
 

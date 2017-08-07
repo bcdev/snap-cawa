@@ -1,6 +1,6 @@
 import numpy as np
-# import interpolators_fortran as interpolators
-import interpolators_pure_python as interpolators
+import interpolators_fortran as interpolators
+# import interpolators_pure_python as interpolators
 
 
 def is_monotonically_increasing(v):

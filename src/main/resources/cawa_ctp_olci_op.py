@@ -90,6 +90,7 @@ class CawaCtpOlciOp:
                     f.write('existing meris_sun_spectral_flux_rr_10_11: ' + spectral_fluxes_input_path + '\n')
 
                 shared_libs_dir = tempfile.gettempdir()
+                # todo: add Windows case here
                 if not os.path.exists(shared_libs_dir + '/lib-python'):
                     zf.extract('lib-python/interpolators.so', shared_libs_dir)
                     zf.extract('lib-python/nd_interpolator.so', shared_libs_dir)
@@ -100,6 +101,7 @@ class CawaCtpOlciOp:
                     os.path.join(str(shared_libs_dir), 'lib-python/optimal_estimation_core.so')
 
         f.write('shared_libs_dir = %s' % (shared_libs_dir + '/lib-python') + '\n')
+        print 'shared_libs_dir: ', shared_libs_dir
         sys.path.append(shared_libs_dir + '/lib-python')
 
         import cawa_ctp_olci_core as cawa_core

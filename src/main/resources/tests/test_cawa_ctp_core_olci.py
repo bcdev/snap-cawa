@@ -4,6 +4,7 @@ import sys
 import unittest
 import time
 
+from sys import platform
 import numpy as np
 
 import cawa_utils as cu
@@ -12,8 +13,11 @@ import cawa_utils as cu
 # noinspection PyUnresolvedReferences
 class TestCawaCtpCoreOlci(unittest.TestCase):
     def setUp(self):
+        print 'Platform: ', platform
+
         parent_dir = os.path.dirname(os.path.normpath(os.path.dirname(__file__)))
         sys.path.append(parent_dir + '/libs')
+        sys.path.append(parent_dir + '/lib-python')
 
         import cawa_ctp_olci_core as cawa_ctp_core
         import cawa_ctp as cawa_ctp
